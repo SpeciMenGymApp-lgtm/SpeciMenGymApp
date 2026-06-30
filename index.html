@@ -164,7 +164,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .modal-title{font-size:17px;font-weight:800;margin-bottom:14px;}
 .modal-actions{display:flex;gap:8px;margin-top:13px;padding-bottom:calc(var(--safe)+6px);}
 
-.toast{position:fixed;bottom:calc(70px + var(--safe));left:50%;transform:translateX(-50%) translateY(8px);background:var(--bg4);border:1px solid var(--green);color:var(--green);padding:9px 18px;border-radius:100px;font-size:13px;font-weight:600;z-index:300;opacity:0;transition:all 0.22s;pointer-events:none;white-space:nowrap;}
+.toast{position:fixed;bottom:calc(70px + var(--safe));left:50%;transform:translateX(-50%) translateY(8px);background:var(--bg4);border:1px solid var(--green);color:var(--green);padding:9px 18px;border-radius:100px;font-size:13px;font-weight:600;z-index:600;opacity:0;transition:all 0.22s;pointer-events:none;white-space:nowrap;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
 .empty{text-align:center;padding:44px 16px;color:var(--t3);}
@@ -1994,7 +1994,14 @@ $('s1-next').addEventListener('click',function(){
 });
 $('s2-back').addEventListener('click',function(){obShow('s1');});
 $('s2-next').addEventListener('click',function(){
-  if(!$('ob-fnac').value||!$('ob-alt').value||!$('ob-peso').value){toast('Completa peso, altura y fecha de nacimiento','var(--red)');return;}
+  var faltantes=[];
+  if(!$('ob-fnac').value) faltantes.push('fecha de nacimiento');
+  if(!$('ob-alt').value) faltantes.push('altura');
+  if(!$('ob-peso').value) faltantes.push('peso');
+  if(faltantes.length){
+    toast('Falta: '+faltantes.join(', '),'var(--red)');
+    return;
+  }
   obShow('s3');
 });
 $('s3-back').addEventListener('click',function(){obShow('s2');});
