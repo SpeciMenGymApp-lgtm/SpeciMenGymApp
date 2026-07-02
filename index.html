@@ -1045,7 +1045,17 @@ var fmtDate=function(d){return d?new Date(d+'T12:00').toLocaleDateString('es-ES'
 function toast(msg,col){var t=$('toast');t.textContent=msg;t.style.borderColor=col||'var(--green)';t.style.color=col||'var(--green)';t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2200);}
 function openM(id){$(id).classList.add('open');}
 function closeM(id){$(id).classList.remove('open');}
-function calcEdad(fnac){if(!fnac)return 30;return new Date().getFullYear()-new Date(fnac).getFullYear();}
+function calcEdad(fnac){
+  if(!fnac) return 30;
+  var hoy=new Date();
+  var nac=new Date(fnac);
+  if(isNaN(nac.getTime())) return 30;
+  var edad=hoy.getUTCFullYear()-nac.getUTCFullYear();
+  // Restar 1 si el cumpleaños aún no ha llegado este año
+  var cumpleEsteAno=new Date(Date.UTC(hoy.getUTCFullYear(), nac.getUTCMonth(), nac.getUTCDate()));
+  if(hoy < cumpleEsteAno) edad--;
+  return edad;
+}
 function fmtFechaNac(fnac){
   if(!fnac) return '—';
   var d=new Date(fnac);
@@ -3455,8 +3465,25 @@ function renderCalcMetabolica(u, mac){
 
 function renderPerfil(){
   var u=U(); var mac=u.macros||calcMacros(u); var esH=u.genero==='H';
-  var imc=mac.imc||((u.peso/((u.alt/100)*(u.alt/100))).toFixed(1));
+
+  // ── Usar siempre la medida más reciente disponible ──────────────────
+  var meds=(u.measures||[]).slice().sort(function(a,b){return (a.fecha||'').localeCompare(b.fecha||'');});
+  var lastMed=meds.length?meds[meds.length-1]:null;
+  var pesoActual   = (lastMed&&lastMed.peso)  || u.peso  || '—';
+  var grasaActual  = (lastMed&&lastMed.grasa) || u.grasa || '';
+  var cinActual    = (lastMed&&lastMed.cin)   || u.cin   || '';
+  var cueActual    = (lastMed&&lastMed.cue)   || u.cue   || '';
+  var cadActual    = (lastMed&&lastMed.cad)   || u.cad   || '';
+  var fechaMedLabel= lastMed?('<span style="font-size:9px;color:var(--t3);"> · actualizado '+fmtDate(lastMed.fecha)+'</span>'):'';
+
+  // Recalcular macros con peso actualizado
+  var uTemp=Object.assign({},u,{peso:pesoActual});
+  var macActual=calcMacros(uTemp);
+  var imc=((parseFloat(pesoActual)||0)/((u.alt/100)*(u.alt/100))).toFixed(1);
   var imcLabel=imc<18.5?'Bajo peso':imc<25?'Normopeso':imc<30?'Sobrepeso':'Obesidad';
+
+  var masaMagra=grasaActual?Math.round(parseFloat(pesoActual)*(1-(parseFloat(grasaActual)/100))):(macActual.masaMagra||'—');
+
   var paiLabel={es:'🇪🇸 España',co:'🇨🇴 Colombia'}[u.pais||'es']||u.pais||'—';
   var dietaLabel={equilibrada:'Equilibrada',lowcarb:'Baja en carbos',keto:'Cetogénica'}[u.dieta||'equilibrada'];
   var keyStatus='';
@@ -3475,12 +3502,15 @@ function renderPerfil(){
         +'<div style="margin-top:4px;">'+keyStatus+'</div>'
       +'</div>'
     +'</div>'
-    // ── Datos físicos completos
-    +'<div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;">Ficha completa</div>'
+    // ── Ficha completa con botón editar
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'
+      +'<div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.07em;">Ficha completa'+fechaMedLabel+'</div>'
+      +'<button onclick="openEditPerfil()" style="font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid var(--border2);background:var(--bg3);color:var(--acc2);cursor:pointer;">✏️ Editar</button>'
+    +'</div>'
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;margin-bottom:12px;">'
       +'<div style="background:var(--bg3);border-radius:8px;padding:9px 11px;">'
         +'<div style="font-size:10px;color:var(--t3);margin-bottom:2px;">PESO</div>'
-        +'<div style="font-weight:700;">'+u.peso+' kg</div>'
+        +'<div style="font-weight:700;">'+pesoActual+' kg</div>'
       +'</div>'
       +'<div style="background:var(--bg3);border-radius:8px;padding:9px 11px;">'
         +'<div style="font-size:10px;color:var(--t3);margin-bottom:2px;">ALTURA</div>'
@@ -3496,11 +3526,11 @@ function renderPerfil(){
       +'</div>'
       +'<div style="background:var(--bg3);border-radius:8px;padding:9px 11px;">'
         +'<div style="font-size:10px;color:var(--t3);margin-bottom:2px;">% GRASA</div>'
-        +'<div style="font-weight:700;color:var(--acc2);">'+(u.grasa?u.grasa+'%':'Calcula en Progreso')+'</div>'
+        +'<div style="font-weight:700;color:var(--acc2);">'+(grasaActual?grasaActual+'%':'Registra medidas')+'</div>'
       +'</div>'
       +'<div style="background:var(--bg3);border-radius:8px;padding:9px 11px;">'
         +'<div style="font-size:10px;color:var(--t3);margin-bottom:2px;">MASA MAGRA EST.</div>'
-        +'<div style="font-weight:700;">'+(mac.masaMagra||'—')+' kg</div>'
+        +'<div style="font-weight:700;">'+masaMagra+' kg</div>'
       +'</div>'
       +'<div style="background:var(--bg3);border-radius:8px;padding:9px 11px;">'
         +'<div style="font-size:10px;color:var(--t3);margin-bottom:2px;">IMC</div>'
@@ -3510,17 +3540,17 @@ function renderPerfil(){
         +'<div style="font-size:10px;color:var(--t3);margin-bottom:2px;">EXPERIENCIA</div>'
         +'<div style="font-weight:700;">'+({prin:'Principiante',inter:'Intermedio',avanz:'Avanzado'}[u.exp]||'—')+'</div>'
       +'</div>'
-      +((u.cin)?'<div style="background:var(--bg3);border-radius:8px;padding:9px 11px;">'
+      +(cinActual?'<div style="background:var(--bg3);border-radius:8px;padding:9px 11px;">'
         +'<div style="font-size:10px;color:var(--t3);margin-bottom:2px;">CINTURA</div>'
-        +'<div style="font-weight:700;">'+u.cin+' cm</div>'
+        +'<div style="font-weight:700;">'+cinActual+' cm</div>'
       +'</div>':'')
-      +((u.cue)?'<div style="background:var(--bg3);border-radius:8px;padding:9px 11px;">'
+      +(cueActual?'<div style="background:var(--bg3);border-radius:8px;padding:9px 11px;">'
         +'<div style="font-size:10px;color:var(--t3);margin-bottom:2px;">CUELLO</div>'
-        +'<div style="font-weight:700;">'+u.cue+' cm</div>'
+        +'<div style="font-weight:700;">'+cueActual+' cm</div>'
       +'</div>':'')
-      +((u.cad)?'<div style="background:var(--bg3);border-radius:8px;padding:9px 11px;">'
+      +(cadActual?'<div style="background:var(--bg3);border-radius:8px;padding:9px 11px;">'
         +'<div style="font-size:10px;color:var(--t3);margin-bottom:2px;">CADERA</div>'
-        +'<div style="font-weight:700;">'+u.cad+' cm</div>'
+        +'<div style="font-weight:700;">'+cadActual+' cm</div>'
       +'</div>':'')
     +'</div>'
     // ── Objetivo y plan
@@ -3529,14 +3559,14 @@ function renderPerfil(){
         +'<div><span style="color:var(--t2);">Objetivo: </span><b style="color:var(--acc2);">'+LABEL_OBJ[u.obj||'recomp']+'</b></div>'
         +'<div><span style="color:var(--t2);">Dieta: </span><b>'+dietaLabel+'</b></div>'
         +'<div><span style="color:var(--t2);">País: </span><b>'+paiLabel+'</b></div>'
-        +'<div><span style="color:var(--t2);">Déficit: </span><b>'+( u.deficit||'20')+'%</b></div>'
+        +'<div><span style="color:var(--t2);">Déficit: </span><b>'+(u.deficit||'20')+'%</b></div>'
       +'</div>'
     +'</div>'
-    // ── Macros resumen compacto
+    // ── Macros resumen (con peso actualizado)
     +'<div class="sg3" style="margin-bottom:12px;">'
-      +'<div class="stat"><div class="stat-val" style="color:var(--amber);font-size:18px;">'+(mac.kcal||'—')+'</div><div class="stat-lbl">kcal/día</div></div>'
-      +'<div class="stat"><div class="stat-val" style="color:var(--acc2);font-size:18px;">'+(mac.prot||'—')+'g</div><div class="stat-lbl">proteína</div></div>'
-      +'<div class="stat"><div class="stat-val" style="color:var(--blue);font-size:18px;">'+(Math.round((mac.agua||2500)/100)/10)+'L</div><div class="stat-lbl">agua</div></div>'
+      +'<div class="stat"><div class="stat-val" style="color:var(--amber);font-size:18px;">'+(macActual.kcal||'—')+'</div><div class="stat-lbl">kcal/día</div></div>'
+      +'<div class="stat"><div class="stat-val" style="color:var(--acc2);font-size:18px;">'+(macActual.prot||'—')+'g</div><div class="stat-lbl">proteína</div></div>'
+      +'<div class="stat"><div class="stat-val" style="color:var(--blue);font-size:18px;">'+(Math.round((macActual.agua||2500)/100)/10)+'L</div><div class="stat-lbl">agua</div></div>'
     +'</div>'
     +((u.rests&&u.rests.length)?'<div class="tip warn"><b>Intolerancias:</b> '+u.rests.join(', ')+'</div>':'');
 
@@ -4503,6 +4533,149 @@ async function sendIAEmail(){
   }
 }
 window.sendIAEmail=sendIAEmail;
+
+// ── EDITAR FICHA DE PERFIL DIRECTAMENTE ─────────────────────
+function openEditPerfil(){
+  var u=U(); if(!u) return;
+  var html='<div class="modal-ov open" id="m-edit-ficha" onclick="if(event.target===this)closeM(\'m-edit-ficha\')">'
+    +'<div class="modal" style="max-height:92vh;display:flex;flex-direction:column;">'
+    +'<div class="modal-hnd"></div>'
+    +'<div class="modal-title">✏️ Editar ficha</div>'
+    +'<div style="overflow-y:auto;flex:1;">'
+
+    // Datos personales
+    +'<div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;">Datos personales</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">'
+      +'<div class="fg" style="margin:0;grid-column:1/-1;"><label>Nombre completo</label>'
+        +'<input id="ef-nombre" class="inp" value="'+(u.nombre||'')+'" placeholder="Nombre completo"></div>'
+      +'<div class="fg" style="margin:0;"><label>Fecha nacimiento</label>'
+        +'<input type="date" id="ef-fnac" class="inp" value="'+(u.fnac?u.fnac.slice(0,10):'')+'" oninput="efCalcEdad()"></div>'
+      +'<div class="fg" style="margin:0;"><label>Edad calculada</label>'
+        +'<div id="ef-edad" style="padding:10px 12px;background:var(--bg3);border-radius:var(--r);font-size:14px;font-weight:700;color:var(--acc2);">'
+        +calcEdad(u.fnac)+' años</div></div>'
+    +'</div>'
+
+    // Datos físicos
+    +'<div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;">Datos físicos</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">'
+      +'<div class="fg" style="margin:0;"><label>Peso actual (kg)</label>'
+        +'<input type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" id="ef-peso" class="inp" value="'+(u.peso||'')+'" placeholder="104" oninput="efCalcGrasa()"></div>'
+      +'<div class="fg" style="margin:0;"><label>Altura (cm)</label>'
+        +'<input type="number" inputmode="numeric" id="ef-alt" class="inp" value="'+(u.alt||'')+'" placeholder="178"></div>'
+      +'<div class="fg" style="margin:0;"><label>Cintura (cm)</label>'
+        +'<input type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" id="ef-cin" class="inp" value="'+(u.cin||'')+'" placeholder="117" oninput="efCalcGrasa()"></div>'
+      +'<div class="fg" style="margin:0;"><label>Cuello (cm)</label>'
+        +'<input type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" id="ef-cue" class="inp" value="'+(u.cue||'')+'" placeholder="43" oninput="efCalcGrasa()"></div>'
+      +(u.genero!=='H'?'<div class="fg" style="margin:0;"><label>Cadera (cm)</label>'
+        +'<input type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" id="ef-cad" class="inp" value="'+(u.cad||'')+'" placeholder="100" oninput="efCalcGrasa()"></div>':'')
+    +'</div>'
+    +'<div class="fg"><label>% Grasa corporal <span style="font-weight:400;color:var(--t3);">(se calcula solo al rellenar cintura y cuello)</span></label>'
+      +'<input type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" id="ef-grasa" class="inp" value="'+(u.grasa||'')+'" placeholder="33.6">'
+      +'<div id="ef-grasa-info" style="font-size:11px;color:var(--t3);margin-top:4px;"></div>'
+    +'</div>'
+
+    // Objetivo
+    +'<div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;">Objetivo y plan</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px;">'
+      +'<div class="fg" style="margin:0;"><label>Objetivo</label><select id="ef-obj" class="inp">'
+        +'<option value="perdida"'+(u.obj==='perdida'?' selected':'')+'>Pérdida de grasa</option>'
+        +'<option value="volumen"'+(u.obj==='volumen'?' selected':'')+'>Ganancia muscular</option>'
+        +'<option value="recomp"'+(u.obj==='recomp'?' selected':'')+'>Recomposición</option>'
+        +'<option value="mant"'+(u.obj==='mant'?' selected':'')+'>Mantenimiento</option>'
+      +'</select></div>'
+      +'<div class="fg" style="margin:0;"><label>Déficit/superávit %</label>'
+        +'<select id="ef-deficit" class="inp">'
+        +'<option value="10"'+(u.deficit==='10'?' selected':'')+'>10% — Suave</option>'
+        +'<option value="20"'+(u.deficit==='20'?' selected':'')+'>20% — Moderado</option>'
+        +'<option value="25"'+(u.deficit==='25'?' selected':'')+'>25% — Agresivo</option>'
+        +'</select></div>'
+      +'<div class="fg" style="margin:0;"><label>Experiencia</label><select id="ef-exp" class="inp">'
+        +'<option value="prin"'+(u.exp==='prin'?' selected':'')+'>Principiante</option>'
+        +'<option value="inter"'+(u.exp==='inter'?' selected':'')+'>Intermedio</option>'
+        +'<option value="avanz"'+(u.exp==='avanz'?' selected':'')+'>Avanzado</option>'
+      +'</select></div>'
+      +'<div class="fg" style="margin:0;"><label>Hora de entreno</label><select id="ef-hora" class="inp">'
+        +'<option value="manana"'+(u.horaEntreno==='manana'?' selected':'')+'>🌅 Mañana</option>'
+        +'<option value="mediodia"'+(u.horaEntreno==='mediodia'?' selected':'')+'>☀️ Mediodía</option>'
+        +'<option value="tarde"'+(u.horaEntreno==='tarde'?' selected':'')+'>🌇 Tarde</option>'
+        +'<option value="noche"'+(u.horaEntreno==='noche'?' selected':'')+'>🌙 Noche</option>'
+      +'</select></div>'
+      +'<div class="fg" style="margin:0;grid-column:1/-1;"><label>💼 Tipo de trabajo</label><select id="ef-trabajo" class="inp">'
+        +'<option value="sedentario"'+(u.trabajo==='sedentario'?' selected':'')+'>🪑 Sedentario (oficina)</option>'
+        +'<option value="moderado"'+(u.trabajo==='moderado'?' selected':'')+'>🚶 Moderado (de pie)</option>'
+        +'<option value="activo"'+(u.trabajo==='activo'?' selected':'')+'>🏗️ Activo (esfuerzo físico)</option>'
+      +'</select></div>'
+    +'</div>'
+
+    +'</div>'
+    +'<div class="modal-actions" style="flex-shrink:0;border-top:1px solid var(--border);padding-top:12px;margin-top:4px;">'
+      +'<button class="btn btn-acc btn-full" onclick="saveEditPerfil()">💾 Guardar cambios</button>'
+      +'<button class="btn btn-full" onclick="closeM(\'m-edit-ficha\')" style="margin-top:8px;">Cancelar</button>'
+    +'</div>'
+    +'</div></div>';
+
+  var div=document.createElement('div');
+  div.innerHTML=html;
+  document.body.appendChild(div.firstChild);
+  // Calcular % grasa inicial si hay datos
+  setTimeout(efCalcGrasa, 100);
+}
+window.openEditPerfil=openEditPerfil;
+
+function efCalcEdad(){
+  var fnac=$('ef-fnac')&&$('ef-fnac').value;
+  var el=$('ef-edad');
+  if(el&&fnac) el.textContent=calcEdad(fnac)+' años';
+}
+window.efCalcEdad=efCalcEdad;
+
+function efCalcGrasa(){
+  var u=U(); if(!u) return;
+  var alt=parseFloat(u.alt)||parseFloat($('ef-alt')&&$('ef-alt').value)||0;
+  var cin=parseFloat($('ef-cin')&&$('ef-cin').value)||0;
+  var cue=parseFloat($('ef-cue')&&$('ef-cue').value)||0;
+  var cad=parseFloat($('ef-cad')&&$('ef-cad').value)||0;
+  var genero=u.genero||'H';
+  var info=$('ef-grasa-info'), oGrasa=$('ef-grasa');
+  if(!oGrasa) return;
+  if(alt>0&&cin>0&&cue>0&&cin>cue){
+    var pct=null;
+    if(genero==='H'){
+      pct=Math.round((495/(1.0324-0.19077*Math.log10(cin-cue)+0.15456*Math.log10(alt))-450)*10)/10;
+    } else if(cad>0){
+      pct=Math.round((495/(1.29579-0.35004*Math.log10(cin+cad-cue)+0.22100*Math.log10(alt))-450)*10)/10;
+    }
+    if(pct&&pct>2&&pct<60){
+      oGrasa.value=pct;
+      if(info) info.textContent='✓ Calculado automáticamente con método Navy · editable si tienes otra medición';
+    }
+  }
+}
+window.efCalcGrasa=efCalcGrasa;
+
+function saveEditPerfil(){
+  var u=U(); if(!u) return;
+  u.nombre=$('ef-nombre').value.trim()||u.nombre;
+  u.fnac=$('ef-fnac').value||u.fnac;
+  u.peso=$('ef-peso').value||u.peso;
+  u.alt=$('ef-alt').value||u.alt;
+  u.cin=$('ef-cin').value||u.cin;
+  u.cue=$('ef-cue').value||u.cue;
+  if($('ef-cad')) u.cad=$('ef-cad').value||u.cad;
+  u.grasa=$('ef-grasa').value||u.grasa;
+  u.obj=$('ef-obj').value||u.obj;
+  u.deficit=$('ef-deficit').value||u.deficit;
+  u.exp=$('ef-exp').value||u.exp;
+  u.horaEntreno=$('ef-hora').value||u.horaEntreno;
+  u.trabajo=$('ef-trabajo').value||u.trabajo;
+  // Recalcular macros con los nuevos datos
+  u.macros=calcMacros(u);
+  saveAll();
+  closeM('m-edit-ficha');
+  renderPerfil();
+  toast('✓ Ficha actualizada');
+}
+window.saveEditPerfil=saveEditPerfil;
 
 function toggleKongoQuick(){
   var q=$('kongo-quick');
