@@ -795,6 +795,37 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   </div>
 
   <div class="card"><div class="card-title" style="margin-bottom:10px;">💊 Suplementación</div><div id="perfil-supls"></div></div>
+
+  <!-- ── EXPORTAR / IMPORTAR DATOS ── -->
+  <div class="card">
+    <div class="card-title" style="margin-bottom:4px;">💾 Mis datos</div>
+    <div style="font-size:12px;color:var(--t2);margin-bottom:14px;line-height:1.6;">Exporta tus datos antes de actualizar la app o como respaldo. El JSON contiene todo y permite restaurar. El PDF es un informe legible para compartir.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+      <button class="btn btn-acc" onclick="exportarJSON()" style="font-size:13px;padding:11px 8px;">
+        📦 Exportar JSON<br><span style="font-size:10px;font-weight:400;opacity:.8;">Respaldo completo</span>
+      </button>
+      <button class="btn" onclick="exportarPDF()" style="font-size:13px;padding:11px 8px;border:1px solid var(--border2);">
+        📄 Exportar PDF<br><span style="font-size:10px;font-weight:400;opacity:.8;">Informe legible</span>
+      </button>
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:10px;">
+      <div style="font-size:12px;color:var(--t2);margin-bottom:8px;">Restaurar desde respaldo JSON:</div>
+      <input type="file" id="import-json-file" accept=".json" style="display:none;" onchange="importarJSON(this)">
+      <button class="btn btn-full" onclick="$('import-json-file').click()" style="font-size:13px;">
+        📥 Importar JSON
+      </button>
+      <div id="import-status" style="font-size:11px;margin-top:6px;display:none;"></div>
+    </div>
+    <div style="background:var(--bg3);border-radius:8px;padding:10px 12px;margin-top:10px;border-left:3px solid var(--acc);">
+      <div style="font-size:11px;font-weight:700;color:var(--acc2);margin-bottom:4px;">📱 Nota para iPhone (Safari)</div>
+      <div style="font-size:11px;color:var(--t2);line-height:1.6;">
+        Al exportar, Safari puede abrir el JSON en el navegador en vez de descargarlo.<br>
+        Si eso ocurre: toca el botón compartir <b>□↑</b> → <b>"Guardar en Archivos"</b> → elige <b>Descargas</b>.<br><br>
+        Al importar: toca <b>📥 Importar JSON</b> → en el selector de archivos ve a <b>Archivos → Descargas</b> y elige el archivo <b>SpeciMen_backup_FECHA.json</b>.
+      </div>
+    </div>
+  </div>
+
   <div class="card">
     <div class="card-title" style="margin-bottom:10px;">⚙️ Configuración</div>
     <!-- Opción recomendada: Anthropic Claude -->
@@ -1063,6 +1094,50 @@ function fmtFechaNac(fnac){
   return d.toLocaleDateString('es-ES',{day:'2-digit',month:'long',year:'numeric',timeZone:'UTC'});
 }
 function U(){return APP.users[APP.cur]||{};}
+var SES_DRAFT_KEY='specimen_ses_draft';
+function saveSesionDraft(){
+  try{
+    if(APP.exTemp&&APP.exTemp.length){
+      var draft={exTemp:APP.exTemp,diaIdx:APP._sesionDiaIdx||0,ts:Date.now()};
+      localStorage.setItem(SES_DRAFT_KEY,JSON.stringify(draft));
+    }
+  }catch(e){}
+}
+function clearSesionDraft(){try{localStorage.removeItem(SES_DRAFT_KEY);}catch(e){}}
+function checkSesionDraft(){
+  try{
+    var raw=localStorage.getItem(SES_DRAFT_KEY);
+    if(!raw) return;
+    var d=JSON.parse(raw);
+    // Solo recuperar si el borrador es de menos de 4 horas
+    if(!d||!d.exTemp||!d.exTemp.length||Date.now()-d.ts>4*3600*1000){clearSesionDraft();return;}
+    var mins=Math.round((Date.now()-d.ts)/60000);
+    var banner=document.createElement('div');
+    banner.id='ses-recover-banner';
+    banner.style.cssText='position:fixed;bottom:calc(60px + env(safe-area-inset-bottom));left:12px;right:12px;background:#1a1a0a;border:1px solid var(--acc);border-radius:12px;padding:12px 14px;z-index:400;display:flex;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(0,0,0,.5);';
+    banner.innerHTML='<div style="flex:1;"><div style="font-size:13px;font-weight:700;color:var(--acc2);">⚡ Sesión interrumpida</div>'
+      +'<div style="font-size:11px;color:var(--t2);margin-top:2px;">Hace '+mins+' min · '+d.exTemp.length+' ejercicios</div></div>'
+      +'<button onclick="recoverSesionDraft()" style="background:var(--acc2);color:#000;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;">Recuperar</button>'
+      +'<button onclick="this.parentElement.remove();clearSesionDraft();" style="background:var(--bg3);color:var(--t2);border:none;border-radius:8px;padding:8px 10px;font-size:12px;cursor:pointer;">✕</button>';
+    document.body.appendChild(banner);
+  }catch(e){}
+}
+function recoverSesionDraft(){
+  try{
+    var raw=localStorage.getItem(SES_DRAFT_KEY);
+    if(!raw) return;
+    var d=JSON.parse(raw);
+    APP.exTemp=d.exTemp||[];
+    APP._sesionDiaIdx=d.diaIdx||0;
+    var banner=document.getElementById('ses-recover-banner');
+    if(banner) banner.remove();
+    goTo('sesion');
+    renderExList&&renderExList();
+    toast('✓ Sesión recuperada');
+  }catch(e){toast('No se pudo recuperar la sesión');}
+}
+window.recoverSesionDraft=recoverSesionDraft;
+
 function saveAll(){
   try{
     localStorage.setItem(STORE_KEY,JSON.stringify(APP));
@@ -2040,33 +2115,85 @@ $('guia-close').addEventListener('click',function(){closeM('m-guia');});
 // ── Búsqueda de fotos reales en Wikimedia Commons (licencia libre) ─────
 var _guiaPhotoCache={};
 var _guiaCurrentId=null;
+// Mapa de nombres en español → términos de búsqueda en inglés
+// (Commons tiene principalmente fotos en inglés)
+var GUIA_SEARCH_EN={
+  'Sentadilla con Barra':'barbell squat exercise',
+  'Peso Muerto':'deadlift exercise barbell',
+  'Press Banca':'bench press barbell chest',
+  'Dominadas':'pull-up exercise back',
+  'Hip Thrust':'hip thrust glute exercise',
+  'Press Militar':'overhead press shoulder',
+  'Remo con Barra':'barbell row back exercise',
+  'Curl Barra':'barbell bicep curl',
+  'Zancadas':'lunges exercise legs',
+  'Extensión Tríceps Polea':'tricep pushdown cable',
+  'Prensa de Pierna':'leg press machine',
+  'Caminata Inclinada':'incline treadmill walking cardio',
+  'Caminata inclinada':'incline treadmill walking',
+  'Elíptica':'elliptical machine cardio',
+  'Plancha Isométrica':'plank exercise core',
+  'Elevaciones Laterales':'lateral raise shoulder dumbbell',
+  'Aperturas en Cable':'cable fly chest exercise',
+  'Fondos en Paralelas':'dips tricep chest',
+  'Jalón al Pecho':'lat pulldown cable back',
+  'Sentadilla Goblet':'goblet squat dumbbell',
+  'Curl Femoral Tumbado':'lying leg curl hamstring',
+  'Peso Muerto Rumano':'romanian deadlift hamstring',
+  'Abducción Cadera Máquina':'hip abduction machine glute',
+  'Crunch':'crunch abdominal exercise'
+};
+function getSearchQuery(titulo){
+  // Buscar coincidencia parcial en el mapa
+  var keys=Object.keys(GUIA_SEARCH_EN);
+  for(var i=0;i<keys.length;i++){
+    if(titulo.toLowerCase().indexOf(keys[i].toLowerCase())>=0||keys[i].toLowerCase().indexOf(titulo.toLowerCase().split(' ')[0])>=0){
+      return encodeURIComponent(GUIA_SEARCH_EN[keys[i]]);
+    }
+  }
+  // Fallback: usar el título en español + 'exercise'
+  return encodeURIComponent(titulo+' exercise');
+}
+
 function fetchGuiaPhotos(tituloEjercicio, id){
   if(_guiaPhotoCache[id]){
     renderGuiaPhotos(_guiaPhotoCache[id]);
     return;
   }
-  var query=encodeURIComponent(tituloEjercicio+' exercise gym technique');
-  var url='https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrnamespace=6&gsrsearch='+query+'&gsrlimit=6&prop=imageinfo&iiprop=url%7Cmime&iiurlwidth=360&format=json&origin=*';
+  var query=getSearchQuery(tituloEjercicio);
+  var url='https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrnamespace=6&gsrsearch='+query+'&gsrlimit=10&prop=imageinfo&iiprop=url%7Cmime%7Csize&iiurlwidth=400&format=json&origin=*';
   fetch(url).then(function(r){return r.json();}).then(function(data){
     var pages=data&&data.query&&data.query.pages;
     if(!pages) return;
     var imgs=Object.values(pages)
       .filter(function(p){
-        var mime=p.imageinfo&&p.imageinfo[0]&&p.imageinfo[0].mime;
-        return mime&&(mime.indexOf('jpeg')>=0||mime.indexOf('png')>=0||mime.indexOf('webp')>=0);
+        var ii=p.imageinfo&&p.imageinfo[0];
+        if(!ii) return false;
+        var mime=ii.mime||'';
+        // Solo fotos (no svg, gif, video)
+        if(mime.indexOf('jpeg')<0&&mime.indexOf('png')<0&&mime.indexOf('webp')<0) return false;
+        // Filtrar imágenes muy pequeñas (iconos, logos)
+        var w=ii.width||0, h=ii.height||0;
+        if(w<200||h<200) return false;
+        return true;
+      })
+      .sort(function(a,b){
+        // Priorizar imágenes de mayor resolución dentro del límite de thumb
+        var wa=(a.imageinfo[0].thumbwidth||a.imageinfo[0].width||0);
+        var wb=(b.imageinfo[0].thumbwidth||b.imageinfo[0].width||0);
+        return wb-wa;
       })
       .map(function(p){return p.imageinfo[0].thumburl||p.imageinfo[0].url;})
       .filter(Boolean)
       .slice(0,2);
     if(imgs.length){
       _guiaPhotoCache[id]=imgs;
-      // Solo actualizar si el usuario sigue viendo este mismo ejercicio
       if(_guiaCurrentId===id){
         var guiaImgsEl=$('guia-imgs');
         if(guiaImgsEl) renderGuiaPhotos(imgs);
       }
     }
-  }).catch(function(e){console.warn('Búsqueda de fotos falló, se mantiene el dibujo técnico:',e);});
+  }).catch(function(e){console.warn('Búsqueda de fotos falló:',e);});
 }
 function renderGuiaPhotos(imgs){
   var el=$('guia-imgs');
@@ -2300,6 +2427,9 @@ function dedupUsers(){
 function initApp(){
   dedupUsers();
   updateUserSwitcher();
+  checkSesionDraft();
+  // Guardar borrador de sesión activa cada 30s para recuperación tras crash
+  setInterval(saveSesionDraft, 30000);
   renderHome();
   document.querySelectorAll('.bn').forEach(function(b){
     b.addEventListener('click',function(){goTo(this.getAttribute('data-s'));});
@@ -2636,7 +2766,7 @@ function renderPlanEj(){
               +'<span class="plan-sets-badge">'+e.s+' × '+e.r+'</span>'
               +e.mus+(e.rir!==undefined&&e.rir!==''?' · RIR '+e.rir:'')
             +'</div>'
-            +(hasPrev?'<div class="plan-ex-pr">Mejor: '+bestKg+' kg × '+bestReps+' reps</div>':'')
+            +(hasPrev?(isCardioEx(e)?'<div class="plan-ex-pr">Último: '+bestReps+' km/h · '+bestKg+' min</div>':'<div class="plan-ex-pr">Mejor: '+bestKg+' kg × '+bestReps+' reps</div>'):'')
           +'</div>'
         +'</div>'
         +'<button onclick="swapPlanEx(event,'+i+','+exIdx+',\''+emus+'\')" title="Cambiar ejercicio" style="flex-shrink:0;width:30px;height:30px;border-radius:50%;background:var(--bg3);border:1px solid var(--border2);color:var(--t3);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-left:4px;">🔄</button>'
@@ -2655,7 +2785,10 @@ function renderPlanEj(){
         +'<span style="font-size:10px;font-weight:600;padding:3px 8px;border-radius:100px;background:var(--bg3);color:var(--t2);">'+tipoLabel+'</span>'
       +'</div>'
       +exsHtml
-      +'<button class="hevy-start-btn" onclick="goTo(\'sesion\')">Empezar sesión</button>'
+      +'<div style="display:flex;gap:8px;margin-top:10px;">'
+        +'<button class="hevy-start-btn" style="flex:1;" onclick="APP._sesionDiaIdx='+i+';goTo(\'sesion\')">▶ Empezar sesión</button>'
+        +'<button onclick="openAddCustomEx('+i+')" title="Añadir ejercicio" style="padding:8px 12px;border-radius:8px;border:1px solid var(--border2);background:var(--bg3);color:var(--t3);font-size:14px;cursor:pointer;">➕</button>'
+      +'</div>'
       +'</div>';
   }).join('');
 }
@@ -2790,14 +2923,25 @@ function populateTipoSesion(){
     o.textContent=d.dia+' — '+d.nombre;
     sel.appendChild(o);
   });
-  // Preseleccionar día de hoy
+  // Preseleccionar día: si se vino del botón del plan, usar ese día
   var dow=new Date().getDay(); var idxMap=[6,0,1,2,3,4,5]; var idx=idxMap[dow];
+  if(APP._sesionDiaIdx!==undefined&&APP._sesionDiaIdx!==null) idx=APP._sesionDiaIdx;
   var diaH=(u.planEj||[])[idx];
   if(diaH&&diaH.tipo!=='descanso') sel.value=diaH.nombre;
   // Cargar ejercicios cuando cambia el tipo
   sel.onchange=function(){ loadDayExercises(); };
   loadDayExercises();
 }
+
+// Carga un día específico por índice (llamado desde el botón del plan)
+function loadSesionDia(diaIdx){
+  var u=U(); if(!u||!u.planEj) return;
+  var d=u.planEj[diaIdx]; if(!d||d.tipo==='descanso') return;
+  var sel=$('sf-tipo');
+  if(sel) sel.value=d.nombre;
+  loadDayExercises();
+}
+window.loadSesionDia=loadSesionDia;
 
 // Carga los ejercicios del día seleccionado en APP.exTemp
 function loadDayExercises(){
@@ -2865,11 +3009,15 @@ function renderExList(){
         +(ex.extra?'<button onclick="removeEx('+exIdx+')" style="background:transparent;border:none;color:var(--red);font-size:16px;cursor:pointer;padding:2px 4px;line-height:1;">✕</button>':'')
       +'</div>'
       +'</div>';
-    // Cabecera de columnas
+    // Cabecera de columnas — diferente para cardio vs peso
+    var esCardio=isCardioEx(ex);
     var colHdr='<div style="display:grid;grid-template-columns:28px 1fr 1fr 32px;gap:7px;margin-bottom:4px;padding:0 2px;">'
       +'<div></div>'
-      +'<div style="font-size:10px;color:var(--t3);text-align:center;text-transform:uppercase;letter-spacing:0.06em;">Peso (kg)</div>'
-      +'<div style="font-size:10px;color:var(--t3);text-align:center;text-transform:uppercase;letter-spacing:0.06em;">Reps reales</div>'
+      +(esCardio
+        ?'<div style="font-size:10px;color:var(--t3);text-align:center;text-transform:uppercase;letter-spacing:0.06em;">Duración (min)</div>'
+         +'<div style="font-size:10px;color:var(--t3);text-align:center;text-transform:uppercase;letter-spacing:0.06em;">Vel / Nivel</div>'
+        :'<div style="font-size:10px;color:var(--t3);text-align:center;text-transform:uppercase;letter-spacing:0.06em;">Peso (kg)</div>'
+         +'<div style="font-size:10px;color:var(--t3);text-align:center;text-transform:uppercase;letter-spacing:0.06em;">Reps reales</div>')
       +'<div></div>'
       +'</div>';
     // Filas de series
@@ -2877,8 +3025,11 @@ function renderExList(){
       var done=s.done;
       return '<div class="serie-row" data-ex="'+exIdx+'" data-s="'+sIdx+'">'
         +'<div class="serie-num'+(done?' done':'')+'">'+( sIdx+1)+'</div>'
-        +'<input class="serie-input'+(s.kg?' filled':'')+'" type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="kg" value="'+s.kg+'" data-ex="'+exIdx+'" data-s="'+sIdx+'" data-field="kg">'
-        +'<input class="serie-input'+(s.reps&&s.done?' filled':'')+'" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="reps" value="'+s.reps+'" data-ex="'+exIdx+'" data-s="'+sIdx+'" data-field="reps">'
+        +(esCardio
+          ?'<input class="serie-input'+(s.kg?' filled':'')+'" type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="min" value="'+s.kg+'" data-ex="'+exIdx+'" data-s="'+sIdx+'" data-field="kg">'
+           +'<input class="serie-input'+(s.reps&&s.done?' filled':'')+'" type="text" inputmode="decimal" placeholder="km/h o nivel" value="'+s.reps+'" data-ex="'+exIdx+'" data-s="'+sIdx+'" data-field="reps">'
+          :'<input class="serie-input'+(s.kg?' filled':'')+'" type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="kg" value="'+s.kg+'" data-ex="'+exIdx+'" data-s="'+sIdx+'" data-field="kg">'
+           +'<input class="serie-input'+(s.reps&&s.done?' filled':'')+'" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="reps" value="'+s.reps+'" data-ex="'+exIdx+'" data-s="'+sIdx+'" data-field="reps">')
         +'<div class="serie-check'+(done?' done':'')+'" data-ex="'+exIdx+'" data-s="'+sIdx+'">'+( done?'✓':'')+'</div>'
         +'</div>';
     }).join('');
@@ -3030,6 +3181,7 @@ function saveSesion(){
   var totalSeries=exsData.reduce(function(a,e){return a+e.seriesCompletadas;},0);
   var volTotal=exsData.reduce(function(a,e){return a+e.volumenTotal;},0);
   toast('✓ Sesión guardada · '+totalSeries+' series · '+volTotal+'kg volumen');
+  clearSesionDraft();
   setTimeout(function(){goTo('hist');},800);
 }
 
@@ -4412,6 +4564,8 @@ function swapPlanEx(evt, diaIdx, exIdx, musculo){
     +'<div class="modal-actions"><button class="btn btn-full" onclick="closeM(\'m-swap-ex\')">Cancelar</button></div>'
     +'</div></div>';
 
+  var old=document.getElementById('m-swap-ex');
+  if(old) old.parentNode.removeChild(old);
   var div=document.createElement('div');
   div.innerHTML=html;
   document.body.appendChild(div.firstChild);
@@ -4431,6 +4585,110 @@ function confirmSwapPlanEx(diaIdx, exIdx, newName){
   toast('✓ '+oldName+' → '+newName);
 }
 window.confirmSwapPlanEx=confirmSwapPlanEx;
+
+// ── Detectar si un ejercicio es de tiempo/cardio (no de carga de kg) ──
+function isCardioEx(e){
+  var cardioIds=['caminata','caminata-m','eliptica','cardio-sab','movilidad','caminar'];
+  var cardioMus=['Cardiovascular','Cardio','Cardio/','Recuperación'];
+  var r=e.r||'';
+  if(r.indexOf('min')>=0||r.indexOf('seg')>=0) return true;
+  if(cardioIds.indexOf(e.id||'')>=0) return true;
+  if(cardioMus.some(function(m){return (e.mus||'').indexOf(m)>=0;})) return true;
+  return false;
+}
+window.isCardioEx=isCardioEx;
+
+// ══════════════════════════════════════════════
+// FIX 2: Poder añadir ejercicios propios al plan
+// FIX 6: Flexibilidad para hacer un día en otro día
+// ══════════════════════════════════════════════
+
+// Abre modal para elegir un día del plan y hacer esa sesión hoy
+function openFlexDia(){
+  var u=U(); if(!u||!u.planEj) return;
+  var dias=u.planEj.filter(function(d){return d.tipo!=='descanso';});
+  var rows=dias.map(function(d,i){
+    var idx=u.planEj.indexOf(d);
+    return '<div class="srch-item" onclick="startSesionDia('+idx+')">'
+      +'<div class="srch-item-name">'+d.dia+' — '+d.nombre+'</div>'
+      +'<div class="srch-item-sub" style="color:var(--t3);">'+d.exs.length+' ejercicios · Toca para empezar</div>'
+      +'</div>';
+  }).join('');
+  var html='<div class="modal-ov open" id="m-flex-dia" onclick="if(event.target===this)closeM(\'m-flex-dia\')">'
+    +'<div class="modal"><div class="modal-hnd"></div>'
+    +'<div class="modal-title">📅 ¿Qué día quieres entrenar?</div>'
+    +'<div style="font-size:12px;color:var(--t3);margin-bottom:12px;">Elige cualquier día del plan — lo puedes hacer cuando quieras, sin importar el día de la semana.</div>'
+    +'<div style="max-height:55vh;overflow-y:auto;">'+rows+'</div>'
+    +'<div class="modal-actions"><button class="btn btn-full" onclick="closeM(\'m-flex-dia\')">Cancelar</button></div>'
+    +'</div></div>';
+  var old=document.getElementById('m-flex-dia');
+  if(old) old.parentNode.removeChild(old);
+  var div=document.createElement('div');
+  div.innerHTML=html;
+  document.body.appendChild(div.firstChild);
+}
+window.openFlexDia=openFlexDia;
+
+function startSesionDia(diaIdx){
+  var u=U(); if(!u||!u.planEj) return;
+  APP._sesionDiaIdx=diaIdx;
+  closeM('m-flex-dia');
+  goTo('sesion');
+  // Cargar los ejercicios de ese día concreto
+  if(typeof loadSesionDia==='function') loadSesionDia(diaIdx);
+  else toast('Día seleccionado: '+(u.planEj[diaIdx]||{}).nombre);
+}
+window.startSesionDia=startSesionDia;
+
+// Abrir modal para añadir ejercicio personalizado al plan
+function openAddCustomEx(diaIdx){
+  var html='<div class="modal-ov open" id="m-custom-ex" onclick="if(event.target===this)closeM(\'m-custom-ex\')">'
+    +'<div class="modal"><div class="modal-hnd"></div>'
+    +'<div class="modal-title">➕ Añadir ejercicio al plan</div>'
+    +'<div class="fg"><label>Nombre del ejercicio</label><input id="cx-nombre" class="inp" placeholder="Ej: Press Inclinado Mancuernas"></div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">'
+      +'<div class="fg" style="margin:0;"><label>Series</label><input type="number" id="cx-series" class="inp" inputmode="numeric" placeholder="4" value="4"></div>'
+      +'<div class="fg" style="margin:0;"><label>Reps / Tiempo</label><input id="cx-reps" class="inp" placeholder="10-12"></div>'
+      +'<div class="fg" style="margin:0;"><label>RIR</label><input type="number" id="cx-rir" class="inp" inputmode="numeric" placeholder="2" value="2"></div>'
+    +'</div>'
+    +'<div class="fg"><label>Músculo principal</label><input id="cx-mus" class="inp" placeholder="Pecho / Tríceps"></div>'
+    +'<div class="fg"><label>Tipo</label><select id="cx-tipo" class="inp">'
+      +'<option value="peso">🏋️ Carga de peso (kg)</option>'
+      +'<option value="tiempo">⏱️ Tiempo / Cardio (min, velocidad)</option>'
+    +'</select></div>'
+    +'<div class="modal-actions">'
+      +'<button class="btn btn-acc btn-full" onclick="saveCustomEx('+diaIdx+')">Añadir al plan ✓</button>'
+      +'<button class="btn btn-full" onclick="closeM(\'m-custom-ex\')" style="margin-top:8px;">Cancelar</button>'
+    +'</div></div></div>';
+  var old=document.getElementById('m-custom-ex');
+  if(old) old.parentNode.removeChild(old);
+  var div=document.createElement('div');
+  div.innerHTML=html;
+  document.body.appendChild(div.firstChild);
+}
+window.openAddCustomEx=openAddCustomEx;
+
+function saveCustomEx(diaIdx){
+  var u=U(); if(!u||!u.planEj) return;
+  var nombre=($('cx-nombre').value||'').trim();
+  if(!nombre){toast('Escribe el nombre del ejercicio','var(--red)');return;}
+  var ex={
+    n:nombre, id:getSvgIdForName(nombre),
+    s:parseInt($('cx-series').value)||4,
+    r:$('cx-reps').value||'10-12',
+    rir:$('cx-rir').value||'2',
+    mus:$('cx-mus').value||'General',
+    tipo:$('cx-tipo').value||'peso',
+    custom:true
+  };
+  if(!u.planEj[diaIdx].exs) u.planEj[diaIdx].exs=[];
+  u.planEj[diaIdx].exs.push(ex);
+  saveAll();
+  closeM('m-custom-ex');
+  renderPlanEj();
+  toast('✓ Ejercicio añadido al plan');
+}
+window.saveCustomEx=saveCustomEx;
 
 // ── SWAP EJERCICIO EN SESIÓN ACTIVA ───────────────────────
 function swapSesionEx(exIdx, musculo){
@@ -4458,6 +4716,8 @@ function swapSesionEx(exIdx, musculo){
     +'<div class="modal-actions"><button class="btn btn-full" onclick="closeM(\'m-swap-sesion-ex\')">Cancelar</button></div>'
     +'</div></div>';
 
+  var old2=document.getElementById('m-swap-sesion-ex');
+  if(old2) old2.parentNode.removeChild(old2);
   var div=document.createElement('div');
   div.innerHTML=html;
   document.body.appendChild(div.firstChild);
@@ -4676,6 +4936,208 @@ function saveEditPerfil(){
   toast('✓ Ficha actualizada');
 }
 window.saveEditPerfil=saveEditPerfil;
+
+// ══════════════════════════════════════════════════════
+// EXPORTAR / IMPORTAR DATOS
+// ══════════════════════════════════════════════════════
+
+// ── JSON: respaldo completo ───────────────────────────
+function exportarJSON(){
+  try{
+    var u=U(); if(!u){toast('Sin usuario activo','var(--red)');return;}
+    var backup={
+      version:'specimen_v1',
+      fecha:new Date().toISOString(),
+      app:APP
+    };
+    var blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');
+    a.href=url;
+    a.download='SpeciMen_backup_'+new Date().toISOString().slice(0,10)+'.json';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function(){URL.revokeObjectURL(url);document.body.removeChild(a);},1000);
+    toast('✓ JSON exportado correctamente');
+  }catch(e){toast('Error exportando: '+e.message,'var(--red)');}
+}
+window.exportarJSON=exportarJSON;
+
+// ── JSON: importar / restaurar ────────────────────────
+function importarJSON(input){
+  var file=input.files&&input.files[0];
+  if(!file) return;
+  var st=$('import-status');
+  if(st){st.style.display='block';st.style.color='var(--acc2)';st.textContent='⏳ Leyendo archivo...';}
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var data=JSON.parse(e.target.result);
+      // Aceptar tanto el formato envuelto {version,app} como el APP directo
+      var appData=data.app||data;
+      if(!appData.users||!Array.isArray(appData.users)||!appData.users.length){
+        throw new Error('El archivo no contiene datos de usuarios válidos');
+      }
+      // Confirmar antes de sobrescribir
+      var numSes=appData.users.reduce(function(t,u){return t+(u.sessions||[]).length;},0);
+      if(!confirm('¿Restaurar copia de seguridad?\n\n• '+appData.users.length+' usuario(s)\n• '+numSes+' sesiones registradas\n\nEsto reemplazará los datos actuales de este dispositivo.')){
+        if(st){st.style.display='none';}
+        input.value='';
+        return;
+      }
+      APP.users=appData.users;
+      APP.cur=appData.cur||0;
+      if(APP.cur>=APP.users.length) APP.cur=0;
+      saveAll();
+      if(st){st.style.color='var(--green)';st.textContent='✓ Datos restaurados correctamente. Recargando...';}
+      setTimeout(function(){location.reload();},1500);
+    }catch(err){
+      if(st){st.style.color='var(--red)';st.textContent='✕ Error: '+err.message;}
+    }
+  };
+  reader.onerror=function(){
+    if(st){st.style.color='var(--red)';st.textContent='✕ No se pudo leer el archivo';}
+  };
+  reader.readAsText(file);
+}
+window.importarJSON=importarJSON;
+
+// ── PDF: informe de progreso ──────────────────────────
+function exportarPDF(){
+  var u=U(); if(!u){toast('Sin usuario activo','var(--red)');return;}
+  toast('⏳ Generando PDF...');
+
+  // Cargar jsPDF desde CDN si no está disponible
+  if(typeof window.jspdf==='undefined'&&typeof window.jsPDF==='undefined'){
+    var script=document.createElement('script');
+    script.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    script.onload=function(){generarPDF(u);};
+    script.onerror=function(){toast('Sin conexión para cargar jsPDF','var(--red)');};
+    document.head.appendChild(script);
+  } else {
+    generarPDF(u);
+  }
+}
+window.exportarPDF=exportarPDF;
+
+function generarPDF(u){
+  try{
+    var jsPDF=window.jspdf?window.jspdf.jsPDF:window.jsPDF;
+    var doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    var mac=u.macros||calcMacros(u);
+    var meds=(u.measures||[]).slice().sort(function(a,b){return (a.fecha||'').localeCompare(b.fecha||'');});
+    var lastMed=meds.length?meds[meds.length-1]:null;
+    var W=210, M=18, CW=W-M*2;
+    var y=M;
+
+    // Colores
+    var GOLD=[201,168,76], BG=[15,15,25], TEXT=[240,240,250], GRAY=[120,120,150];
+
+    function rect(x,_y,w,h,r,col){
+      doc.setFillColor(col[0],col[1],col[2]);
+      doc.roundedRect(x,_y,w,h,r,r,'F');
+    }
+    function txt(str,x,_y,size,col,align){
+      doc.setFontSize(size||11);
+      doc.setTextColor(col?col[0]:240,col?col[1]:240,col?col[2]:250);
+      doc.text(String(str||''),x,_y,{align:align||'left'});
+    }
+
+    // ── CABECERA ──────────────────────────────────────
+    rect(0,0,W,36,0,BG);
+    txt('SpeciMen Gym App',M,12,16,GOLD);
+    txt('Informe de progreso personal',M,19,9,GRAY);
+    txt(new Date().toLocaleDateString('es-ES',{weekday:'long',year:'numeric',month:'long',day:'numeric'}),W-M,19,8,GRAY,'right');
+    txt(u.nombre||'Atleta',M,29,13,TEXT);
+    txt(u.email||'',W-M,29,8,GRAY,'right');
+    y=44;
+
+    // ── FICHA FÍSICA ──────────────────────────────────
+    txt('FICHA FÍSICA',M,y,8,GOLD); y+=5;
+    var fichaItems=[
+      ['Peso',((lastMed&&lastMed.peso)||u.peso||'—')+' kg'],
+      ['Altura',(u.alt||'—')+' cm'],
+      ['Edad',calcEdad(u.fnac)+' años'],
+      ['IMC',((parseFloat((lastMed&&lastMed.peso)||u.peso||0)/Math.pow((u.alt||170)/100,2)).toFixed(1))],
+      ['% Grasa',((lastMed&&lastMed.grasa)||u.grasa||'—')+'%'],
+      ['Masa magra',(mac.masaMagra||'—')+' kg'],
+      ['Cintura',((lastMed&&lastMed.cin)||u.cin||'—')+' cm'],
+      ['Cuello',((lastMed&&lastMed.cue)||u.cue||'—')+' cm'],
+      ['Objetivo',{perdida:'Pérdida de grasa',volumen:'Ganancia muscular',recomp:'Recomposición',mant:'Mantenimiento'}[u.obj||'recomp']],
+      ['Kcal/día',(mac.kcal||'—')+' kcal'],
+      ['Proteína',(mac.prot||'—')+' g/día'],
+      ['Agua',(Math.round((mac.agua||2500)/100)/10)+' L/día'],
+    ];
+    var cols=2, colW=CW/cols, rH=7;
+    fichaItems.forEach(function(item,i){
+      var col=i%cols, row=Math.floor(i/cols);
+      var x=M+col*colW, iy=y+row*(rH+1);
+      rect(x,iy,colW-2,rH,2,[22,22,35]);
+      txt(item[0],x+3,iy+4.5,7,GRAY);
+      txt(item[1],x+colW-5,iy+4.5,8,TEXT,'right');
+    });
+    y+=Math.ceil(fichaItems.length/cols)*(rH+1)+8;
+
+    // ── HISTORIAL DE SESIONES ─────────────────────────
+    var sessions=(u.sessions||[]).slice(-15).reverse(); // últimas 15
+    if(sessions.length){
+      txt('HISTORIAL DE SESIONES (últimas '+sessions.length+')',M,y,8,GOLD); y+=5;
+      sessions.forEach(function(s){
+        if(y>270){doc.addPage();y=M;}
+        rect(M,y,CW,8,2,[22,22,35]);
+        var label=(s.tipo||'Sesión').slice(0,30);
+        txt(label,M+3,y+5,8,TEXT);
+        txt(fmtDate(s.fecha),M+CW*0.45,y+5,7,GRAY);
+        txt((s.dur||'—')+' min',M+CW*0.62,y+5,7,GRAY);
+        txt('RPE '+(s.rpe||'—'),M+CW*0.76,y+5,7,GRAY);
+        var vol=(s.exs||[]).reduce(function(t,e){return t+((e.series||[]).reduce(function(tv,sr){return tv+(sr.done?(parseFloat(sr.kg)||0)*(parseInt(sr.reps)||1):0);},0));},0);
+        if(vol>0) txt(Math.round(vol)+' kg vol',M+CW-2,y+5,7,GOLD,'right');
+        y+=9;
+      });
+      y+=4;
+    }
+
+    // ── EVOLUCIÓN DE MEDIDAS ──────────────────────────
+    if(meds.length){
+      if(y>240){doc.addPage();y=M;}
+      txt('EVOLUCIÓN DE MEDIDAS',M,y,8,GOLD); y+=5;
+      // Cabecera tabla
+      var tCols=['Fecha','Peso','% Grasa','Cintura','Cuello'];
+      var tWidths=[35,25,25,25,25];
+      var tx=M;
+      tCols.forEach(function(h,i){
+        rect(tx,y,tWidths[i]-1,6,1,[30,30,50]);
+        txt(h,tx+1,y+4,6,GOLD);
+        tx+=tWidths[i];
+      });
+      y+=7;
+      meds.slice(-10).forEach(function(m){
+        if(y>275){doc.addPage();y=M;}
+        tx=M;
+        var row=[fmtDate(m.fecha),m.peso?m.peso+' kg':'—',m.grasa?m.grasa+'%':'—',m.cin?m.cin+' cm':'—',m.cue?m.cue+' cm':'—'];
+        row.forEach(function(v,i){
+          txt(v,tx+1,y+4,7,TEXT);
+          tx+=tWidths[i];
+        });
+        doc.setDrawColor(40,40,60);
+        doc.line(M,y+6,M+CW,y+6);
+        y+=7;
+      });
+      y+=4;
+    }
+
+    // ── PIE DE PÁGINA ─────────────────────────────────
+    rect(0,287,W,10,0,BG);
+    txt('SpeciMen Gym App · Informe generado el '+new Date().toLocaleDateString('es-ES'),W/2,293,7,GRAY,'center');
+
+    doc.save('SpeciMen_informe_'+u.nombre.split(' ')[0]+'_'+new Date().toISOString().slice(0,10)+'.pdf');
+    toast('✓ PDF generado y descargado');
+  }catch(err){
+    console.error('PDF error:',err);
+    toast('Error generando PDF: '+err.message,'var(--red)');
+  }
+}
+window.generarPDF=generarPDF;
 
 function toggleKongoQuick(){
   var q=$('kongo-quick');
