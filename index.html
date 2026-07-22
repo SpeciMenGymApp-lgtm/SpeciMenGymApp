@@ -646,6 +646,9 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     <button class="guia-tab" id="pt-comp" onclick="planTab('comp')">🛒 Compra</button>
   </div>
   <div id="pv-ej">
+  <button onclick="abrirModalPlanIA()" style="width:100%;margin-bottom:10px;padding:11px;border-radius:10px;border:1.5px solid var(--acc);background:var(--accb);color:var(--acc2);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+    🤖 Generar plan personalizado con IA + evidencia científica
+  </button>
   <button class="btn btn-ghost btn-full" style="margin-bottom:12px;border:1.5px dashed var(--border2);" onclick="openExSearch()">+ Buscar ejercicio en base de datos</button>
   <div id="plan-ej-list"></div>
 </div>
@@ -1297,18 +1300,154 @@ var LABEL_OBJ={recomp:'Recomposición',perdida:'Pérdida de grasa',volumen:'Gana
 function getPlanEjercicio(u){
   var obj=u.obj||'recomp';
   var esH=u.genero==='H';
+  // Si hay un plan generado por IA guardado, usarlo
+  if(u.planEjIA&&u.planEjIA.length) return u.planEjIA;
   if(esH){
     if(obj==='perdida') return planH_perdida(u);
     if(obj==='volumen') return planH_volumen(u);
     if(obj==='mant') return planH_mant(u);
-    return planH(u); // recomp por defecto
+    return planH(u);
   } else {
     if(obj==='perdida') return planM_perdida(u);
     if(obj==='volumen') return planM_volumen(u);
     if(obj==='mant') return planM_mant(u);
-    return planM(u); // recomp por defecto
+    return planM(u);
   }
 }
+
+// ══════════════════════════════════════════════════════
+// GENERACIÓN DE PLAN CON IA + EVIDENCIA CIENTÍFICA
+// ══════════════════════════════════════════════════════
+async function generarPlanIA(){
+  var u=U(); if(!u) return;
+  var key=ANTHROPIC_KEY||GEMINI_KEY;
+  if(!key){toast('Necesitas configurar una API key (Claude o Gemini) en Perfil → Configuración','var(--amber)');return;}
+
+  var btn=$('btn-generar-plan-ia');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Analizando tu perfil...';}
+
+  var mac=calcMacros(u);
+  var obj={perdida:'pérdida de grasa',volumen:'ganancia muscular',recomp:'recomposición corporal',mant:'mantenimiento'}[u.obj||'recomp'];
+  var exp={prin:'principiante (0-3 meses)',inter:'intermedio (4-12 meses)',avanz:'avanzado (+12 meses)'}[u.exp||'inter'];
+  var trabajo={sedentario:'sedentario (oficina)',moderado:'moderado (de pie)',activo:'activo (esfuerzo físico)'}[u.trabajo||'moderado'];
+
+  var prompt='Eres un científico del ejercicio certificado (CSCS) especializado en periodización y evidencia científica actualizada (2024-2026). Diseña un plan de entrenamiento semanal COMPLETAMENTE PERSONALIZADO basado en los siguientes datos reales del usuario y en los últimos metaanálisis publicados.\n\n'
+    +'DATOS DEL USUARIO:\n'
+    +'- Objetivo: '+obj+'\n'
+    +'- Género: '+(u.genero==='H'?'Hombre':'Mujer')+' · Edad: '+calcEdad(u.fnac)+' años\n'
+    +'- Peso: '+(u.peso||'—')+' kg · Altura: '+(u.alt||'—')+' cm · IMC: '+mac.imc+'\n'
+    +'- % Grasa corporal: '+(u.grasa||'—')+'% · Masa magra: '+(mac.masaMagra||'—')+' kg\n'
+    +'- Experiencia en gym: '+exp+'\n'
+    +'- Tipo de trabajo diario: '+trabajo+'\n'
+    +'- Hora de entrenamiento: '+(u.horaEntreno||'tarde')+'\n'
+    +'- TDEE: '+mac.tdee+' kcal · Target calórico: '+mac.kcal+' kcal/día\n'
+    +'- Intolerancies/restricciones: '+(u.rests&&u.rests.length?u.rests.join(', '):'ninguna')+'\n\n'
+    +'PRINCIPIOS DE EVIDENCIA (aplicar obligatoriamente):\n'
+    +'- Pérdida de grasa: 150-250 min/semana actividad moderada-vigorosa + fuerza 3x/semana. El entrenamiento de fuerza preserva masa magra en déficit (Frontiers in Endocrinology, 2025). Déficit 20% máximo.\n'
+    +'- Hipertrofia: 10+ series/músculo/semana distribuidas en 2-3 sesiones. Cargas 6-12 reps, cerca del fallo. Sobrecarga progresiva obligatoria (Sports Medicine meta-analysis, 2025).\n'
+    +'- Recomposición: entrenamiento de fuerza 3-4x/semana + proteína 1.6-2.2g/kg. Déficit calórico leve 10-15% (Frontiers in Nutrition, 2024).\n'
+    +'- Siempre: ejercicios compuestos primero, RIR 1-3 en trabajo pesado, NEAT importante.\n\n'
+    +'INSTRUCCIONES PARA EL PLAN:\n'
+    +'Genera exactamente 7 días (Lunes a Domingo). Para días de descanso activo o descanso completo, indícalo claramente.\n'
+    +'Responde SOLO con JSON válido, sin texto extra:\n'
+    +'[\n'
+    +'  {"dia":"Lunes","nombre":"Nombre descriptivo del día","color":"#ef4444","tipo":"fuerza","objetivo":"Objetivo específico del día","exs":[\n'
+    +'    {"id":"sentadilla","n":"Nombre del ejercicio","s":4,"r":"6-8","rir":2,"mus":"Músculo principal","nota":"Indicación técnica específica"}\n'
+    +'  ]}\n'
+    +']\n'
+    +'IDs disponibles: sentadilla, peso-muerto, press-banca, press-banca-fb, press-incl, dominadas, hip-thrust, hip-thrust-m, press-militar, remo-barra, remo-cable, remo-uni, curl-barra, curl-m, zancadas, ext-polea, prensa, jalon-m, elev-lat, elev-lat-m, fondos, goblet, squat-sumo, aperturas-cable, pullover, plancha, plancha-lat, crunch-m, caminata, eliptica, movilidad, caminar, abduccion, gemelo-pie, hip-thrust-fb-m, peso-muerto-rum, curl-fem, ext-cuad\n'
+    +'Tipos: "fuerza", "cardio", "descanso"\n'
+    +'Colores: fuerza=#ef4444, cardio=#14b8a6, descanso=#22c55e/#3a3a5c';
+
+  try{
+    var resp, txt;
+    if(ANTHROPIC_KEY){
+      resp=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01'},
+        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:4000,messages:[{role:'user',content:prompt}]})
+      });
+      var ad=await resp.json();
+      if(ad.error) throw new Error('Claude: '+(ad.error.message||ad.error.type));
+      txt=ad.content[0].text||'';
+    } else {
+      resp=await fetch('https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+GEMINI_KEY},
+        body:JSON.stringify({model:'gemini-2.5-flash',messages:[{role:'user',content:prompt}],temperature:0.3,max_tokens:4000})
+      });
+      var gd=await resp.json();
+      if(gd.error) throw new Error('Gemini: '+(gd.error.message||JSON.stringify(gd.error)));
+      txt=gd.choices[0].message.content||'';
+    }
+    // Extraer JSON
+    txt=txt.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+    var jStart=txt.indexOf('['), jEnd=txt.lastIndexOf(']');
+    if(jStart>=0&&jEnd>jStart) txt=txt.slice(jStart,jEnd+1);
+    var plan=JSON.parse(txt);
+    if(!Array.isArray(plan)||plan.length<7) throw new Error('El plan generado no tiene el formato correcto');
+
+    u.planEjIA=plan;
+    u.planEj=plan;
+    saveAll();
+    if(btn){btn.disabled=false;btn.textContent='🔄 Regenerar plan IA';}
+    closeM('m-generar-plan-ia');
+    goTo('plan');
+    renderPlanEj();
+    toast('✅ Plan personalizado generado con IA + evidencia científica');
+  }catch(e){
+    if(btn){btn.disabled=false;btn.textContent='🤖 Generar plan con IA';}
+    toast('Error: '+e.message,'var(--red)');
+    console.error('Plan IA error:',e);
+  }
+}
+window.generarPlanIA=generarPlanIA;
+
+function abrirModalPlanIA(){
+  var u=U(); if(!u) return;
+  var mac=calcMacros(u);
+  var tienePlanIA=!!(u.planEjIA&&u.planEjIA.length);
+  var html='<div class="modal-ov open" id="m-generar-plan-ia" onclick="if(event.target===this)closeM(\'m-generar-plan-ia\')">'
+    +'<div class="modal"><div class="modal-hnd"></div>'
+    +'<div class="modal-title">🤖 Plan personalizado con IA</div>'
+    +'<div style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:14px;">'
+      +'La IA analizará tu perfil completo y creará un plan de entrenamiento basado en los últimos metaanálisis (Sports Medicine 2025, Frontiers in Endocrinology 2025) y adaptado exactamente a:'
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px;">'
+      +['🎯 Objetivo: <b>'+{perdida:'Pérdida de grasa',volumen:'Ganancia muscular',recomp:'Recomposición',mant:'Mantenimiento'}[u.obj||'recomp']+'</b>',
+        '⚖️ IMC: <b>'+mac.imc+'</b> · '+mac.imcLabel,
+        '💪 Masa magra: <b>'+(mac.masaMagra||'—')+' kg</b>',
+        '🏋️ Experiencia: <b>'+{prin:'Principiante',inter:'Intermedio',avanz:'Avanzado'}[u.exp||'inter']+'</b>',
+        '⏰ Hora entreno: <b>'+{manana:'Mañana',mediodia:'Mediodía',tarde:'Tarde',noche:'Noche'}[u.horaEntreno||'tarde']+'</b>',
+        '💼 Trabajo: <b>'+{sedentario:'Sedentario',moderado:'Moderado',activo:'Activo'}[u.trabajo||'moderado']+'</b>'
+      ].map(function(t){return '<div style="background:var(--bg3);border-radius:8px;padding:8px 10px;font-size:11px;color:var(--t2);">'+t+'</div>';}).join('')
+    +'</div>'
+    +(tienePlanIA?'<div style="background:var(--gb);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--green);margin-bottom:12px;">✅ Ya tienes un plan generado por IA. Puedes regenerarlo para actualizarlo.</div>':'')
+    +'<div style="font-size:11px;color:var(--t3);margin-bottom:14px;">⏱ El proceso tarda 10-20 segundos según la conexión.</div>'
+    +'<div class="modal-actions">'
+      +'<button class="btn btn-acc btn-full" id="btn-generar-plan-ia" onclick="generarPlanIA()">🤖 '+(tienePlanIA?'Regenerar':'Generar')+' plan con IA</button>'
+      +(tienePlanIA?'<button class="btn btn-full" onclick="resetPlanIA()" style="margin-top:8px;">↩️ Volver al plan estándar</button>':'')
+      +'<button class="btn btn-full" onclick="closeM(\'m-generar-plan-ia\')" style="margin-top:8px;">Cancelar</button>'
+    +'</div></div></div>';
+  var old=document.getElementById('m-generar-plan-ia');
+  if(old) old.parentNode.removeChild(old);
+  var div=document.createElement('div');
+  div.innerHTML=html;
+  document.body.appendChild(div.firstChild);
+}
+window.abrirModalPlanIA=abrirModalPlanIA;
+
+function resetPlanIA(){
+  var u=U(); if(!u) return;
+  if(!confirm('¿Volver al plan estándar? Se perderá el plan generado por IA.')) return;
+  delete u.planEjIA;
+  u.planEj=getPlanEjercicio(u);
+  saveAll();
+  closeM('m-generar-plan-ia');
+  renderPlanEj();
+  toast('Plan estándar restaurado');
+}
+window.resetPlanIA=resetPlanIA;
 
 // ── HOMBRE RECOMPOSICIÓN (original, sin cambios) ──────
 function planH(u){
@@ -1411,44 +1550,56 @@ function planM(u){
 function planH_perdida(u){
   var exp=u.exp||'inter';
   return[
-    {dia:'Lunes',nombre:'Full Body A — Circuito de Fuerza',color:'#ef4444',tipo:'fuerza',exs:[
-      {id:'sentadilla',n:'Sentadilla con Barra',s:4,r:'10-12',rir:2,mus:'Cuádriceps/Glúteo'},
-      {id:'press-banca',n:'Press Banca',s:3,r:'10-12',rir:2,mus:'Pecho'},
-      {id:'remo-barra',n:'Remo con Barra',s:3,r:'10-12',rir:2,mus:'Espalda'},
-      {id:'press-militar',n:'Press Militar',s:3,r:'12-15',rir:1,mus:'Hombros'},
-      {id:'plancha',n:'Plancha isométrica',s:3,r:'45-60s',rir:0,mus:'Core'},
-      {id:'caminata',n:'Cardio HIIT final: 15 min intervalos',s:1,r:'15 min',rir:0,mus:'Cardiovascular'}
+    // ── LUNES: DÍA TESTOSTERONA (FUERZA) ──────────────────────────
+    // Objetivo: activar señal anabólica fuerte. Protege músculo en déficit.
+    {dia:'Lunes',nombre:'🟥 Día Testosterona — Fuerza + Pecho/Tríceps',color:'#ef4444',tipo:'fuerza',exs:[
+      {id:'press-banca',n:'Press Banca con Barra',s:4,r:'5-6',rir:3,mus:'Pecho/Deltoides anterior',nota:'Trabajo pesado — señal anabólica fuerte'},
+      {id:'press-incl',n:'Press Inclinado con Barra',s:3,r:'6-8',rir:2,mus:'Pecho superior/Tríceps'},
+      {id:'fondos',n:'Fondos Lastrados',s:3,r:'8',rir:2,mus:'Pecho/Tríceps',nota:'Si puedes añadir lastre'},
+      {id:'ext-polea',n:'Extensión de Tríceps Pesada',s:3,r:'8',rir:2,mus:'Tríceps'},
+      {id:'caminata',n:'Cardio suave post-sesión',s:1,r:'10 min',rir:0,mus:'Cardiovascular',nota:'Solo 10 min suave — no subir cortisol'}
     ]},
-    {dia:'Martes',nombre:'Cardio HIIT + Core',color:'#14b8a6',tipo:'cardio',exs:[
-      {id:'caminata',n:'Caminata inclinada (10-12%) o correr',s:1,r:'25-30 min',rir:0,mus:'Cardio/Glúteo'},
-      {id:'eliptica',n:'Intervalos en bicicleta/elíptica',s:6,r:'40s fuerte / 20s suave',rir:0,mus:'Cardiovascular'},
-      {id:'crunch-m',n:'Crunch + Elevación piernas',s:3,r:'20-25',rir:0,mus:'Abdomen'},
-      {id:'plancha-lat',n:'Plancha lateral',s:3,r:'30s/lado',rir:0,mus:'Oblicuos'}
+    // ── MARTES: DÍA METABÓLICO (GRASA) ────────────────────────────
+    // Objetivo: vaciar glucógeno + aumentar gasto energético. Superseries continuas.
+    {dia:'Martes',nombre:'🟦 Día Metabólico — Espalda/Bíceps + HIIT',color:'#3b82f6',tipo:'fuerza',exs:[
+      {id:'jalon-m',n:'Jalón al Pecho',s:4,r:'12-15',rir:1,mus:'Dorsal/Bíceps',nota:'Superserie con Remo — sin descanso entre ambos'},
+      {id:'remo-cable',n:'Remo en Máquina',s:4,r:'12-15',rir:1,mus:'Espalda media',nota:'Superserie con Jalón — 4 rondas continuas'},
+      {id:'curl-barra',n:'Curl con Barra',s:3,r:'12',rir:1,mus:'Bíceps',nota:'Superserie con Curl Martillo — 3 rondas'},
+      {id:'curl-m',n:'Curl Martillo con Mancuernas',s:3,r:'12',rir:1,mus:'Bíceps/Braquial',nota:'Superserie con Curl Barra — sin descanso'},
+      {id:'elev-lat-m',n:'Face Pull',s:3,r:'15',rir:1,mus:'Deltoides posterior/Manguito'},
+      {id:'eliptica',n:'Cardio Escaladora HIIT',s:1,r:'20 min',rir:0,mus:'Cardiovascular',nota:'Escaladora — alta intensidad intermitente 20 min'}
     ]},
-    {dia:'Miércoles',nombre:'Full Body B — Potencia',color:'#ef4444',tipo:'fuerza',exs:[
-      {id:'peso-muerto',n:'Peso Muerto Convencional',s:4,r:'8-10',rir:2,mus:'Cadena posterior'},
-      {id:'dominadas',n:'Dominadas / Jalón al Pecho',s:3,r:'8-12',rir:2,mus:'Dorsal'},
-      {id:'fondos',n:'Fondos en Paralelas',s:3,r:'10-15',rir:1,mus:'Tríceps/Pecho'},
-      {id:'zancadas',n:'Zancadas caminando',s:3,r:'12/lado',rir:1,mus:'Cuádriceps/Glúteo'},
-      {id:'curl-barra',n:'Curl Bíceps',s:2,r:'12-15',rir:1,mus:'Bíceps'},
-      {id:'caminata',n:'Cardio LISS 15 min post-sesión',s:1,r:'15 min',rir:0,mus:'Cardiovascular'}
+    // ── MIÉRCOLES: DÍA NEURAL + CORE ──────────────────────────────
+    // Objetivo: mejorar sistema nervioso = más fuerza futura.
+    {dia:'Miércoles',nombre:'🟨 Día Neural + Core — Hombros/Fuerza',color:'#f59e0b',tipo:'fuerza',exs:[
+      {id:'press-militar',n:'Press Militar con Barra',s:4,r:'5',rir:3,mus:'Deltoides/Tríceps',nota:'Trabajo neurológico pesado — mejora fuerza futura'},
+      {id:'elev-lat',n:'Elevaciones Laterales Ligeras',s:4,r:'15',rir:1,mus:'Deltoides lateral',nota:'Ligeras — énfasis en contracción, no en peso'},
+      {id:'plancha',n:'Plancha Isométrica',s:4,r:'45-60s',rir:0,mus:'Core/Estabilizadores',nota:'4 rondas — progresa el tiempo cada semana'},
+      {id:'caminata',n:'HIIT corto post-sesión',s:1,r:'10 min',rir:0,mus:'Cardiovascular',nota:'10 min HIIT — complemento metabólico'}
     ]},
-    {dia:'Jueves',nombre:'Cardio Moderado + Movilidad',color:'#14b8a6',tipo:'cardio',exs:[
-      {id:'caminata',n:'Caminata inclinada o natación',s:1,r:'40-45 min',rir:0,mus:'Cardio/Recuperación'},
-      {id:'movilidad',n:'Movilidad + estiramientos',s:1,r:'15-20 min',rir:0,mus:'Recuperación'}
+    // ── JUEVES: DÍA QUEMA GRASA EXTREMA (PIERNAS) ─────────────────
+    // Este es el día clave para grasa visceral.
+    {dia:'Jueves',nombre:'🟩 Día Quema Grasa — Piernas + Cardio Largo',color:'#22c55e',tipo:'fuerza',exs:[
+      {id:'sentadilla',n:'Sentadilla con Barra',s:4,r:'6',rir:3,mus:'Cuádriceps/Glúteo/Core',nota:'DÍA CLAVE para grasa visceral — máxima activación muscular'},
+      {id:'peso-muerto-rum',n:'Peso Muerto Rumano',s:3,r:'8',rir:2,mus:'Isquiotibiales/Glúteo'},
+      {id:'prensa',n:'Prensa de Pierna',s:3,r:'12',rir:1,mus:'Cuádriceps/Glúteo',nota:'Superserie con Zancadas — sin descanso entre ambos'},
+      {id:'zancadas',n:'Zancadas caminando',s:3,r:'12/lado',rir:1,mus:'Cuádriceps/Glúteo',nota:'Superserie con Prensa — 3 rondas continuas'},
+      {id:'ext-cuad',n:'Extensión de Cuádriceps',s:3,r:'15',rir:0,mus:'Cuádriceps',nota:'Superserie con Femoral — sin descanso'},
+      {id:'curl-fem',n:'Curl Femoral Tumbado',s:3,r:'15',rir:0,mus:'Isquiotibiales',nota:'Superserie con Extensión — sin descanso'},
+      {id:'caminata',n:'Cardio LISS largo post-sesión',s:1,r:'20-25 min',rir:0,mus:'Cardiovascular',nota:'20-25 min cardio largo — maximiza oxidación de grasa'}
     ]},
-    {dia:'Viernes',nombre:'Full Body C — Metabólico',color:'#ef4444',tipo:'fuerza',exs:[
-      {id:'prensa',n:'Prensa de Pierna',s:4,r:'15-20',rir:1,mus:'Cuádriceps/Glúteo'},
-      {id:'remo-cable',n:'Remo en Cable',s:3,r:'12-15',rir:1,mus:'Espalda'},
-      {id:'elev-lat',n:'Elevaciones Laterales',s:3,r:'15-20',rir:1,mus:'Deltoides'},
-      {id:'ext-polea',n:'Extensión Tríceps Polea',s:3,r:'15-20',rir:1,mus:'Tríceps'},
-      {id:'hip-thrust',n:'Hip Thrust',s:3,r:'15-20',rir:1,mus:'Glúteo'},
-      {id:'plancha',n:'Finisher: 3 planchas 60s',s:3,r:'60s',rir:0,mus:'Core'}
+    // ── VIERNES: DESCANSO ACTIVO ───────────────────────────────────
+    {dia:'Viernes',nombre:'Descanso Activo + NEAT',color:'#22c55e',tipo:'descanso',exs:[
+      {id:'caminar',n:'Caminata moderada',s:1,r:'45-60 min',rir:0,mus:'NEAT/Recuperación',nota:'Ritmo moderado — aumenta gasto calórico sin estrés muscular'}
     ]},
-    {dia:'Sábado',nombre:'Cardio activo + NEAT',color:'#22c55e',tipo:'descanso',exs:[
-      {id:'caminata',n:'Caminata 45-60 min (ritmo moderado)',s:1,r:'45-60 min',rir:0,mus:'NEAT/Recuperación'}
+    // ── SÁBADO: OPCIONAL (cardio o repetir día débil) ──────────────
+    {dia:'Sábado',nombre:'Opcional — Repetir día débil o cardio',color:'#6c4fff',tipo:'descanso',exs:[
+      {id:'eliptica',n:'Cardio moderado o día de especialización',s:1,r:'30-40 min',rir:0,mus:'Cardiovascular/Recuperación',nota:'Opcional: repite el grupo muscular más débil o cardio LISS'}
     ]},
-    {dia:'Domingo',nombre:'Descanso completo',color:'#3a3a5c',tipo:'descanso',exs:[]}
+    // ── DOMINGO: DESCANSO COMPLETO ─────────────────────────────────
+    {dia:'Domingo',nombre:'Descanso completo — Recuperación',color:'#3a3a5c',tipo:'descanso',exs:[
+      {id:'movilidad',n:'Movilidad y estiramientos suaves (opcional)',s:1,r:'15-20 min',rir:0,mus:'Recuperación'}
+    ]}
   ];
 }
 
@@ -3541,14 +3692,14 @@ async function runIA(){
   var activeKey=ANTHROPIC_KEY||GEMINI_KEY;
   var mac2=u.macros||calcMacros(u);
   var sesData=sesUlt7.map(function(s){return (s.tipo||'?')+' RPE '+(s.rpe||'?');}).join(', ')||'Sin sesiones registradas';
-  var prompt='Eres un fisiologista del ejercicio y nutricionista clínico certificado. Proporciona un análisis técnico y preciso del siguiente perfil. Sé breve pero altamente específico — usa terminología clínica real (p.ej. tasa metabólica, balance nitrogenado, umbral anaeróbico, déficit energético, periodización). Genera confianza con precisión, no con palabras de relleno.\n\nPERFIL CLÍNICO:\nGénero: '+(u.genero==='H'?'Hombre':'Mujer')+' · Edad: '+calcEdad(u.fnac)+' años\nObjetivo: '+LABEL_OBJ[u.obj||'recomp']+'\nBMR (Mifflin): '+mac2.bmr+' kcal · TDEE estimado: '+mac2.tdee+' kcal · Déficit aplicado: '+mac2.deficitReal+'% → '+mac2.kcal+' kcal/día\nMasa magra estimada: '+mac2.masaMagra+' kg · % Grasa corporal: '+(u.grasa||'—')+'% · IMC: '+((parseFloat(u.peso||0)/Math.pow((u.alt||170)/100,2)).toFixed(1))+'\nProteína objetivo: '+mac2.prot+' g/día ('+Math.round((mac2.prot*4/mac2.kcal)*100)+'% kcal)\nPeso semana anterior: '+(prevMed.peso||u.peso||'—')+' kg → actual: '+(lastMed.peso||u.peso||'—')+' kg\nCintura: '+(prevMed.cin||'—')+' → '+(lastMed.cin||'—')+' cm\nSesiones completadas: '+sesUlt7.length+'/5 · RPE promedio: '+(sesUlt7.reduce(function(a,s){return a+(parseFloat(s.rpe)||7);},0)/Math.max(1,sesUlt7.length)).toFixed(1)+'/10\nSesiones: '+sesData+'\n\nResponde EXACTAMENTE en este formato (sin cambiar los encabezados, sin texto adicional):\n\nNIVEL: bueno\nRESUMEN: [Análisis clínico en 2 frases. Menciona datos concretos del perfil.]\nENTRENO1: [Recomendación técnica de entrenamiento con fundamento fisiológico]\nENTRENO2: [Segunda recomendación técnica de entrenamiento]\nNUTRICION1: [Recomendación nutricional clínica con datos específicos de kcal o macros]\nNUTRICION2: [Segunda recomendación nutricional]\nPLAN: [Directiva concreta para la próxima semana: qué hacer, cuándo y por qué]\n\n(NIVEL: bueno = progreso óptimo, regular = progreso aceptable con ajustes, necesita_mejorar = cambios urgentes necesarios)';
+  var prompt='Eres un fisiologista del ejercicio y nutricionista clínico certificado con 15 años de experiencia en recomposición corporal. Redacta un informe de progreso semanal completo, técnico y útil para el paciente. Usa terminología clínica real pero explicada brevemente entre paréntesis cuando sea necesario. Cada sección debe tener sustancia real — no frases genéricas.\n\nPERFIL CLÍNICO DEL PACIENTE:\nGénero: '+(u.genero==='H'?'Hombre':'Mujer')+' · Edad: '+calcEdad(u.fnac)+' años\nObjetivo: '+LABEL_OBJ[u.obj||'recomp']+'\nBMR Mifflin: '+mac2.bmr+' kcal/día · TDEE estimado: '+mac2.tdee+' kcal/día\nDéficit aplicado: '+mac2.deficitReal+'% → Target calórico: '+mac2.kcal+' kcal/día\nMasa magra estimada: '+mac2.masaMagra+' kg · % Grasa corporal (Navy): '+(u.grasa||'—')+'%\nIMC: '+((parseFloat(u.peso||0)/Math.pow((u.alt||170)/100,2)).toFixed(1))+'\nProteína objetivo: '+mac2.prot+' g/día ('+Math.round((mac2.prot*4/mac2.kcal)*100)+'% del VCT)\nPeso semana anterior: '+(prevMed.peso||u.peso||'—')+' kg → Peso actual: '+(lastMed.peso||u.peso||'—')+' kg\nCintura: '+(prevMed.cin||'—')+' → '+(lastMed.cin||'—')+' cm\nSesiones completadas esta semana: '+sesUlt7.length+'/5\nRPE promedio: '+(sesUlt7.reduce(function(a,s){return a+(parseFloat(s.rpe)||7);},0)/Math.max(1,sesUlt7.length)).toFixed(1)+'/10\nDetalle sesiones: '+sesData+'\n\nResponde EXACTAMENTE con este formato. Cada campo debe tener 2-4 frases con datos concretos:\n\nNIVEL: [bueno / regular / necesita_mejorar]\nRESUMEN: [3-4 frases de análisis clínico. Interpreta los datos de composición corporal, adherencia al entrenamiento y balance energético. Menciona cifras concretas.]\nENTRENO1: [Recomendación técnica específica de entrenamiento. Explica el fundamento fisiológico. Incluye parámetros concretos: series, cargas, frecuencia o intensidad.]\nENTRENO2: [Segunda recomendación técnica. Diferente aspecto del entrenamiento: recuperación, progresión, técnica o periodización.]\nNUTRICION1: [Recomendación nutricional clínica con datos exactos de kcal, macros o timing. Explica el mecanismo metabólico.]\nNUTRICION2: [Segunda recomendación nutricional. Puede abordar micronutrientes, hidratación, distribución de comidas o suplementación basada en evidencia.]\nPLAN: [Directiva concreta y accionable para los próximos 7 días. Especifica qué hacer, con qué frecuencia, a qué intensidad y por qué en este momento del proceso.]\n\n(NIVEL: bueno=progreso óptimo sin cambios urgentes · regular=progreso aceptable con ajustes menores · necesita_mejorar=estancamiento o regresión que requiere cambios)';
   try{
     var resp, txt;
     if(ANTHROPIC_KEY){
       resp=await fetch('https://api.anthropic.com/v1/messages',{
         method:'POST',
         headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01'},
-        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:800,messages:[{role:'user',content:prompt}]})
+        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1200,messages:[{role:'user',content:prompt}]})
       });
       var ad=await resp.json();
       if(ad.error) throw new Error('Claude: '+(ad.error.message||ad.error.type));
@@ -3558,7 +3709,7 @@ async function runIA(){
       resp=await fetch(gUrl,{
         method:'POST',
         headers:{'Content-Type':'application/json','Authorization':'Bearer '+GEMINI_KEY},
-        body:JSON.stringify({model:'gemini-2.5-flash',messages:[{role:'user',content:prompt}],temperature:0.4,max_tokens:800})
+        body:JSON.stringify({model:'gemini-2.5-flash',messages:[{role:'user',content:prompt}],temperature:0.4,max_tokens:1200})
       });
       var gd=await resp.json();
       if(gd.error) throw new Error('Gemini: '+(gd.error.message||JSON.stringify(gd.error)));
@@ -3566,18 +3717,48 @@ async function runIA(){
       txt=gd.choices[0].message.content||'';
     }
     // ── Parser de texto plano — sin riesgo de JSON corruption ────
+    // Parser robusto: captura contenido hasta el siguiente encabezado o fin de texto
     function extractLine(label){
-      var re=new RegExp(label+':\\s*(.+)','i');
+      // Busca el label y captura todo hasta el siguiente label conocido o fin
+      var labels='NIVEL|RESUMEN|ENTRENO1|ENTRENO2|NUTRICION1|NUTRICION2|PLAN|ENTRENAMIENTO|NUTRICION|AJUSTE';
+      var re=new RegExp(label+'[:\\s]+([\\s\\S]+?)(?=(?:'+labels+')[:\\s]|$)','i');
       var m=txt.match(re);
-      return m?m[1].trim():'';
+      if(m) return m[1].replace(/\n+/g,' ').trim();
+      return '';
+    }
+    // También intentar variantes de nombres que el modelo pueda usar
+    function extractAny(){
+      var args=[].slice.call(arguments);
+      for(var i=0;i<args.length;i++){var v=extractLine(args[i]);if(v) return v;}
+      return '';
     }
     var aj={
-      nivel: extractLine('NIVEL')||'regular',
-      resumen: extractLine('RESUMEN')||'Análisis completado.',
-      ajustes_entreno: [extractLine('ENTRENO1'),extractLine('ENTRENO2')].filter(Boolean),
-      ajustes_nutricion: [extractLine('NUTRICION1'),extractLine('NUTRICION2')].filter(Boolean),
-      recomendacion: extractLine('PLAN')||''
+      nivel: extractAny('NIVEL')||'regular',
+      resumen: extractAny('RESUMEN','ANÁLISIS','ANALISIS')||'Análisis completado.',
+      ajustes_entreno: [
+        extractAny('ENTRENO1','ENTRENAMIENTO1','ENTRENAMIENTO 1','AJUSTE ENTRENO 1','AJUSTE1'),
+        extractAny('ENTRENO2','ENTRENAMIENTO2','ENTRENAMIENTO 2','AJUSTE ENTRENO 2','AJUSTE2')
+      ].filter(Boolean),
+      ajustes_nutricion: [
+        extractAny('NUTRICION1','NUTRICIÓN1','NUTRICION 1','NUTRICIÓN 1','AJUSTE NUTRICION 1'),
+        extractAny('NUTRICION2','NUTRICIÓN2','NUTRICION 2','NUTRICIÓN 2','AJUSTE NUTRICION 2')
+      ].filter(Boolean),
+      recomendacion: extractAny('PLAN','DIRECTIVA','RECOMENDACION','PRÓXIMA SEMANA')||''
     };
+    // Si ajustes siguen vacíos, intentar extraer por numeración (1. 2. •)
+    if(!aj.ajustes_entreno.length||!aj.ajustes_nutricion.length){
+      var lines=txt.split('\n').map(function(l){return l.trim();}).filter(Boolean);
+      var inEntreno=false, inNutri=false, entr=[], nutri=[];
+      lines.forEach(function(l){
+        if(/entren|ajuste.*entren/i.test(l)){inEntreno=true;inNutri=false;return;}
+        if(/nutri|alimenta/i.test(l)){inNutri=true;inEntreno=false;return;}
+        if(/plan|directiva|próxima|semana/i.test(l)){inEntreno=false;inNutri=false;return;}
+        if(inEntreno&&/^[•\-\d\*→]/.test(l)) entr.push(l.replace(/^[•\-\d\*→\.]+\s*/,''));
+        if(inNutri&&/^[•\-\d\*→]/.test(l)) nutri.push(l.replace(/^[•\-\d\*→\.]+\s*/,''));
+      });
+      if(!aj.ajustes_entreno.length&&entr.length) aj.ajustes_entreno=entr.slice(0,2);
+      if(!aj.ajustes_nutricion.length&&nutri.length) aj.ajustes_nutricion=nutri.slice(0,2);
+    }
     var niv={'bueno':'b','regular':'r','necesita_mejorar':'m'}[aj.nivel.trim().toLowerCase()]||'r';
     var nivLabel={'bueno':'✅ Progreso óptimo','regular':'⚡ Progreso aceptable','necesita_mejorar':'⚠️ Ajustes urgentes'}[aj.nivel.trim().toLowerCase()]||'⚡ Progreso aceptable';
     var motor=ANTHROPIC_KEY?'Claude Sonnet 4 (Anthropic)':GEMINI_KEY?'Gemini 2.5 Flash (Google)':'IA';
@@ -3774,12 +3955,13 @@ function renderPerfil(){
     +((u.rests&&u.rests.length)?'<div class="tip warn"><b>Intolerancias:</b> '+u.rests.join(', ')+'</div>':'');
 
   var SUPLS_H=[
-    {ico:'⚡',n:'Creatina Creapure — 5g/día',d:'El suplemento con más evidencia. Sin ciclos. Cualquier momento.',p:'ESENCIAL',c:'var(--green)'},
-    {ico:'🥛',n:'Whey Isolate (sin soja/lactosa)',d:'Post-entreno. 25-30g en agua. Dymatize ISO100 o HSN.',p:'ESENCIAL',c:'var(--green)'},
-    {ico:'🐟',n:'Omega-3 EPA+DHA — ≥2.000mg/día',d:'Antiinflamatorio. Con comida que tenga grasa.',p:'ESENCIAL',c:'var(--green)'},
-    {ico:'☀️',n:'Vitamina D3+K2 — 2.000-4.000 UI/día',d:'Función hormonal y absorción de calcio.',p:'IMPORTANTE',c:'var(--amber)'},
-    {ico:'🌙',n:'Magnesio bisglicinato — 300-400mg/noche',d:'Calidad del sueño y recuperación muscular.',p:'IMPORTANTE',c:'var(--amber)'},
-    {ico:'☕',n:'Cafeína — 1-2 cafés pre-entreno',d:'100-200mg, 30 min antes. Mejora fuerza y quema grasa.',p:'OPCIONAL',c:'var(--blue)'}
+    {ico:'⚡',n:'Creatina Monohidrato Creapure — 5g/día',d:'IMPRESCINDIBLE para recomposición. Mantiene fuerza en déficit, evita pérdida muscular, mejora rendimiento. Sin ciclos, siempre. Marcas: HSN Creapure · MyProtein · Prozis.',p:'ESENCIAL',c:'var(--green)'},
+    {ico:'🥛',n:'Proteína Aislada (Whey Isolate o Vegetal)',d:'Objetivo: ~160g proteína diarios. Déficit + alta proteína = pérdida de grasa sin perder músculo. Usar post-entreno o cuando falte proteína. Marcas: Dymatize ISO100 · HSN Evowhey Isolate · Weider Vegan.',p:'ESENCIAL',c:'var(--green)'},
+    {ico:'🐟',n:'Omega-3 EPA+DHA — mínimo 2.000mg/día',d:'CLAVE para grasa visceral. Mejora sensibilidad a la insulina, reduce inflamación y ayuda a movilizar grasa visceral. Tomar con comida. Marcas: Solgar · Nordic Naturals · HSN Omega 3.',p:'ESENCIAL',c:'var(--green)'},
+    {ico:'🌙',n:'Magnesio Bisglicinato — 300-400mg antes de dormir',d:'Mejora recuperación, sueño profundo y equilibrio de electrolitos. Especialmente importante en dieta con déficit calórico. Marcas: HSN Magnesio Bisglicinato · Solgar Magnesium.',p:'ESENCIAL',c:'var(--green)'},
+    {ico:'💧',n:'Electrolitos (Sodio · Potasio · Magnesio)',d:'MUY IMPORTANTE con cardio frecuente e hidratación baja. Evita calambres y mantiene rendimiento. Marcas: HSN Evobasic Electrolytes · LMNT (premium).',p:'IMPORTANTE',c:'var(--amber)'},
+    {ico:'☕',n:'Cafeína natural — pre-entreno',d:'Aumenta gasto energético y mejora rendimiento cardio. Opción: café solo o té verde 30 min antes del entrenamiento. 100-200mg.',p:'OPCIONAL',c:'var(--blue)'},
+    {ico:'🔥',n:'L-Carnitina — opcional',d:'No es milagrosa, pero puede ayudar en déficit + cardio frecuente. Mejor en forma líquida tartrato. Tomar pre-cardio.',p:'OPCIONAL',c:'var(--blue)'}
   ];
   var SUPLS_M=[
     {ico:'🥛',n:'Proteína whey o vegana',d:'Post-entreno. 20-25g.',p:'ESENCIAL',c:'var(--green)'},
