@@ -1331,33 +1331,21 @@ async function generarPlanIA(){
   var exp={prin:'principiante (0-3 meses)',inter:'intermedio (4-12 meses)',avanz:'avanzado (+12 meses)'}[u.exp||'inter'];
   var trabajo={sedentario:'sedentario (oficina)',moderado:'moderado (de pie)',activo:'activo (esfuerzo físico)'}[u.trabajo||'moderado'];
 
-  var prompt='Eres un científico del ejercicio certificado (CSCS) especializado en periodización y evidencia científica actualizada (2024-2026). Diseña un plan de entrenamiento semanal COMPLETAMENTE PERSONALIZADO basado en los siguientes datos reales del usuario y en los últimos metaanálisis publicados.\n\n'
-    +'DATOS DEL USUARIO:\n'
-    +'- Objetivo: '+obj+'\n'
-    +'- Género: '+(u.genero==='H'?'Hombre':'Mujer')+' · Edad: '+calcEdad(u.fnac)+' años\n'
-    +'- Peso: '+(u.peso||'—')+' kg · Altura: '+(u.alt||'—')+' cm · IMC: '+mac.imc+'\n'
-    +'- % Grasa corporal: '+(u.grasa||'—')+'% · Masa magra: '+(mac.masaMagra||'—')+' kg\n'
-    +'- Experiencia en gym: '+exp+'\n'
-    +'- Tipo de trabajo diario: '+trabajo+'\n'
-    +'- Hora de entrenamiento: '+(u.horaEntreno||'tarde')+'\n'
-    +'- TDEE: '+mac.tdee+' kcal · Target calórico: '+mac.kcal+' kcal/día\n'
-    +'- Intolerancies/restricciones: '+(u.rests&&u.rests.length?u.rests.join(', '):'ninguna')+'\n\n'
-    +'PRINCIPIOS DE EVIDENCIA (aplicar obligatoriamente):\n'
-    +'- Pérdida de grasa: 150-250 min/semana actividad moderada-vigorosa + fuerza 3x/semana. El entrenamiento de fuerza preserva masa magra en déficit (Frontiers in Endocrinology, 2025). Déficit 20% máximo.\n'
-    +'- Hipertrofia: 10+ series/músculo/semana distribuidas en 2-3 sesiones. Cargas 6-12 reps, cerca del fallo. Sobrecarga progresiva obligatoria (Sports Medicine meta-analysis, 2025).\n'
-    +'- Recomposición: entrenamiento de fuerza 3-4x/semana + proteína 1.6-2.2g/kg. Déficit calórico leve 10-15% (Frontiers in Nutrition, 2024).\n'
-    +'- Siempre: ejercicios compuestos primero, RIR 1-3 en trabajo pesado, NEAT importante.\n\n'
-    +'INSTRUCCIONES PARA EL PLAN:\n'
-    +'Genera exactamente 7 días (Lunes a Domingo). Para días de descanso activo o descanso completo, indícalo claramente.\n'
-    +'Responde SOLO con JSON válido, sin texto extra:\n'
-    +'[\n'
-    +'  {"dia":"Lunes","nombre":"Nombre descriptivo del día","color":"#ef4444","tipo":"fuerza","objetivo":"Objetivo específico del día","exs":[\n'
-    +'    {"id":"sentadilla","n":"Nombre del ejercicio","s":4,"r":"6-8","rir":2,"mus":"Músculo principal","nota":"Indicación técnica específica"}\n'
-    +'  ]}\n'
-    +']\n'
-    +'IDs disponibles: sentadilla, peso-muerto, press-banca, press-banca-fb, press-incl, dominadas, hip-thrust, hip-thrust-m, press-militar, remo-barra, remo-cable, remo-uni, curl-barra, curl-m, zancadas, ext-polea, prensa, jalon-m, elev-lat, elev-lat-m, fondos, goblet, squat-sumo, aperturas-cable, pullover, plancha, plancha-lat, crunch-m, caminata, eliptica, movilidad, caminar, abduccion, gemelo-pie, hip-thrust-fb-m, peso-muerto-rum, curl-fem, ext-cuad\n'
-    +'Tipos: "fuerza", "cardio", "descanso"\n'
-    +'Colores: fuerza=#ef4444, cardio=#14b8a6, descanso=#22c55e/#3a3a5c';
+  var prompt='Eres un científico del ejercicio (CSCS). Diseña un plan de entrenamiento semanal basado en evidencia científica 2025 para este usuario.\n\n'
+    +'USUARIO: '+(u.genero==='H'?'Hombre':'Mujer')+', '+calcEdad(u.fnac)+' años, '+obj+', '
+    +mac.masaMagra+'kg masa magra, '+u.grasa+'% grasa, IMC '+mac.imc+', '
+    +'experiencia '+exp+', trabajo '+trabajo+', entrena '+u.horaEntreno+'\n'
+    +'TDEE: '+mac.tdee+' kcal → Target: '+mac.kcal+' kcal\n\n'
+    +'EVIDENCIA A APLICAR:\n'
+    +'- Pérdida grasa: fuerza 3x/semana preserva masa magra en déficit (Frontiers Endocrinology 2025). 150-250 min actividad/semana.\n'
+    +'- Hipertrofia: 10+ series/músculo/semana, 6-12 reps cerca del fallo (Sports Medicine meta-analysis 2025).\n'
+    +'- Recomp: fuerza 3-4x + proteína 1.6-2.2g/kg + déficit 10-15%.\n\n'
+    +'Responde SOLO con JSON. Sin texto extra. Formato COMPACTO:\n'
+    +'[{"dia":"Lunes","nombre":"X","color":"#ef4444","tipo":"fuerza","exs":[{"id":"sentadilla","n":"Sentadilla","s":4,"r":"6-8","rir":2,"mus":"Cuad/Glut"}]}]\n\n'
+    +'IDs válidos: sentadilla,peso-muerto,press-banca,press-banca-fb,press-incl,dominadas,hip-thrust,hip-thrust-m,press-militar,remo-barra,remo-cable,remo-uni,curl-barra,curl-m,zancadas,ext-polea,prensa,jalon-m,elev-lat,elev-lat-m,fondos,goblet,squat-sumo,aperturas-cable,pullover,plancha,plancha-lat,crunch-m,caminata,eliptica,movilidad,caminar,abduccion,gemelo-pie,peso-muerto-rum,curl-fem,ext-cuad\n'
+    +'Tipos: fuerza,cardio,descanso. Colores: fuerza=#ef4444, cardio=#14b8a6, descanso=#22c55e\n'
+    +'Genera exactamente 7 días (Lunes-Domingo). Días descanso: exs:[].\n'
+    +'IMPORTANTE: Responde SOLO el array JSON, sin explicaciones, sin markdown.';
 
   try{
     var resp, txt;
@@ -1365,7 +1353,7 @@ async function generarPlanIA(){
       resp=await fetch('https://api.anthropic.com/v1/messages',{
         method:'POST',
         headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01'},
-        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:4000,messages:[{role:'user',content:prompt}]})
+        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:8000,messages:[{role:'user',content:prompt}]})
       });
       var ad=await resp.json();
       if(ad.error) throw new Error('Claude: '+(ad.error.message||ad.error.type));
@@ -1374,18 +1362,38 @@ async function generarPlanIA(){
       resp=await fetch('https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',{
         method:'POST',
         headers:{'Content-Type':'application/json','Authorization':'Bearer '+GEMINI_KEY},
-        body:JSON.stringify({model:'gemini-2.5-flash',messages:[{role:'user',content:prompt}],temperature:0.3,max_tokens:4000})
+        body:JSON.stringify({model:'gemini-2.5-flash',messages:[{role:'user',content:prompt}],temperature:0.2,max_tokens:8000})
       });
       var gd=await resp.json();
       if(gd.error) throw new Error('Gemini: '+(gd.error.message||JSON.stringify(gd.error)));
       txt=gd.choices[0].message.content||'';
     }
-    // Extraer JSON
+    // Parser robusto para JSON de array
     txt=txt.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
     var jStart=txt.indexOf('['), jEnd=txt.lastIndexOf(']');
     if(jStart>=0&&jEnd>jStart) txt=txt.slice(jStart,jEnd+1);
-    var plan=JSON.parse(txt);
-    if(!Array.isArray(plan)||plan.length<7) throw new Error('El plan generado no tiene el formato correcto');
+    // Intentar parsear; si falla, reparar JSON truncado
+    var plan;
+    try{
+      plan=JSON.parse(txt);
+    }catch(pe){
+      // Reparar: cerrar objetos y array abiertos
+      var fixed=txt;
+      var opens=(fixed.match(/\{/g)||[]).length-(fixed.match(/\}/g)||[]).length;
+      var openArr=(fixed.match(/\[/g)||[]).length-(fixed.match(/\]/g)||[]).length;
+      // Cerrar strings sin cerrar (busca último campo abierto)
+      if(fixed.match(/"[^"]*$/)) fixed=fixed.replace(/"([^"]*)$/, '"$1"');
+      for(var k=0;k<opens;k++) fixed+='}';
+      for(var k=0;k<openArr;k++) fixed+=']';
+      plan=JSON.parse(fixed);
+    }
+    if(!Array.isArray(plan)||!plan.length) throw new Error('La IA no devolvió un plan válido. Inténtalo de nuevo.');
+    // Asegurar 7 días — completar con descanso si faltan
+    var dias=['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+    while(plan.length<7){
+      var dia=dias[plan.length]||'Día '+(plan.length+1);
+      plan.push({dia:dia,nombre:'Descanso',color:'#3a3a5c',tipo:'descanso',exs:[]});
+    }
 
     u.planEjIA=plan;
     u.planEj=plan;
@@ -1406,6 +1414,8 @@ window.generarPlanIA=generarPlanIA;
 function abrirModalPlanIA(){
   var u=U(); if(!u) return;
   var mac=calcMacros(u);
+  var imc=parseFloat(mac.imc||0);
+  var imcLabel=imc<18.5?'Bajo peso':imc<25?'Normopeso':imc<30?'Sobrepeso':'Obesidad';
   var tienePlanIA=!!(u.planEjIA&&u.planEjIA.length);
   var html='<div class="modal-ov open" id="m-generar-plan-ia" onclick="if(event.target===this)closeM(\'m-generar-plan-ia\')">'
     +'<div class="modal"><div class="modal-hnd"></div>'
@@ -1415,7 +1425,7 @@ function abrirModalPlanIA(){
     +'</div>'
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px;">'
       +['🎯 Objetivo: <b>'+{perdida:'Pérdida de grasa',volumen:'Ganancia muscular',recomp:'Recomposición',mant:'Mantenimiento'}[u.obj||'recomp']+'</b>',
-        '⚖️ IMC: <b>'+mac.imc+'</b> · '+mac.imcLabel,
+        '⚖️ IMC: <b>'+mac.imc+'</b> · '+imcLabel,
         '💪 Masa magra: <b>'+(mac.masaMagra||'—')+' kg</b>',
         '🏋️ Experiencia: <b>'+{prin:'Principiante',inter:'Intermedio',avanz:'Avanzado'}[u.exp||'inter']+'</b>',
         '⏰ Hora entreno: <b>'+{manana:'Mañana',mediodia:'Mediodía',tarde:'Tarde',noche:'Noche'}[u.horaEntreno||'tarde']+'</b>',
@@ -1423,7 +1433,7 @@ function abrirModalPlanIA(){
       ].map(function(t){return '<div style="background:var(--bg3);border-radius:8px;padding:8px 10px;font-size:11px;color:var(--t2);">'+t+'</div>';}).join('')
     +'</div>'
     +(tienePlanIA?'<div style="background:var(--gb);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--green);margin-bottom:12px;">✅ Ya tienes un plan generado por IA. Puedes regenerarlo para actualizarlo.</div>':'')
-    +'<div style="font-size:11px;color:var(--t3);margin-bottom:14px;">⏱ El proceso tarda 10-20 segundos según la conexión.</div>'
+    +'<div style="font-size:11px;color:var(--t3);margin-bottom:14px;">⏱ El proceso tarda 15-30 segundos según la conexión.</div>'
     +'<div class="modal-actions">'
       +'<button class="btn btn-acc btn-full" id="btn-generar-plan-ia" onclick="generarPlanIA()">🤖 '+(tienePlanIA?'Regenerar':'Generar')+' plan con IA</button>'
       +(tienePlanIA?'<button class="btn btn-full" onclick="resetPlanIA()" style="margin-top:8px;">↩️ Volver al plan estándar</button>':'')
@@ -3699,7 +3709,7 @@ async function runIA(){
       resp=await fetch('https://api.anthropic.com/v1/messages',{
         method:'POST',
         headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01'},
-        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1200,messages:[{role:'user',content:prompt}]})
+        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:2000,messages:[{role:'user',content:prompt}]})
       });
       var ad=await resp.json();
       if(ad.error) throw new Error('Claude: '+(ad.error.message||ad.error.type));
@@ -3709,7 +3719,7 @@ async function runIA(){
       resp=await fetch(gUrl,{
         method:'POST',
         headers:{'Content-Type':'application/json','Authorization':'Bearer '+GEMINI_KEY},
-        body:JSON.stringify({model:'gemini-2.5-flash',messages:[{role:'user',content:prompt}],temperature:0.4,max_tokens:1200})
+        body:JSON.stringify({model:'gemini-2.5-flash',messages:[{role:'user',content:prompt}],temperature:0.4,max_tokens:2000})
       });
       var gd=await resp.json();
       if(gd.error) throw new Error('Gemini: '+(gd.error.message||JSON.stringify(gd.error)));
@@ -5579,7 +5589,7 @@ async function kongoSend(){
         headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01'},
         body:JSON.stringify({
           model:'claude-sonnet-4-6',
-          max_tokens:1200,
+          max_tokens:2000,
           system:systemPrompt,
           messages:apiMsgs
         })
@@ -5598,7 +5608,7 @@ async function kongoSend(){
         body:JSON.stringify({
           model:'gemini-2.5-flash',
           messages:geminiMsgs.map(function(m){return {role:m.role,content:m.content};}),
-          max_tokens:1200,
+          max_tokens:2000,
           temperature:0.7
         })
       });
