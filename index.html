@@ -877,6 +877,9 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   <button class="bn" data-s="perfil"><span class="bn-ico">👤</span><span>Perfil</span></button>
   <button class="bn" data-s="kongo"><span class="bn-ico">🦍</span><span>Kongo</span></button>
 </nav>
+<div style="position:fixed;bottom:calc(var(--safe) + 1px);left:0;right:0;text-align:center;font-size:8.5px;color:#2e2e45;letter-spacing:.04em;pointer-events:none;z-index:99;line-height:1;">
+  Desarrollado por Cristhian Andres Serna Salazar &nbsp;|&nbsp; 2026
+</div>
 
 <!-- MODAL ejercicio -->
 <div class="modal-ov" id="m-ex">
@@ -1560,55 +1563,120 @@ function planM(u){
 function planH_perdida(u){
   var exp=u.exp||'inter';
   return[
-    // ── LUNES: DÍA TESTOSTERONA (FUERZA) ──────────────────────────
-    // Objetivo: activar señal anabólica fuerte. Protege músculo en déficit.
-    {dia:'Lunes',nombre:'🟥 Día Testosterona — Fuerza + Pecho/Tríceps',color:'#ef4444',tipo:'fuerza',exs:[
-      {id:'press-banca',n:'Press Banca con Barra',s:4,r:'5-6',rir:3,mus:'Pecho/Deltoides anterior',nota:'Trabajo pesado — señal anabólica fuerte'},
-      {id:'press-incl',n:'Press Inclinado con Barra',s:3,r:'6-8',rir:2,mus:'Pecho superior/Tríceps'},
-      {id:'fondos',n:'Fondos Lastrados',s:3,r:'8',rir:2,mus:'Pecho/Tríceps',nota:'Si puedes añadir lastre'},
-      {id:'ext-polea',n:'Extensión de Tríceps Pesada',s:3,r:'8',rir:2,mus:'Tríceps'},
-      {id:'caminata',n:'Cardio suave post-sesión',s:1,r:'10 min',rir:0,mus:'Cardiovascular',nota:'Solo 10 min suave — no subir cortisol'}
+
+    // ══════════════════════════════════════════════════════
+    // LUNES — DÍA TESTOSTERONA 🟥
+    // Objetivo: señal anabólica fuerte → protege músculo en déficit calórico
+    // Ciencia: el entrenamiento de fuerza pesado mantiene masa magra incluso con déficit 20%
+    // ══════════════════════════════════════════════════════
+    {dia:'Lunes',nombre:'🟥 Testosterona — Pecho · Tríceps · Hombro Fuerza',color:'#ef4444',tipo:'fuerza',exs:[
+      // Bloque 1: Fuerza pesada (compuestos — activación máxima SNC)
+      {id:'press-banca',n:'Press Banca con Barra',s:4,r:'5-6',rir:3,mus:'Pecho/Deltoides anterior',nota:'PESADO — señal anabólica. Descanso completo 3-4 min entre series'},
+      {id:'press-incl',n:'Press Inclinado con Barra',s:3,r:'6-8',rir:2,mus:'Pecho superior/Tríceps',nota:'Barra — mayor activación que mancuernas en zona clavicular'},
+      // Bloque 2: Volumen (accesorios — agotar fibras)
+      {id:'press-banca-fb',n:'Press Banca Mancuernas (rango completo)',s:3,r:'10-12',rir:1,mus:'Pecho/Esternón',nota:'Rango completo — estira el pectoral en la bajada'},
+      {id:'aperturas-cable',n:'Aperturas en Cable (polea baja)',s:3,r:'12-15',rir:1,mus:'Pecho inferior/Serrato',nota:'Polea baja → pecho inferior. Aprieta en la contracción 1 segundo'},
+      {id:'fondos',n:'Fondos en Paralelas (peso corporal o lastrado)',s:3,r:'8-12',rir:2,mus:'Pecho/Tríceps',nota:'Si puedes, añade lastre. Inclínate hacia adelante para más pecho'},
+      // Bloque 3: Tríceps (aislado)
+      {id:'ext-polea',n:'Extensión Tríceps Cuerda (polea alta)',s:3,r:'12-15',rir:1,mus:'Tríceps',nota:'Superserie OPCIONAL con press francés — 3 rondas sin descanso'},
+      // Cardio final suave — no subir cortisol
+      {id:'caminata',n:'Cardio SUAVE post-sesión',s:1,r:'10-15 min',rir:0,mus:'Cardiovascular',nota:'❗Solo suave — no HIIT hoy. Subir cortisol anularía la señal anabólica'}
     ]},
-    // ── MARTES: DÍA METABÓLICO (GRASA) ────────────────────────────
-    // Objetivo: vaciar glucógeno + aumentar gasto energético. Superseries continuas.
-    {dia:'Martes',nombre:'🟦 Día Metabólico — Espalda/Bíceps + HIIT',color:'#3b82f6',tipo:'fuerza',exs:[
-      {id:'jalon-m',n:'Jalón al Pecho',s:4,r:'12-15',rir:1,mus:'Dorsal/Bíceps',nota:'Superserie con Remo — sin descanso entre ambos'},
-      {id:'remo-cable',n:'Remo en Máquina',s:4,r:'12-15',rir:1,mus:'Espalda media',nota:'Superserie con Jalón — 4 rondas continuas'},
-      {id:'curl-barra',n:'Curl con Barra',s:3,r:'12',rir:1,mus:'Bíceps',nota:'Superserie con Curl Martillo — 3 rondas'},
-      {id:'curl-m',n:'Curl Martillo con Mancuernas',s:3,r:'12',rir:1,mus:'Bíceps/Braquial',nota:'Superserie con Curl Barra — sin descanso'},
-      {id:'elev-lat-m',n:'Face Pull',s:3,r:'15',rir:1,mus:'Deltoides posterior/Manguito'},
-      {id:'eliptica',n:'Cardio Escaladora HIIT',s:1,r:'20 min',rir:0,mus:'Cardiovascular',nota:'Escaladora — alta intensidad intermitente 20 min'}
+
+    // ══════════════════════════════════════════════════════
+    // MARTES — DÍA METABÓLICO 🟦
+    // Objetivo: vaciar glucógeno + maximizar gasto calórico
+    // Ciencia: superseries con <60s descanso → EPOC elevado durante 24-48h post-sesión
+    // ══════════════════════════════════════════════════════
+    {dia:'Martes',nombre:'🟦 Metabólico — Espalda · Bíceps · HIIT',color:'#3b82f6',tipo:'fuerza',exs:[
+      // Superserie A: Dorsal (4 rondas sin descanso entre A1 y A2)
+      {id:'jalon-m',n:'A1 · Jalón al Pecho (agarre ancho)',s:4,r:'12-15',rir:1,mus:'Dorsal/Bíceps',nota:'SUPERSERIE con A2 — sin descanso. Descanso 60s tras completar la ronda'},
+      {id:'remo-cable',n:'A2 · Remo en Polea (agarre neutro)',s:4,r:'12-15',rir:1,mus:'Espalda media/Romboides',nota:'SUPERSERIE con A1 — 4 rondas. Pausa 1s en contracción máxima'},
+      // Superserie B: Bíceps (3 rondas sin descanso entre B1 y B2)
+      {id:'curl-barra',n:'B1 · Curl con Barra',s:3,r:'10-12',rir:1,mus:'Bíceps braquial',nota:'SUPERSERIE con B2 — sin descanso. Codos fijos al cuerpo'},
+      {id:'curl-m',n:'B2 · Curl Martillo Mancuernas',s:3,r:'12',rir:1,mus:'Braquial/Braquiorradial',nota:'SUPERSERIE con B1 — trabaja la cabeza externa del bíceps'},
+      // Accesorio: Espalda alta / Manguito
+      {id:'elev-lat-m',n:'Face Pull con Cuerda',s:3,r:'15-20',rir:1,mus:'Deltoides posterior/Manguito rotador',nota:'Clave para salud articular del hombro. Codos a altura de orejas'},
+      {id:'remo-uni',n:'Remo Unilateral Mancuerna (kroc row)',s:3,r:'12-15',rir:1,mus:'Dorsal/Trapecio medio',nota:'Rango completo — deja colgar el brazo abajo al bajar'},
+      // Cardio HIIT en Escaladora
+      {id:'eliptica',n:'Escaladora HIIT — 20 min',s:1,r:'20 min',rir:0,mus:'Cardiovascular/EPOC',nota:'Protocolo: 40s fuerte · 20s suave · repetir. La escaladora es superior a la cinta para grasa visceral'}
     ]},
-    // ── MIÉRCOLES: DÍA NEURAL + CORE ──────────────────────────────
-    // Objetivo: mejorar sistema nervioso = más fuerza futura.
-    {dia:'Miércoles',nombre:'🟨 Día Neural + Core — Hombros/Fuerza',color:'#f59e0b',tipo:'fuerza',exs:[
-      {id:'press-militar',n:'Press Militar con Barra',s:4,r:'5',rir:3,mus:'Deltoides/Tríceps',nota:'Trabajo neurológico pesado — mejora fuerza futura'},
-      {id:'elev-lat',n:'Elevaciones Laterales Ligeras',s:4,r:'15',rir:1,mus:'Deltoides lateral',nota:'Ligeras — énfasis en contracción, no en peso'},
-      {id:'plancha',n:'Plancha Isométrica',s:4,r:'45-60s',rir:0,mus:'Core/Estabilizadores',nota:'4 rondas — progresa el tiempo cada semana'},
-      {id:'caminata',n:'HIIT corto post-sesión',s:1,r:'10 min',rir:0,mus:'Cardiovascular',nota:'10 min HIIT — complemento metabólico'}
+
+    // ══════════════════════════════════════════════════════
+    // MIÉRCOLES — DÍA NEURAL + HOMBROS + CORE 🟨
+    // Objetivo: potenciar sistema nervioso (más fuerza futura) + core fuerte + metabolismo activo
+    // Ciencia: el trabajo neurológico (<5 reps) mejora el reclutamiento de fibras sin añadir volumen extra
+    // ══════════════════════════════════════════════════════
+    {dia:'Miércoles',nombre:'🟨 Neural + Hombros · Core · Cardio corto',color:'#f59e0b',tipo:'fuerza',exs:[
+      // Bloque 1: Neurológico pesado
+      {id:'press-militar',n:'Press Militar con Barra (pie)',s:5,r:'3-5',rir:3,mus:'Deltoides/Tríceps/Core',nota:'PESADO. Descanso 3-4 min. Estabilización de core activa durante todo el movimiento'},
+      // Bloque 2: Hombros — volumen lateral/posterior
+      {id:'elev-lat',n:'Elevaciones Laterales (mancuernas)',s:4,r:'15-20',rir:1,mus:'Deltoides lateral',nota:'LIGERAS. Énfasis en contracción — no en peso. Pausa 1s arriba'},
+      {id:'elev-lat-m',n:'Pájaro/Elevaciones Posteriores',s:3,r:'15',rir:1,mus:'Deltoides posterior/Romboides',nota:'Superserie OPCIONAL con elevaciones laterales'},
+      {id:'pullover',n:'Pullover con Mancuerna',s:3,r:'12',rir:1,mus:'Dorsal/Serrato/Pectoral',nota:'Gran activador de serrato anterior — mejora postura en déficit'},
+      // Bloque 3: Core funcional (fuerza real, no crunch)
+      {id:'plancha',n:'Plancha Isométrica',s:4,r:'45-60s',rir:0,mus:'Core/Transverso/Multífidos',nota:'Progresa 5s cada semana. Respira profundo — no aguantes el aire'},
+      {id:'plancha-lat',n:'Plancha Lateral',s:3,r:'30-40s/lado',rir:0,mus:'Oblicuos/Cuadrado lumbar',nota:'Caderas alineadas — no dejes caer la pelvis'},
+      {id:'crunch-m',n:'Crunch en Polea Alta (de rodillas)',s:3,r:'15-20',rir:1,mus:'Recto abdominal',nota:'Resistencia constante → superior al crunch en suelo'},
+      // HIIT final corto
+      {id:'caminata',n:'HIIT Corto post-sesión',s:1,r:'10-12 min',rir:0,mus:'Cardiovascular',nota:'Bicicleta estática o cinta: 30s fuerte · 30s suave · 10 rondas'}
     ]},
-    // ── JUEVES: DÍA QUEMA GRASA EXTREMA (PIERNAS) ─────────────────
-    // Este es el día clave para grasa visceral.
-    {dia:'Jueves',nombre:'🟩 Día Quema Grasa — Piernas + Cardio Largo',color:'#22c55e',tipo:'fuerza',exs:[
-      {id:'sentadilla',n:'Sentadilla con Barra',s:4,r:'6',rir:3,mus:'Cuádriceps/Glúteo/Core',nota:'DÍA CLAVE para grasa visceral — máxima activación muscular'},
-      {id:'peso-muerto-rum',n:'Peso Muerto Rumano',s:3,r:'8',rir:2,mus:'Isquiotibiales/Glúteo'},
-      {id:'prensa',n:'Prensa de Pierna',s:3,r:'12',rir:1,mus:'Cuádriceps/Glúteo',nota:'Superserie con Zancadas — sin descanso entre ambos'},
-      {id:'zancadas',n:'Zancadas caminando',s:3,r:'12/lado',rir:1,mus:'Cuádriceps/Glúteo',nota:'Superserie con Prensa — 3 rondas continuas'},
-      {id:'ext-cuad',n:'Extensión de Cuádriceps',s:3,r:'15',rir:0,mus:'Cuádriceps',nota:'Superserie con Femoral — sin descanso'},
-      {id:'curl-fem',n:'Curl Femoral Tumbado',s:3,r:'15',rir:0,mus:'Isquiotibiales',nota:'Superserie con Extensión — sin descanso'},
-      {id:'caminata',n:'Cardio LISS largo post-sesión',s:1,r:'20-25 min',rir:0,mus:'Cardiovascular',nota:'20-25 min cardio largo — maximiza oxidación de grasa'}
+
+    // ══════════════════════════════════════════════════════
+    // JUEVES — DÍA QUEMA GRASA EXTREMA (PIERNAS) 🟩
+    // Objetivo: máxima activación muscular → mayor gasto energético total
+    // Ciencia: el cuádriceps y glúteo son los músculos más grandes del cuerpo.
+    // Una sesión de piernas pesada puede quemar 400-600 kcal adicionales en 24-48h (EPOC)
+    // ══════════════════════════════════════════════════════
+    {dia:'Jueves',nombre:'🟩 Quema Grasa Extrema — Piernas completas',color:'#22c55e',tipo:'fuerza',exs:[
+      // Compuestos pesados primero (activación máxima del eje hormonal)
+      {id:'sentadilla',n:'Sentadilla con Barra (trasera)',s:4,r:'5-6',rir:3,mus:'Cuádriceps/Glúteo/Core',nota:'❗DÍA CLAVE para grasa visceral. Sentadilla es el ejercicio más efectivo para la composición corporal'},
+      {id:'peso-muerto-rum',n:'Peso Muerto Rumano',s:4,r:'8',rir:2,mus:'Isquiotibiales/Glúteo/Erector',nota:'Mantén espalda neutra. Siente el estiramiento de isquios en la bajada'},
+      // Superserie A: Cuádriceps (3 rondas sin descanso)
+      {id:'prensa',n:'A1 · Prensa de Pierna (pies altos)',s:3,r:'12-15',rir:1,mus:'Cuádriceps/Glúteo',nota:'SUPERSERIE con A2. Pies altos = más glúteo. Pies bajos = más cuádríceps'},
+      {id:'zancadas',n:'A2 · Zancadas Caminando',s:3,r:'12/lado',rir:1,mus:'Cuádriceps/Glúteo/Estabilizadores',nota:'SUPERSERIE con A1 — sin descanso. 3 rondas continuas'},
+      // Superserie B: Aislado quad + femoral (3 rondas sin descanso)
+      {id:'ext-cuad',n:'B1 · Extensión de Cuádriceps (máquina)',s:3,r:'15',rir:0,mus:'Cuádriceps (recto femoral)',nota:'SUPERSERIE con B2 — sin descanso. Pausa 1s en extensión completa'},
+      {id:'curl-fem',n:'B2 · Curl Femoral Tumbado',s:3,r:'15',rir:0,mus:'Isquiotibiales',nota:'SUPERSERIE con B1. Aprieta el glúteo al final del movimiento'},
+      // Glúteo específico
+      {id:'hip-thrust',n:'Hip Thrust con Barra',s:3,r:'12-15',rir:1,mus:'Glúteo mayor/Isquiotibiales',nota:'Pausa 1s arriba. El glúteo es clave para la quema de grasa visceral en hombres'},
+      {id:'abduccion',n:'Abducción de Cadera en Máquina',s:3,r:'20',rir:1,mus:'Glúteo medio/menor',nota:'Velocidad lenta — no uses inercia'},
+      // Cardio largo final (grasa oxidativa)
+      {id:'caminata',n:'Cardio LISS largo — Caminata inclinada',s:1,r:'20-25 min',rir:0,mus:'Cardiovascular/Grasa oxidativa',nota:'12-15% inclinación · 5-6 km/h. LISS post-piernas maximiza oxidación de ácidos grasos'}
     ]},
-    // ── VIERNES: DESCANSO ACTIVO ───────────────────────────────────
-    {dia:'Viernes',nombre:'Descanso Activo + NEAT',color:'#22c55e',tipo:'descanso',exs:[
-      {id:'caminar',n:'Caminata moderada',s:1,r:'45-60 min',rir:0,mus:'NEAT/Recuperación',nota:'Ritmo moderado — aumenta gasto calórico sin estrés muscular'}
+
+    // ══════════════════════════════════════════════════════
+    // VIERNES — DÍA FULLBODY METABÓLICO + CARDIO 🟪
+    // Objetivo: segundo estímulo metabólico de la semana — mantener quema activa
+    // Ciencia: 5 días de entrenamiento/semana es óptimo para pérdida de grasa sin sobreentrenamiento
+    // ══════════════════════════════════════════════════════
+    {dia:'Viernes',nombre:'🟪 FullBody Metabólico — Circuito + Cardio',color:'#6c4fff',tipo:'fuerza',exs:[
+      // Circuito fullbody (movimientos compuestos, descanso mínimo)
+      {id:'goblet',n:'Sentadilla Goblet (mancuerna)',s:3,r:'15-20',rir:1,mus:'Cuádriceps/Glúteo/Core',nota:'Circuito — 60s descanso entre rondas. Excelente para días de menor energía'},
+      {id:'dominadas',n:'Dominadas o Jalón al Pecho',s:3,r:'8-12',rir:2,mus:'Dorsal/Bíceps',nota:'Usa asistencia si es necesario. La progresión en dominadas es el mejor indicador de fuerza relativa'},
+      {id:'press-banca-fb',n:'Press con Mancuernas (banco plano)',s:3,r:'12-15',rir:1,mus:'Pecho/Hombro',nota:'Peso moderado — énfasis en control del movimiento'},
+      {id:'peso-muerto-rum',n:'Peso Muerto Rumano Mancuernas',s:3,r:'12',rir:1,mus:'Isquiotibiales/Glúteo',nota:'Versión mancuernas — mayor rango de movimiento que con barra'},
+      {id:'press-militar',n:'Press Arnold Mancuernas (de pie)',s:3,r:'12',rir:1,mus:'Deltoides 3 cabezas',nota:'Rotación interna → externa en el movimiento. Trabaja el deltoides completo'},
+      {id:'plancha',n:'Plancha + Toque de Hombros alternos',s:3,r:'20 toques',rir:0,mus:'Core/Estabilizadores',nota:'Variante dinámica de plancha — mayor activación del transverso'},
+      // Cardio moderado-largo
+      {id:'eliptica',n:'Cardio Moderado — Elíptica o Bici',s:1,r:'25-30 min',rir:0,mus:'Cardiovascular',nota:'Zona 2 (puedes hablar). Mantiene quema calórica sin comprometer recuperación'}
     ]},
-    // ── SÁBADO: OPCIONAL (cardio o repetir día débil) ──────────────
-    {dia:'Sábado',nombre:'Opcional — Repetir día débil o cardio',color:'#6c4fff',tipo:'descanso',exs:[
-      {id:'eliptica',n:'Cardio moderado o día de especialización',s:1,r:'30-40 min',rir:0,mus:'Cardiovascular/Recuperación',nota:'Opcional: repite el grupo muscular más débil o cardio LISS'}
+
+    // ══════════════════════════════════════════════════════
+    // SÁBADO — NEAT + DESCANSO ACTIVO
+    // NEAT (Non-Exercise Activity Thermogenesis) = 15-30% del gasto calórico diario
+    // ══════════════════════════════════════════════════════
+    {dia:'Sábado',nombre:'🚶 NEAT + Cardio activo suave',color:'#14b8a6',tipo:'descanso',exs:[
+      {id:'caminar',n:'Caminata moderada (exterior o cinta)',s:1,r:'45-60 min',rir:0,mus:'NEAT/Recuperación activa',nota:'Ritmo moderado — puedes hablar. Sin inclinación alta hoy. El NEAT diario puede sumar 300-500 kcal extra'},
+      {id:'movilidad',n:'Movilidad y estiramientos (opcional)',s:1,r:'15-20 min',rir:0,mus:'Recuperación/Flexibilidad',nota:'Cadenas posterior, pectoral, cadera. Mejora la calidad del entreno siguiente'}
     ]},
-    // ── DOMINGO: DESCANSO COMPLETO ─────────────────────────────────
-    {dia:'Domingo',nombre:'Descanso completo — Recuperación',color:'#3a3a5c',tipo:'descanso',exs:[
-      {id:'movilidad',n:'Movilidad y estiramientos suaves (opcional)',s:1,r:'15-20 min',rir:0,mus:'Recuperación'}
+
+    // ══════════════════════════════════════════════════════
+    // DOMINGO — DESCANSO COMPLETO
+    // La recuperación es donde ocurre la adaptación real
+    // ══════════════════════════════════════════════════════
+    {dia:'Domingo',nombre:'😴 Descanso completo — Supercompensación',color:'#3a3a5c',tipo:'descanso',exs:[
+      {id:'movilidad',n:'Foam rolling y movilidad suave (opcional)',s:1,r:'15 min',rir:0,mus:'Recuperación',nota:'Solo si te apetece. El descanso completo es OBLIGATORIO — sin él no hay adaptación'}
     ]}
   ];
 }
@@ -2245,16 +2313,110 @@ function showExDetail(id, nombre){
 }
 // ── FIN showExDetail ──────────────────────────────────────────
 
+// ── Modal YouTube — abre el video dentro de la app, se puede cerrar ──
+function openYouTube(url, titulo){
+  if(!url) return;
+  var old=document.getElementById('m-youtube');
+  if(old) old.parentNode.removeChild(old);
+  // Convertir URL de YouTube a embed
+  var videoId='';
+  var m=url.match(/(?:v=|youtu\.be\/|shorts\/)([A-Za-z0-9_-]{11})/);
+  if(m) videoId=m[1];
+  var embedUrl=videoId
+    ?'https://www.youtube.com/embed/'+videoId+'?autoplay=1&rel=0&modestbranding=1'
+    :url;
+  var div=document.createElement('div');
+  div.id='m-youtube';
+  div.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:10000;display:flex;flex-direction:column;';
+  div.innerHTML=
+    '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#111;flex-shrink:0;">'
+      +'<div style="font-size:13px;font-weight:700;color:#fff;max-width:80%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">▶ '+(titulo||'Tutorial')+'</div>'
+      +'<button onclick="document.getElementById(\'m-youtube\').remove()" style="background:#333;border:none;color:#fff;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;">✕ Cerrar</button>'
+    +'</div>'
+    +(videoId
+      ?'<iframe src="'+embedUrl+'" style="flex:1;width:100%;border:none;" allowfullscreen allow="autoplay;fullscreen" frameborder="0"></iframe>'
+      :'<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;">'
+        +'<div style="color:#aaa;font-size:13px;">No se puede incrustar este video.</div>'
+        +'<a href="'+url+'" target="_blank" rel="noopener" style="background:#FF0000;color:#fff;padding:12px 24px;border-radius:8px;font-weight:700;text-decoration:none;">Abrir en YouTube</a>'
+      +'</div>')
+    +'<div style="padding:10px 16px;background:#111;text-align:center;flex-shrink:0;">'
+      +'<span style="font-size:10px;color:#555;">Fuente: Jeff Nippard · YouTube · Se puede cerrar y volver a la app</span>'
+    +'</div>';
+  document.body.appendChild(div);
+}
+window.openYouTube=openYouTube;
+var YOUTUBE_LINKS={
+  'sentadilla':       'https://www.youtube.com/watch?v=Uv_DKDl7EjA', // Jeff Nippard - How To Squat
+  'press-banca':      'https://www.youtube.com/watch?v=hWbUlkb5Ms4', // Jeff Nippard - Bench Press Technique
+  'press-banca-fb':   'https://www.youtube.com/watch?v=hWbUlkb5Ms4',
+  'press-incl':       'https://www.youtube.com/watch?v=wWWzn2l_830', // Jeff Nippard - Incline Press
+  'peso-muerto':      'https://www.youtube.com/watch?v=op9kVnSso6Q', // Jeff Nippard - Deadlift
+  'peso-muerto-rum':  'https://www.youtube.com/watch?v=hCDzSR6bW10', // Jeff Nippard - Romanian DL
+  'dominadas':        'https://www.youtube.com/watch?v=eGo4IYlbE5g', // Jeff Nippard - Pull-Up
+  'press-militar':    'https://www.youtube.com/watch?v=2yjwXTZQDDI', // Jeff Nippard - Overhead Press
+  'hip-thrust':       'https://www.youtube.com/watch?v=xDmFkJxPzeM', // Jeff Nippard - Hip Thrust
+  'hip-thrust-m':     'https://www.youtube.com/watch?v=xDmFkJxPzeM',
+  'hip-thrust-fb-m':  'https://www.youtube.com/watch?v=xDmFkJxPzeM',
+  'remo-barra':       'https://www.youtube.com/watch?v=FWJR5Ve8UT4', // Jeff Nippard - Barbell Row
+  'remo-cable':       'https://www.youtube.com/watch?v=xQNrFHEMhI4', // Cable Row
+  'remo-uni':         'https://www.youtube.com/watch?v=pYcpY20QaE8', // Dumbbell Row
+  'jalon-m':          'https://www.youtube.com/watch?v=CAwf7n6Luuc', // Jeff Nippard - Lat Pulldown
+  'pullover':         'https://www.youtube.com/watch?v=FK4rHfFRqTk', // Dumbbell Pullover
+  'curl-barra':       'https://www.youtube.com/watch?v=kwG2ipFRgfo', // Jeff Nippard - Bicep Curl
+  'curl-m':           'https://www.youtube.com/watch?v=kwG2ipFRgfo',
+  'elev-lat':         'https://www.youtube.com/watch?v=3VcKaXpzqRo', // Jeff Nippard - Lateral Raise
+  'elev-lat-m':       'https://www.youtube.com/watch?v=V7dLqBSkCEY', // Face Pull
+  'ext-polea':        'https://www.youtube.com/watch?v=vB5OHsJ3EME', // Tricep Pushdown
+  'fondos':           'https://www.youtube.com/watch?v=2z8JmcrW-As', // Dips
+  'aperturas-cable':  'https://www.youtube.com/watch?v=Iwe6AmxVf7o', // Cable Fly
+  'prensa':           'https://www.youtube.com/watch?v=IZxyjW7MPJQ', // Leg Press
+  'ext-cuad':         'https://www.youtube.com/watch?v=YyvSfVjQeL0', // Leg Extension
+  'curl-fem':         'https://www.youtube.com/watch?v=1Tq3QdYUuHs', // Leg Curl
+  'zancadas':         'https://www.youtube.com/watch?v=QOVaHwm-Q6U', // Lunges
+  'goblet':           'https://www.youtube.com/watch?v=MxsFDhcyFyE', // Goblet Squat
+  'squat-sumo':       'https://www.youtube.com/watch?v=Uv_DKDl7EjA',
+  'plancha':          'https://www.youtube.com/watch?v=pSHjTRCQxIw', // Plank
+  'plancha-lat':      'https://www.youtube.com/watch?v=pSHjTRCQxIw',
+  'crunch-m':         'https://www.youtube.com/watch?v=5ER5Of4MOPI', // Cable Crunch
+  'abduccion':        'https://www.youtube.com/watch?v=kDqklk2KDFE', // Hip Abduction
+  'gemelo-pie':       'https://www.youtube.com/watch?v=gwLzBJYoWlI', // Calf Raise
+  'eliptica':         'https://www.youtube.com/watch?v=V0HkBHgZ9jM', // Elliptical technique
+  'caminata':         'https://www.youtube.com/watch?v=HdR5xHBxHH0', // Incline treadmill walk
+  'movilidad':        'https://www.youtube.com/watch?v=FSSDLDhbacc', // Mobility routine
+  'squat-barra-m':    'https://www.youtube.com/watch?v=Uv_DKDl7EjA',
+  'peso-muerto-rum-m':'https://www.youtube.com/watch?v=hCDzSR6bW10',
+  'jalon-m':          'https://www.youtube.com/watch?v=CAwf7n6Luuc',
+  'remo-cable-m':     'https://www.youtube.com/watch?v=xQNrFHEMhI4',
+  'remo-uni-m':       'https://www.youtube.com/watch?v=pYcpY20QaE8',
+  'curl-fem-m':       'https://www.youtube.com/watch?v=1Tq3QdYUuHs',
+  'curl-conc':        'https://www.youtube.com/watch?v=kwG2ipFRgfo',
+  'ext-tri-m':        'https://www.youtube.com/watch?v=vB5OHsJ3EME',
+  'press-hom-m':      'https://www.youtube.com/watch?v=2yjwXTZQDDI',
+  'ext-cuad-m':       'https://www.youtube.com/watch?v=YyvSfVjQeL0',
+  'prensa-m':         'https://www.youtube.com/watch?v=IZxyjW7MPJQ',
+  'squat-sumo':       'https://www.youtube.com/watch?v=Uv_DKDl7EjA',
+  'hip-thrust-fb-m':  'https://www.youtube.com/watch?v=xDmFkJxPzeM',
+  'cardio-sab':       'https://www.youtube.com/watch?v=V0HkBHgZ9jM',
+  'zancadas-m':       'https://www.youtube.com/watch?v=QOVaHwm-Q6U',
+  'gemelo-m':         'https://www.youtube.com/watch?v=gwLzBJYoWlI',
+  'caminar':          'https://www.youtube.com/watch?v=HdR5xHBxHH0',
+  'plancha-m':        'https://www.youtube.com/watch?v=pSHjTRCQxIw'
+};
+
 function showGuia(nombre,id){
   var g=getGuia(id);
+  var ytLink=YOUTUBE_LINKS[id]||null;
   var tab='pasos';
   function render(){
     $('guia-content').innerHTML='<div style="background:var(--bg3);border-radius:var(--r);padding:14px;margin-bottom:12px;text-align:center;">'
       +'<div style="font-size:17px;font-weight:800;margin-bottom:4px;">'+g.titulo+'</div>'
       +'<div style="font-size:12px;color:var(--acc2);">💪 '+g.mus+'</div>'
       +'<div style="font-size:11px;color:var(--t3);margin-top:2px;">🏋️ '+g.maq+'</div>'
+      // Botón YouTube si hay link
+      +(ytLink
+        ?'<button onclick="openYouTube(\''+ytLink+'\',this.closest(\'[id^=guia]\').querySelector(\'.guia-titulo\')?this.closest(\'[id^=guia]\').querySelector(\'.guia-titulo\').textContent:\"Tutorial\")" style="display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:8px 16px;background:#FF0000;color:#fff;border-radius:20px;font-size:12px;font-weight:700;border:none;cursor:pointer;"><svg width="16" height="12" viewBox="0 0 16 12" fill="white"><path d="M15.7 1.9A2 2 0 0 0 14.3.5C13 .1 8 .1 8 .1S3 .1 1.7.5A2 2 0 0 0 .3 1.9C0 3.2 0 6 0 6s0 2.8.3 4.1A2 2 0 0 0 1.7 11.5C3 11.9 8 11.9 8 11.9s5 0 6.3-.4a2 2 0 0 0 1.4-1.4C16 8.8 16 6 16 6s0-2.8-.3-4.1zM6.4 8.5V3.5l4.2 2.5-4.2 2.5z"/></svg> Ver técnica</button>'
+        :'')
       +'</div>'
-      // Skeleton de carga — sin SVG, solo spinner hasta que lleguen las fotos reales
       +'<div id="guia-imgs" style="border-radius:10px;overflow:hidden;margin-bottom:12px;background:#111;min-height:160px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;">'
         +'<div style="width:32px;height:32px;border:3px solid var(--border2);border-top-color:var(--acc2);border-radius:50%;animation:spin 0.8s linear infinite;"></div>'
         +'<div style="font-size:11px;color:var(--t3);">Cargando imágenes...</div>'
@@ -2608,8 +2770,8 @@ function initApp(){
   dedupUsers();
   updateUserSwitcher();
   checkSesionDraft();
-  // Guardar borrador de sesión activa cada 30s para recuperación tras crash
-  setInterval(saveSesionDraft, 30000);
+  // Guardar borrador cada 5 segundos (+ inmediatamente en cada input/check)
+  setInterval(saveSesionDraft, 5000);
   renderHome();
   document.querySelectorAll('.bn').forEach(function(b){
     b.addEventListener('click',function(){goTo(this.getAttribute('data-s'));});
@@ -2950,6 +3112,7 @@ function renderPlanEj(){
           +'</div>'
         +'</div>'
         +'<button onclick="swapPlanEx(event,'+i+','+exIdx+',\''+emus+'\')" title="Cambiar ejercicio" style="flex-shrink:0;width:30px;height:30px;border-radius:50%;background:var(--bg3);border:1px solid var(--border2);color:var(--t3);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-left:4px;">🔄</button>'
+        +(YOUTUBE_LINKS[e.id||'']?'<button onclick="openYouTube(\''+YOUTUBE_LINKS[e.id||'']+'\')" title="Ver en YouTube" style="flex-shrink:0;width:30px;height:30px;border-radius:50%;background:#FF0000;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-left:0px;padding:0;"><svg width="12" height="9" viewBox="0 0 16 12" fill="white"><path d="M15.7 1.9A2 2 0 0 0 14.3.5C13 .1 8 .1 8 .1S3 .1 1.7.5A2 2 0 0 0 .3 1.9C0 3.2 0 6 0 6s0 2.8.3 4.1A2 2 0 0 0 1.7 11.5C3 11.9 8 11.9 8 11.9s5 0 6.3-.4a2 2 0 0 0 1.4-1.4C16 8.8 16 6 16 6s0-2.8-.3-4.1zM6.4 8.5V3.5l4.2 2.5-4.2 2.5z"/></svg></button>':'')
         +'</div>';
     }).join('');
 
@@ -3174,9 +3337,11 @@ function renderExList(){
     // Header del ejercicio
     var hdr='<div class="ex-card-hdr">'
       +'<div>'
-        +'<div class="ex-card-name" onclick="showGuia(this.dataset.n,this.dataset.id)" data-n="'+ex.n.replace(/"/g,'&quot;')+'" data-id="'+(ex.id||'default')+'">'
+        +'<div style="display:flex;align-items:center;gap:8px;">'
+          +'<div class="ex-card-name" onclick="showGuia(this.dataset.n,this.dataset.id)" data-n="'+ex.n.replace(/"/g,'&quot;')+'" data-id="'+(ex.id||'default')+'">'
           +ex.n
         +'</div>'
+        +(YOUTUBE_LINKS[ex.id||'']?'<button onclick="openYouTube(\''+YOUTUBE_LINKS[ex.id||'']+'\')" title="Ver en YouTube" style="flex-shrink:0;width:22px;height:22px;background:#FF0000;border-radius:4px;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;padding:0;"><svg width=\"10\" height=\"8\" viewBox=\"0 0 16 12\" fill=\"white\"><path d=\"M15.7 1.9A2 2 0 0 0 14.3.5C13 .1 8 .1 8 .1S3 .1 1.7.5A2 2 0 0 0 .3 1.9C0 3.2 0 6 0 6s0 2.8.3 4.1A2 2 0 0 0 1.7 11.5C3 11.9 8 11.9 8 11.9s5 0 6.3-.4a2 2 0 0 0 1.4-1.4C16 8.8 16 6 16 6s0-2.8-.3-4.1zM6.4 8.5V3.5l4.2 2.5-4.2 2.5z\"/></svg></button>':'')
         +'<div class="ex-card-meta">'+ex.mus+(ex.rir!==undefined&&ex.rir!==''?' · RIR '+ex.rir:'')+'</div>'
       +'</div>'
       +'<div style="display:flex;align-items:center;gap:6px;">'
@@ -3231,6 +3396,7 @@ function renderExList(){
       var field=this.getAttribute('data-field');
       APP.exTemp[ei].series[si][field]=this.value;
       this.classList.toggle('filled',!!this.value);
+      saveSesionDraft(); // guardar inmediatamente al escribir
     });
     // Al salir del campo kg, sugerir mismo peso que serie anterior
     inp.addEventListener('blur',function(){
@@ -3240,6 +3406,7 @@ function renderExList(){
         var prev=APP.exTemp[ei].series[si-1].kg;
         if(prev){this.value=prev;APP.exTemp[ei].series[si].kg=prev;this.classList.add('filled');}
       }
+      saveSesionDraft(); // guardar al salir del campo
     });
   });
 
@@ -3264,6 +3431,7 @@ function renderExList(){
       }
       var wasDone=s.done;
       s.done=!s.done;
+      saveSesionDraft(); // guardar al completar/descompletar serie
       renderExList();
       // Feedback háptico
       if(navigator.vibrate) navigator.vibrate(30);
@@ -5081,6 +5249,7 @@ function buildEmailHTML(d){
     +'<div style="background:#070710;border:1px solid #222;border-top:none;border-radius:0 0 12px 12px;padding:14px 24px;text-align:center;">'
       +'<div style="font-size:10px;color:#404060;">Hola '+d.nombre+' — Informe generado el '+d.fecha+' con '+d.motor+'</div>'
       +'<div style="font-size:9px;color:#303050;margin-top:4px;">SpeciMen Gym App · Tu entrenador personal con IA</div>'
+      +'<div style="font-size:8px;color:#252540;margin-top:6px;border-top:1px solid #111;padding-top:6px;letter-spacing:.03em;">Desarrollado por Cristhian Andres Serna Salazar &nbsp;|&nbsp; 2026</div>'
     +'</div>'
 
     +'</div></body></html>';
@@ -5465,7 +5634,8 @@ function generarPDF(u){
 
     // ── PIE DE PÁGINA ─────────────────────────────────
     rect(0,287,W,10,0,BG);
-    txt('SpeciMen Gym App · Informe generado el '+new Date().toLocaleDateString('es-ES'),W/2,293,7,GRAY,'center');
+    txt('SpeciMen Gym App · Informe generado el '+new Date().toLocaleDateString('es-ES'),W/2,292,7,GRAY,'center');
+    txt('Desarrollado por Cristhian Andres Serna Salazar  |  2026',W/2,296,6,[50,50,70],'center');
 
     doc.save('SpeciMen_informe_'+u.nombre.split(' ')[0]+'_'+new Date().toISOString().slice(0,10)+'.pdf');
     toast('✓ PDF generado y descargado');
