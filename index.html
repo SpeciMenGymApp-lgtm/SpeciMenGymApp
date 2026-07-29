@@ -877,8 +877,8 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   <button class="bn" data-s="perfil"><span class="bn-ico">👤</span><span>Perfil</span></button>
   <button class="bn" data-s="kongo"><span class="bn-ico">🦍</span><span>Kongo</span></button>
 </nav>
-<div style="position:fixed;bottom:calc(var(--safe) + 1px);left:0;right:0;text-align:center;font-size:8.5px;color:#2e2e45;letter-spacing:.04em;pointer-events:none;z-index:99;line-height:1;">
-  Desarrollado por Cristhian Andres Serna Salazar &nbsp;|&nbsp; 2026
+<div style="position:fixed;bottom:calc(var(--safe) + 56px);left:0;right:0;text-align:center;font-size:9px;color:#5a5a7a;letter-spacing:.05em;pointer-events:none;z-index:99;line-height:1;font-weight:500;">
+  Desarrollado por <span style="color:#8080a8;">Cristhian Andrés Serna Salazar</span> &nbsp;|&nbsp; 2026
 </div>
 
 <!-- MODAL ejercicio -->
@@ -2417,10 +2417,6 @@ function showGuia(nombre,id){
         ?'<button onclick="openYouTube(\''+ytLink+'\',this.closest(\'[id^=guia]\').querySelector(\'.guia-titulo\')?this.closest(\'[id^=guia]\').querySelector(\'.guia-titulo\').textContent:\"Tutorial\")" style="display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:8px 16px;background:#FF0000;color:#fff;border-radius:20px;font-size:12px;font-weight:700;border:none;cursor:pointer;"><svg width="16" height="12" viewBox="0 0 16 12" fill="white"><path d="M15.7 1.9A2 2 0 0 0 14.3.5C13 .1 8 .1 8 .1S3 .1 1.7.5A2 2 0 0 0 .3 1.9C0 3.2 0 6 0 6s0 2.8.3 4.1A2 2 0 0 0 1.7 11.5C3 11.9 8 11.9 8 11.9s5 0 6.3-.4a2 2 0 0 0 1.4-1.4C16 8.8 16 6 16 6s0-2.8-.3-4.1zM6.4 8.5V3.5l4.2 2.5-4.2 2.5z"/></svg> Ver técnica</button>'
         :'')
       +'</div>'
-      +'<div id="guia-imgs" style="border-radius:10px;overflow:hidden;margin-bottom:12px;background:#111;min-height:160px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;">'
-        +'<div style="width:32px;height:32px;border:3px solid var(--border2);border-top-color:var(--acc2);border-radius:50%;animation:spin 0.8s linear infinite;"></div>'
-        +'<div style="font-size:11px;color:var(--t3);">Cargando imágenes...</div>'
-      +'</div>'
       +'<div class="guia-tab-row">'
       +'<button class="guia-tab'+(tab==='pasos'?' active':'')+'" onclick="guiaTab(\'pasos\')">📋 Técnica</button>'
       +'<button class="guia-tab'+(tab==='errores'?' active':'')+'" onclick="guiaTab(\'errores\')">⚠️ Errores</button>'
@@ -2433,121 +2429,10 @@ function showGuia(nombre,id){
   window.guiaTab=function(t){tab=t;render();};
   render();
   openM('m-guia');
-  _guiaCurrentId=id;
-  fetchGuiaPhotos(g.titulo, id);
 }
 $('guia-close').addEventListener('click',function(){closeM('m-guia');});
 
 // ── GIFs reales de ejercicios ─────────────────────────────────
-// Mapa de IDs de ejercicio → GIF directo de ExerciseDB (sin API key)
-// URLs públicas y estables de static.exercisedb.dev
-var EXERCISE_GIFS={
-  'sentadilla':        ['https://static.exercisedb.dev/media/0028.gif','https://static.exercisedb.dev/media/0011.gif'],
-  'peso-muerto':       ['https://static.exercisedb.dev/media/0042.gif','https://static.exercisedb.dev/media/0001.gif'],
-  'press-banca':       ['https://static.exercisedb.dev/media/0019.gif','https://static.exercisedb.dev/media/0025.gif'],
-  'press-banca-fb':    ['https://static.exercisedb.dev/media/0025.gif','https://static.exercisedb.dev/media/0033.gif'],
-  'press-incl':        ['https://static.exercisedb.dev/media/0033.gif','https://static.exercisedb.dev/media/0019.gif'],
-  'dominadas':         ['https://static.exercisedb.dev/media/0007.gif','https://static.exercisedb.dev/media/0291.gif'],
-  'hip-thrust':        ['https://static.exercisedb.dev/media/1460.gif','https://static.exercisedb.dev/media/3293.gif'],
-  'hip-thrust-m':      ['https://static.exercisedb.dev/media/3293.gif','https://static.exercisedb.dev/media/1460.gif'],
-  'press-militar':     ['https://static.exercisedb.dev/media/0054.gif','https://static.exercisedb.dev/media/0057.gif'],
-  'remo-barra':        ['https://static.exercisedb.dev/media/0014.gif','https://static.exercisedb.dev/media/0020.gif'],
-  'curl-barra':        ['https://static.exercisedb.dev/media/0032.gif','https://static.exercisedb.dev/media/0040.gif'],
-  'zancadas':          ['https://static.exercisedb.dev/media/0045.gif','https://static.exercisedb.dev/media/1200.gif'],
-  'ext-polea':         ['https://static.exercisedb.dev/media/0037.gif','https://static.exercisedb.dev/media/0038.gif'],
-  'prensa':            ['https://static.exercisedb.dev/media/0030.gif','https://static.exercisedb.dev/media/0031.gif'],
-  'jalon-m':           ['https://static.exercisedb.dev/media/0291.gif','https://static.exercisedb.dev/media/0007.gif'],
-  'elev-lat':          ['https://static.exercisedb.dev/media/0057.gif','https://static.exercisedb.dev/media/0058.gif'],
-  'peso-muerto-rum':   ['https://static.exercisedb.dev/media/0001.gif','https://static.exercisedb.dev/media/0042.gif'],
-  'curl-fem':          ['https://static.exercisedb.dev/media/0096.gif','https://static.exercisedb.dev/media/1556.gif'],
-  'remo-cable':        ['https://static.exercisedb.dev/media/0020.gif','https://static.exercisedb.dev/media/0014.gif'],
-  'plancha':           ['https://static.exercisedb.dev/media/0013.gif','https://static.exercisedb.dev/media/0062.gif'],
-  'fondos':            ['https://static.exercisedb.dev/media/0218.gif','https://static.exercisedb.dev/media/0019.gif'],
-  'goblet':            ['https://static.exercisedb.dev/media/0028.gif','https://static.exercisedb.dev/media/0011.gif'],
-  'squat-sumo':        ['https://static.exercisedb.dev/media/0011.gif','https://static.exercisedb.dev/media/0028.gif'],
-  'aperturas-cable':   ['https://static.exercisedb.dev/media/0025.gif','https://static.exercisedb.dev/media/0033.gif'],
-  'pullover':          ['https://static.exercisedb.dev/media/0039.gif','https://static.exercisedb.dev/media/0025.gif'],
-  'remo-uni':          ['https://static.exercisedb.dev/media/0020.gif','https://static.exercisedb.dev/media/0014.gif'],
-  'caminata':          ['https://static.exercisedb.dev/media/3220.gif','https://static.exercisedb.dev/media/3221.gif'],
-  'eliptica':          ['https://static.exercisedb.dev/media/3220.gif','https://static.exercisedb.dev/media/3221.gif'],
-  'crunch-m':          ['https://static.exercisedb.dev/media/0062.gif','https://static.exercisedb.dev/media/0013.gif'],
-  'abduccion':         ['https://static.exercisedb.dev/media/1770.gif','https://static.exercisedb.dev/media/1460.gif'],
-  'default':           ['https://static.exercisedb.dev/media/0028.gif','https://static.exercisedb.dev/media/0019.gif']
-};
-
-var _guiaPhotoCache={};
-var _guiaCurrentId=null;
-
-function getSearchQuery(titulo){
-  var GUIA_SEARCH_EN={
-    'Sentadilla con Barra':'barbell squat','Prensa de Pierna':'leg press',
-    'Hip Thrust':'hip thrust','Peso Muerto Rumano':'romanian deadlift',
-    'Peso Muerto':'barbell deadlift','Press Banca Barra':'barbell bench press',
-    'Press Banca':'bench press','Dominadas':'pull up','Jalón':'lat pulldown',
-    'Remo con Barra':'barbell row','Press Militar':'overhead press',
-    'Curl Barra':'barbell curl','Zancadas':'lunge','Plancha':'plank',
-    'Elevaciones Laterales':'lateral raise','Fondos':'dips','Crunch':'crunch',
-    'Caminata':'treadmill walking','Elíptica':'elliptical'
-  };
-  var keys=Object.keys(GUIA_SEARCH_EN);
-  for(var i=0;i<keys.length;i++){
-    if(titulo.toLowerCase().indexOf(keys[i].toLowerCase())>=0) return GUIA_SEARCH_EN[keys[i]];
-  }
-  return titulo.split(' ').slice(0,3).join(' ');
-}
-
-function fetchGuiaPhotos(tituloEjercicio, id){
-  // 1. Caché inmediata
-  if(_guiaPhotoCache[id]){renderGuiaPhotos(_guiaPhotoCache[id]);return;}
-
-  // 2. Mapa local de GIFs reales — instantáneo, sin red
-  var localGifs=EXERCISE_GIFS[id]||EXERCISE_GIFS['default'];
-  if(localGifs&&localGifs.length){
-    _guiaPhotoCache[id]=localGifs;
-    if(_guiaCurrentId===id){
-      var el=$('guia-imgs');
-      if(el) renderGuiaPhotos(localGifs);
-    }
-  }
-
-  // 3. En paralelo: buscar en wger para ejercicios específicos no en el mapa
-  var query=encodeURIComponent(getSearchQuery(tituloEjercicio));
-  fetch('https://wger.de/api/v2/exercise/search/?term='+query+'&language=english&format=json')
-    .then(function(r){return r.json();})
-    .then(function(data){
-      var sugg=data&&data.suggestions;
-      if(!sugg||!sugg.length) return;
-      var baseId=sugg[0].data&&sugg[0].data.id;
-      if(!baseId) return;
-      return fetch('https://wger.de/api/v2/exerciseimage/?exercise_base='+baseId+'&format=json')
-        .then(function(r2){return r2.json();})
-        .then(function(imgData){
-          var imgs=(imgData.results||[]).map(function(i){return i.image;}).filter(Boolean).slice(0,2);
-          if(imgs.length&&_guiaCurrentId===id){
-            _guiaPhotoCache[id]=imgs;
-            var el=$('guia-imgs');
-            if(el) renderGuiaPhotos(imgs);
-          }
-        });
-    })
-    .catch(function(){});  // silencioso — ya tenemos GIFs del mapa local
-}
-function renderGuiaPhotos(imgs){
-  var el=$('guia-imgs');
-  if(!el) return;
-  var esGif=imgs[0]&&imgs[0].indexOf('.gif')>=0;
-  el.innerHTML='<div style="display:grid;grid-template-columns:'+(imgs.length>1?'1fr 1fr':'1fr')+';gap:6px;border-radius:var(--r);overflow:hidden;">'
-    +imgs.map(function(src){
-      return '<div style="background:#f5f5f5;border-radius:6px;overflow:hidden;">'
-        +'<img src="'+src+'" loading="lazy" style="width:100%;height:170px;object-fit:cover;display:block;" onerror="this.closest(\'div\').style.display=\'none\';">'
-        +'</div>';
-    }).join('')
-    +'</div>'
-    +'<div style="font-size:9px;color:var(--t3);text-align:center;margin-top:4px;">'
-    +(esGif?'🎬 GIF animado · wger Exercise DB (licencia libre)':'📷 wger Exercise DB (licencia libre)')
-    +'</div>';
-}
-
 // ── ONBOARDING ────────────────────────────────
 var ONB={genero:null};
 renderRestGrid();
@@ -3334,33 +3219,40 @@ function renderExList(){
     var pct=ex.series.length?Math.round(seriesDone/ex.series.length*100):0;
     var card=document.createElement('div');
     card.className='ex-card';
+    var ytUrl=YOUTUBE_LINKS[ex.id||'']||'';
+    var ytBtn=ytUrl?'<button onclick="openYouTube(\''+ytUrl+'\')" title="Ver en YouTube" style="flex-shrink:0;width:20px;height:20px;background:#FF0000;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;border:none;cursor:pointer;padding:0;vertical-align:middle;margin-left:6px;"><svg width="9" height="7" viewBox="0 0 16 12" fill="white"><path d="M15.7 1.9A2 2 0 0 0 14.3.5C13 .1 8 .1 8 .1S3 .1 1.7.5A2 2 0 0 0 .3 1.9C0 3.2 0 6 0 6s0 2.8.3 4.1A2 2 0 0 0 1.7 11.5C3 11.9 8 11.9 8 11.9s5 0 6.3-.4a2 2 0 0 0 1.4-1.4C16 8.8 16 6 16 6s0-2.8-.3-4.1zM6.4 8.5V3.5l4.2 2.5-4.2 2.5z"/></svg></button>':'';
     // Header del ejercicio
     var hdr='<div class="ex-card-hdr">'
-      +'<div>'
-        +'<div style="display:flex;align-items:center;gap:8px;">'
-          +'<div class="ex-card-name" onclick="showGuia(this.dataset.n,this.dataset.id)" data-n="'+ex.n.replace(/"/g,'&quot;')+'" data-id="'+(ex.id||'default')+'">'
-          +ex.n
+      +'<div style="flex:1;min-width:0;">'
+        +'<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:2px;">'
+          +'<div class="ex-card-name" onclick="showGuia(this.dataset.n,this.dataset.id)" data-n="'+ex.n.replace(/"/g,'&quot;')+'" data-id="'+(ex.id||'default')+'" style="cursor:pointer;">'+ex.n+'</div>'
+          +ytBtn
         +'</div>'
-        +(YOUTUBE_LINKS[ex.id||'']?'<button onclick="openYouTube(\''+YOUTUBE_LINKS[ex.id||'']+'\')" title="Ver en YouTube" style="flex-shrink:0;width:22px;height:22px;background:#FF0000;border-radius:4px;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;padding:0;"><svg width=\"10\" height=\"8\" viewBox=\"0 0 16 12\" fill=\"white\"><path d=\"M15.7 1.9A2 2 0 0 0 14.3.5C13 .1 8 .1 8 .1S3 .1 1.7.5A2 2 0 0 0 .3 1.9C0 3.2 0 6 0 6s0 2.8.3 4.1A2 2 0 0 0 1.7 11.5C3 11.9 8 11.9 8 11.9s5 0 6.3-.4a2 2 0 0 0 1.4-1.4C16 8.8 16 6 16 6s0-2.8-.3-4.1zM6.4 8.5V3.5l4.2 2.5-4.2 2.5z\"/></svg></button>':'')
         +'<div class="ex-card-meta">'+ex.mus+(ex.rir!==undefined&&ex.rir!==''?' · RIR '+ex.rir:'')+'</div>'
       +'</div>'
-      +'<div style="display:flex;align-items:center;gap:6px;">'
+      +'<div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">'
         +(pct===100
           ?'<span class="ex-card-badge" style="background:var(--gb);color:var(--green);">✓ Completo</span>'
           :seriesDone>0
             ?'<span class="ex-card-badge" style="background:var(--ab);color:var(--amber);">'+seriesDone+'/'+ex.series.length+' series</span>'
-            :'<span class="ex-card-badge" style="background:var(--bg4);color:var(--t2);">'+ex.seriesPlan+' series · '+ex.repsPlan+'</span>')
+            :'<span class="ex-card-badge" style="background:var(--bg4);color:var(--t2);">'+ex.seriesPlan+' · '+ex.repsPlan+'</span>')
         +'<button onclick="swapSesionEx('+exIdx+',\''+(ex.mus||'').replace(/'/g,"\\'")+'\')" title="Cambiar ejercicio" style="background:transparent;border:none;color:var(--t3);font-size:15px;cursor:pointer;padding:2px 4px;line-height:1;">🔄</button>'
         +(ex.extra?'<button onclick="removeEx('+exIdx+')" style="background:transparent;border:none;color:var(--red);font-size:16px;cursor:pointer;padding:2px 4px;line-height:1;">✕</button>':'')
       +'</div>'
       +'</div>';
-    // Cabecera de columnas — diferente para cardio vs peso
-    var esCardio=isCardioEx(ex);
+    // Cabecera de columnas — 4 tipos según ejercicio
+    var exTipo=getExTipo(ex);
     var colHdr='<div style="display:grid;grid-template-columns:28px 1fr 1fr 32px;gap:7px;margin-bottom:4px;padding:0 2px;">'
       +'<div></div>'
-      +(esCardio
+      +(exTipo==='hiit'
         ?'<div style="font-size:10px;color:var(--t3);text-align:center;text-transform:uppercase;letter-spacing:0.06em;">Duración (min)</div>'
          +'<div style="font-size:10px;color:var(--t3);text-align:center;text-transform:uppercase;letter-spacing:0.06em;">Vel / Nivel</div>'
+        :exTipo==='tiempo'
+        ?'<div style="font-size:10px;color:var(--t3);text-align:center;text-transform:uppercase;letter-spacing:0.06em;">Tiempo (seg)</div>'
+         +'<div style="font-size:10px;color:var(--t3);text-align:center;text-transform:uppercase;letter-spacing:0.06em;">Rondas</div>'
+        :exTipo==='reps'
+        ?'<div style="font-size:10px;color:var(--t3);text-align:center;text-transform:uppercase;letter-spacing:0.06em;">Reps</div>'
+         +'<div style="font-size:10px;color:var(--t3);text-align:center;text-transform:uppercase;letter-spacing:0.06em;">Serie</div>'
         :'<div style="font-size:10px;color:var(--t3);text-align:center;text-transform:uppercase;letter-spacing:0.06em;">Peso (kg)</div>'
          +'<div style="font-size:10px;color:var(--t3);text-align:center;text-transform:uppercase;letter-spacing:0.06em;">Reps reales</div>')
       +'<div></div>'
@@ -3368,13 +3260,24 @@ function renderExList(){
     // Filas de series
     var seriesHtml=ex.series.map(function(s,sIdx){
       var done=s.done;
+      var inp1,inp2;
+      if(exTipo==='hiit'){
+        inp1='<input class="serie-input'+(s.kg?' filled':'')+'" type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="min" value="'+s.kg+'" data-ex="'+exIdx+'" data-s="'+sIdx+'" data-field="kg">';
+        inp2='<input class="serie-input'+(s.reps&&s.done?' filled':'')+'" type="text" inputmode="decimal" placeholder="km/h" value="'+s.reps+'" data-ex="'+exIdx+'" data-s="'+sIdx+'" data-field="reps">';
+      } else if(exTipo==='tiempo'){
+        inp1='<input class="serie-input'+(s.kg?' filled':'')+'" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="seg" value="'+s.kg+'" data-ex="'+exIdx+'" data-s="'+sIdx+'" data-field="kg">';
+        inp2='<input class="serie-input filled" type="text" style="color:var(--t3);background:var(--bg4);" value="'+(sIdx+1)+'" readonly data-ex="'+exIdx+'" data-s="'+sIdx+'" data-field="reps">';
+      } else if(exTipo==='reps'){
+        inp1='<input class="serie-input'+(s.reps?' filled':'')+'" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="reps" value="'+s.reps+'" data-ex="'+exIdx+'" data-s="'+sIdx+'" data-field="reps">';
+        inp2='<div class="serie-input" style="background:var(--bg4);color:var(--t3);display:flex;align-items:center;justify-content:center;font-size:11px;">—</div>';
+      } else {
+        // peso + reps (default)
+        inp1='<input class="serie-input'+(s.kg?' filled':'')+'" type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="kg" value="'+s.kg+'" data-ex="'+exIdx+'" data-s="'+sIdx+'" data-field="kg">';
+        inp2='<input class="serie-input'+(s.reps&&s.done?' filled':'')+'" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="reps" value="'+s.reps+'" data-ex="'+exIdx+'" data-s="'+sIdx+'" data-field="reps">';
+      }
       return '<div class="serie-row" data-ex="'+exIdx+'" data-s="'+sIdx+'">'
         +'<div class="serie-num'+(done?' done':'')+'">'+( sIdx+1)+'</div>'
-        +(esCardio
-          ?'<input class="serie-input'+(s.kg?' filled':'')+'" type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="min" value="'+s.kg+'" data-ex="'+exIdx+'" data-s="'+sIdx+'" data-field="kg">'
-           +'<input class="serie-input'+(s.reps&&s.done?' filled':'')+'" type="text" inputmode="decimal" placeholder="km/h o nivel" value="'+s.reps+'" data-ex="'+exIdx+'" data-s="'+sIdx+'" data-field="reps">'
-          :'<input class="serie-input'+(s.kg?' filled':'')+'" type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="kg" value="'+s.kg+'" data-ex="'+exIdx+'" data-s="'+sIdx+'" data-field="kg">'
-           +'<input class="serie-input'+(s.reps&&s.done?' filled':'')+'" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="reps" value="'+s.reps+'" data-ex="'+exIdx+'" data-s="'+sIdx+'" data-field="reps">')
+        +inp1+inp2
         +'<div class="serie-check'+(done?' done':'')+'" data-ex="'+exIdx+'" data-s="'+sIdx+'">'+( done?'✓':'')+'</div>'
         +'</div>';
     }).join('');
@@ -4998,16 +4901,35 @@ function confirmSwapPlanEx(diaIdx, exIdx, newName){
 window.confirmSwapPlanEx=confirmSwapPlanEx;
 
 // ── Detectar si un ejercicio es de tiempo/cardio (no de carga de kg) ──
-function isCardioEx(e){
-  var cardioIds=['caminata','caminata-m','eliptica','cardio-sab','movilidad','caminar'];
-  var cardioMus=['Cardiovascular','Cardio','Cardio/','Recuperación'];
-  var r=e.r||'';
-  if(r.indexOf('min')>=0||r.indexOf('seg')>=0) return true;
-  if(cardioIds.indexOf(e.id||'')>=0) return true;
-  if(cardioMus.some(function(m){return (e.mus||'').indexOf(m)>=0;})) return true;
-  return false;
+// ── Tipo de medición por ejercicio ────────────────────────────
+// Devuelve: 'peso' | 'tiempo' | 'hiit' | 'reps'
+function getExTipo(e){
+  var id=e.id||'';
+  var r=(e.r||'').toLowerCase();
+  var mus=(e.mus||'').toLowerCase();
+
+  // Tipos HIIT/cardio con velocidad (Duración + Vel/Nivel)
+  var hiitIds=['eliptica','cardio-sab','caminata','caminata-m','caminar'];
+  if(hiitIds.indexOf(id)>=0) return 'hiit';
+  if(r.indexOf('min')>=0&&(mus.indexOf('cardiovascular')>=0||mus.indexOf('cardio')>=0||mus.indexOf('neat')>=0||mus.indexOf('recuperación')>=0)) return 'hiit';
+
+  // Tipos TIEMPO (segundos/isométrico — sin peso ni velocidad)
+  var tiempoIds=['plancha','plancha-lat','plancha-m','movilidad'];
+  if(tiempoIds.indexOf(id)>=0) return 'tiempo';
+  if(r.indexOf('seg')>=0||r.indexOf('s ')>=0||r.indexOf('-60s')>=0||r.indexOf('-45s')>=0) return 'tiempo';
+  if(r.indexOf('min')>=0&&(mus.indexOf('core')>=0||mus.indexOf('estabiliz')>=0||mus.indexOf('recuper')>=0)) return 'tiempo';
+
+  // Tipos SOLO REPS (sin peso — ejercicios de peso corporal puros)
+  var repsIds=['crunch-m','abduccion','gemelo-pie','gemelo-m'];
+  if(repsIds.indexOf(id)>=0) return 'reps';
+
+  // Por defecto: peso + reps
+  return 'peso';
 }
+// Mantener compatibilidad con código que usa isCardioEx
+function isCardioEx(e){var t=getExTipo(e);return t==='hiit'||t==='tiempo';}
 window.isCardioEx=isCardioEx;
+window.getExTipo=getExTipo;
 
 // ══════════════════════════════════════════════
 // FIX 2: Poder añadir ejercicios propios al plan
