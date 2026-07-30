@@ -590,8 +590,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   </div>
   <!-- Crédito legal en onboarding -->
   <div style="text-align:center;font-size:7.5px;color:#3a3a55;padding:12px 16px;letter-spacing:.04em;line-height:1.5;">
-    Desarrollado por <span style="color:#5a5a78;">Cristhian Andrés Serna Salazar</span> © | 2026<br>
-    Todos los derechos reservados. Prohibida su reproducción sin autorización.
+    SpeciMen Gym App® desarrollado por Cristhian Andrés Serna Salazar © | 2026. Todos los derechos reservados. Prohibida su reproducción total o parcial sin autorización.
   </div>
 </div>
 </div>
@@ -881,8 +880,9 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   <button class="bn" data-s="perfil"><span class="bn-ico">👤</span><span>Perfil</span></button>
   <button class="bn" data-s="kongo"><span class="bn-ico">🦍</span><span>Kongo</span></button>
 </nav>
-<div id="dev-credit" style="position:fixed;bottom:0;left:0;right:0;text-align:center;font-size:7.5px;color:#3a3a55;letter-spacing:.04em;pointer-events:none;z-index:98;line-height:1.3;padding:2px 8px calc(var(--safe) + 54px);background:transparent;">
-  Desarrollado por <span style="color:#5a5a78;">Cristhian Andrés Serna Salazar</span> © | 2026 · Todos los derechos reservados
+<div id="dev-credit" style="position:fixed;bottom:0;left:0;right:0;text-align:center;font-size:7px;color:#6060a0;letter-spacing:.03em;pointer-events:none;z-index:98;line-height:1.4;padding:2px 8px calc(var(--safe) + 54px);background:transparent;">
+  <span style="color:#8888c0;font-weight:600;">SpeciMen Gym App®</span> desarrollado por <span style="color:#a0a0d0;font-weight:600;">Cristhian Andrés Serna Salazar</span> © | 2026<br>
+  <span style="color:#5a5a8a;">Todos los derechos reservados. Prohibida su reproducción total o parcial sin autorización.</span>
 </div>
 
 <!-- MODAL ejercicio -->
@@ -3839,7 +3839,7 @@ async function runIA(){
       if(m) return m[1].replace(/\n+/g,' ').trim();
       return '';
     }
-    // También intentar variantes de nombres que el modelo pueda usar
+    // Parser ultra-robusto — captura cualquier estructura que devuelva el modelo
     function extractAny(){
       var args=[].slice.call(arguments);
       for(var i=0;i<args.length;i++){var v=extractLine(args[i]);if(v) return v;}
@@ -3847,31 +3847,40 @@ async function runIA(){
     }
     var aj={
       nivel: extractAny('NIVEL')||'regular',
-      resumen: extractAny('RESUMEN','ANÁLISIS','ANALISIS')||'Análisis completado.',
+      resumen: extractAny('RESUMEN','ANÁLISIS','ANALISIS','SUMMARY')||'Análisis completado.',
       ajustes_entreno: [
-        extractAny('ENTRENO1','ENTRENAMIENTO1','ENTRENAMIENTO 1','AJUSTE ENTRENO 1','AJUSTE1'),
-        extractAny('ENTRENO2','ENTRENAMIENTO2','ENTRENAMIENTO 2','AJUSTE ENTRENO 2','AJUSTE2')
+        extractAny('ENTRENO1','ENTRENAMIENTO1','ENTRENAMIENTO 1','AJUSTE ENTRENO 1','AJUSTE1','TRAINING1','TRAINING 1'),
+        extractAny('ENTRENO2','ENTRENAMIENTO2','ENTRENAMIENTO 2','AJUSTE ENTRENO 2','AJUSTE2','TRAINING2','TRAINING 2')
       ].filter(Boolean),
       ajustes_nutricion: [
-        extractAny('NUTRICION1','NUTRICIÓN1','NUTRICION 1','NUTRICIÓN 1','AJUSTE NUTRICION 1'),
-        extractAny('NUTRICION2','NUTRICIÓN2','NUTRICION 2','NUTRICIÓN 2','AJUSTE NUTRICION 2')
+        extractAny('NUTRICION1','NUTRICIÓN1','NUTRICION 1','NUTRICIÓN 1','NUTRITION1','NUTRITION 1'),
+        extractAny('NUTRICION2','NUTRICIÓN2','NUTRICION 2','NUTRICIÓN 2','NUTRITION2','NUTRITION 2')
       ].filter(Boolean),
-      recomendacion: extractAny('PLAN','DIRECTIVA','RECOMENDACION','PRÓXIMA SEMANA')||''
+      recomendacion: extractAny('PLAN','DIRECTIVA','RECOMENDACION','RECOMENDACIÓN','PRÓXIMA SEMANA','NEXT WEEK')||''
     };
-    // Si ajustes siguen vacíos, intentar extraer por numeración (1. 2. •)
+    // Fallback 1: extraer por viñetas/numeración bajo secciones
     if(!aj.ajustes_entreno.length||!aj.ajustes_nutricion.length){
       var lines=txt.split('\n').map(function(l){return l.trim();}).filter(Boolean);
       var inEntreno=false, inNutri=false, entr=[], nutri=[];
       lines.forEach(function(l){
-        if(/entren|ajuste.*entren/i.test(l)){inEntreno=true;inNutri=false;return;}
-        if(/nutri|alimenta/i.test(l)){inNutri=true;inEntreno=false;return;}
-        if(/plan|directiva|próxima|semana/i.test(l)){inEntreno=false;inNutri=false;return;}
-        if(inEntreno&&/^[•\-\d\*→]/.test(l)) entr.push(l.replace(/^[•\-\d\*→\.]+\s*/,''));
-        if(inNutri&&/^[•\-\d\*→]/.test(l)) nutri.push(l.replace(/^[•\-\d\*→\.]+\s*/,''));
+        if(/entren|ajuste.*entren|training|workout/i.test(l)&&l.length<80){inEntreno=true;inNutri=false;return;}
+        if(/nutri|alimenta|dieta|food|diet/i.test(l)&&l.length<80){inNutri=true;inEntreno=false;return;}
+        if(/plan|directiva|próxima|semana|next|week/i.test(l)&&l.length<80){inEntreno=false;inNutri=false;return;}
+        // Capturar líneas con viñeta O líneas largas de texto bajo la sección
+        if(inEntreno&&l.length>10) entr.push(l.replace(/^[•\-\d\*→\.]+\s*/,''));
+        if(inNutri&&l.length>10) nutri.push(l.replace(/^[•\-\d\*→\.]+\s*/,''));
       });
-      if(!aj.ajustes_entreno.length&&entr.length) aj.ajustes_entreno=entr.slice(0,2);
-      if(!aj.ajustes_nutricion.length&&nutri.length) aj.ajustes_nutricion=nutri.slice(0,2);
+      if(!aj.ajustes_entreno.length&&entr.length) aj.ajustes_entreno=entr.slice(0,3);
+      if(!aj.ajustes_nutricion.length&&nutri.length) aj.ajustes_nutricion=nutri.slice(0,3);
     }
+    // Fallback 2: si aún vacíos, dividir el texto en bloques y asignar
+    if(!aj.ajustes_entreno.length&&!aj.ajustes_nutricion.length){
+      var blocks=txt.split(/\n{2,}/).filter(function(b){return b.trim().length>30;});
+      if(blocks.length>=3) aj.ajustes_entreno=[blocks[1].trim().slice(0,200)];
+      if(blocks.length>=4) aj.ajustes_nutricion=[blocks[2].trim().slice(0,200)];
+    }
+    // Guardar texto crudo para referencia en el email (muestra todo si el parser falla)
+    aj._rawTxt=txt;
     var niv={'bueno':'b','regular':'r','necesita_mejorar':'m'}[aj.nivel.trim().toLowerCase()]||'r';
     var nivLabel={'bueno':'✅ Progreso óptimo','regular':'⚡ Progreso aceptable','necesita_mejorar':'⚠️ Ajustes urgentes'}[aj.nivel.trim().toLowerCase()]||'⚡ Progreso aceptable';
     var motor=ANTHROPIC_KEY?'Claude Sonnet 4 (Anthropic)':GEMINI_KEY?'Gemini (Google)':'IA';
@@ -3900,6 +3909,7 @@ async function runIA(){
       ajustes_entreno: aj.ajustes_entreno||[],
       ajustes_nutricion: aj.ajustes_nutricion||[],
       recomendacion: aj.recomendacion||'',
+      _rawTxt: aj._rawTxt||txt||'',
       motor: motor,
       fecha: new Date().toLocaleDateString('es-ES'),
       // Datos del usuario para el email completo
@@ -5130,22 +5140,28 @@ function buildEmailHTML(d){
   var nivelColor=d.nivLabel&&d.nivLabel.indexOf('óptimo')>=0?'#22c55e':d.nivLabel&&d.nivLabel.indexOf('urgentes')>=0?'#ef4444':'#f0c040';
   var entreno=(d.ajustes_entreno||[]).map(function(a){
     return '<tr><td style="padding:9px 12px;border-bottom:1px solid #1e1e30;font-size:13px;color:#c8c8e0;line-height:1.7;"><span style="color:#c9a84c;font-weight:700;">→</span> '+a+'</td></tr>';
-  }).join('')||'<tr><td style="padding:8px 12px;color:#606080;font-style:italic;">Sin ajustes registrados</td></tr>';
+  }).join('');
   var nutri=(d.ajustes_nutricion||[]).map(function(a){
     return '<tr><td style="padding:9px 12px;border-bottom:1px solid #1e1e30;font-size:13px;color:#c8c8e0;line-height:1.7;"><span style="color:#22c55e;font-weight:700;">→</span> '+a+'</td></tr>';
-  }).join('')||'<tr><td style="padding:8px 12px;color:#606080;font-style:italic;">Sin ajustes registrados</td></tr>';
-  // Logo base64 desde la app
-  // No incluir logo en base64 en el email — causa "Límite Excedido" en MailApp (216KB extra)
-  // Usamos diseño tipográfico en su lugar
-  var logoHtml='<div style="width:50px;height:50px;background:#0a0a0a;border:2px solid #c9a84c;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:20px;">🐕</div>';
+  }).join('');
+  // Si los campos están vacíos, mostrar texto completo del análisis
+  var rawFallback='';
+  if((!entreno||!nutri)&&d._rawTxt){
+    var rawEscaped=(d._rawTxt||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+    rawFallback='<div style="background:#0d0d1a;border-left:1px solid #222;border-right:1px solid #222;padding:16px 24px;">'
+      +'<div style="font-size:10px;font-weight:700;color:#c9a84c;text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;">📋 Análisis completo de la IA</div>'
+      +'<div style="font-size:13px;color:#d0d0e8;line-height:1.8;">'+rawEscaped+'</div>'
+      +'</div>';
+  }
+  if(!entreno) entreno='<tr><td style="padding:8px 12px;color:#606080;font-style:italic;">Ver análisis completo abajo</td></tr>';
+  if(!nutri) nutri='<tr><td style="padding:8px 12px;color:#606080;font-style:italic;">Ver análisis completo abajo</td></tr>';
 
   return '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="margin:0;padding:0;background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;">'
     +'<div style="max-width:600px;margin:0 auto;padding:20px;">'
 
-    // Header con logo
-    +'<div style="background:linear-gradient(135deg,#c9a84c,#f0c040);border-radius:12px 12px 0 0;padding:20px 24px;text-align:center;">'
-      +logoHtml
-      +'<div style="font-size:22px;font-weight:900;color:#0a0a0a;letter-spacing:1px;">SpeciMen® Gym App</div>'
+    // Header — solo texto, sin logo (evita límite de tamaño)
+    +'<div style="background:linear-gradient(135deg,#c9a84c,#f0c040);border-radius:12px 12px 0 0;padding:24px;text-align:center;">'
+      +'<div style="font-size:24px;font-weight:900;color:#0a0a0a;letter-spacing:1px;">SpeciMen® Gym App</div>'
       +'<div style="font-size:12px;color:#5a4000;margin-top:4px;">Informe de análisis de progreso semanal</div>'
     +'</div>'
 
@@ -5203,11 +5219,14 @@ function buildEmailHTML(d){
       +'<div style="font-size:13px;color:#d0d0e8;line-height:1.8;background:#111118;border-radius:8px;padding:12px 14px;">'+d.recomendacion+'</div>'
     +'</div>'
 
+    // Texto completo de la IA si los campos parseados estaban vacíos
+    +rawFallback
+
     // Footer
     +'<div style="background:#070710;border:1px solid #222;border-top:none;border-radius:0 0 12px 12px;padding:14px 24px;text-align:center;">'
       +'<div style="font-size:10px;color:#404060;">Hola '+d.nombre+' — Informe generado el '+d.fecha+' con '+d.motor+'</div>'
       +'<div style="font-size:9px;color:#303050;margin-top:4px;">SpeciMen® Gym App · Tu entrenador personal con IA</div>'
-      +'<div style="font-size:8px;color:#252540;margin-top:6px;border-top:1px solid #111;padding-top:6px;letter-spacing:.03em;">Desarrollado por Cristhian Andrés Serna Salazar © | 2026<br>Todos los derechos reservados. Prohibida su reproducción total o parcial sin autorización.</div>'
+      +'<div style="font-size:8px;color:#252540;margin-top:6px;border-top:1px solid #111;padding-top:6px;letter-spacing:.03em;">SpeciMen Gym App® desarrollado por Cristhian Andrés Serna Salazar © | 2026. Todos los derechos reservados. Prohibida su reproducción total o parcial sin autorización.</div>'
     +'</div>'
 
     +'</div></body></html>';
@@ -5224,16 +5243,88 @@ async function sendIAEmail(){
     return;
   }
   localStorage.setItem('specimen_email_dest',dest);
-  status.style.color='var(--acc2)';status.textContent='⏳ Enviando informe completo...';
+  status.style.color='var(--acc2)';status.textContent='⏳ Generando informe y PDF...';
   var d=_lastIAText;
   var htmlBody=buildEmailHTML(d);
   var textBody='ANÁLISIS SEMANAL — '+d.fecha+'\n\n'
     +d.nivLabel+'\n\n'
     +'RESUMEN:\n'+d.resumen+'\n\n'
+    +(d._rawTxt?'ANÁLISIS COMPLETO:\n'+d._rawTxt+'\n\n':'')
     +'ENTRENAMIENTO:\n'+(d.ajustes_entreno||[]).map(function(a){return '• '+a;}).join('\n')+'\n\n'
     +'NUTRICIÓN:\n'+(d.ajustes_nutricion||[]).map(function(a){return '• '+a;}).join('\n')+'\n\n'
     +'DIRECTIVA PRÓXIMA SEMANA:\n'+d.recomendacion+'\n\n'
     +'— Datos: Peso '+d.peso+'kg · '+d.grasa+'% grasa · '+d.kcal+' kcal/día · '+d.prot+'g prot/día';
+
+  // Generar PDF como base64 para adjuntar al email
+  var pdfBase64='';
+  try{
+    var u=U();
+    if(u&&(typeof window.jspdf!=='undefined'||typeof window.jsPDF!=='undefined')){
+      status.textContent='⏳ Generando PDF adjunto...';
+      var jsPDFcls=window.jspdf?window.jspdf.jsPDF:window.jsPDF;
+      var tmpDoc=new jsPDFcls({orientation:'portrait',unit:'mm',format:'a4'});
+      // PDF simplificado para adjunto (sin gráficas pesadas)
+      var mac=u.macros||calcMacros(u);
+      var meds=(u.measures||[]).slice().sort(function(a,b){return (a.fecha||'').localeCompare(b.fecha||'');});
+      var lastMed=meds.length?meds[meds.length-1]:null;
+      var W=210,M=14,y=20;
+      var GOLD=[201,168,76],BG=[12,12,22],BG2=[22,22,38],TEXT=[235,235,250],GRAY=[110,110,140];
+      function r(x,_y,w,h,col){tmpDoc.setFillColor(col[0],col[1],col[2]);tmpDoc.roundedRect(x,_y,w,h,2,2,'F');}
+      function t(str,x,_y,sz,col,al){tmpDoc.setFontSize(sz||10);tmpDoc.setTextColor(col?col[0]:235,col?col[1]:235,col?col[2]:250);tmpDoc.text(String(str||'—'),x,_y,{align:al||'left'});}
+      // Cabecera
+      r(0,0,W,18,BG);
+      t('SpeciMen® Gym App — Historia Clínica',M,9,13,GOLD);
+      t(new Date().toLocaleDateString('es-ES'),W-M,9,8,GRAY,'right');
+      t(u.nombre||'Atleta',M,15,9,TEXT);
+      t(u.email||'',W-M,15,7,GRAY,'right');
+      y=24;
+      // Ficha
+      var items=[['Peso',((lastMed&&lastMed.peso)||u.peso||'—')+' kg'],['Altura',(u.alt||'—')+' cm'],['Edad',calcEdad(u.fnac)+' años'],['% Grasa',((lastMed&&lastMed.grasa)||u.grasa||'—')+'%'],['Masa magra',(mac.masaMagra||'—')+' kg'],['IMC',((parseFloat((lastMed&&lastMed.peso)||u.peso||0)/Math.pow((u.alt||170)/100,2)).toFixed(1))],['BMR',(mac.bmr||'—')+' kcal'],['TDEE',(mac.tdee||'—')+' kcal'],['Target',(mac.kcal||'—')+' kcal/día'],['Déficit',(mac.deficitReal||'—')+'%'],['Proteína',(mac.prot||'—')+' g/día'],['Agua',(Math.round((mac.agua||2500)/100)/10)+' L/día']];
+      items.forEach(function(it,i){var col=i%3,row=Math.floor(i/3),cw=(210-28)/3,x=M+col*cw;r(x,y+row*8,cw-2,7,BG2);t(it[0],x+2,y+row*8+4.5,6,GRAY);t(it[1],x+cw-3,y+row*8+4.5,7,TEXT,'right');});
+      y+=Math.ceil(items.length/3)*9+6;
+      // Análisis IA
+      if(d&&d.resumen){
+        r(M,y,196,7,BG2);t('🔬 ANÁLISIS IA — '+( d.fecha||''),M+2,y+4.8,8,GOLD);y+=10;
+        t('Nivel: '+(d.nivLabel||'—'),M,y,8,[100,200,100]);y+=6;
+        var resLines=tmpDoc.splitTextToSize(d.resumen||'',182);
+        r(M,y,196,resLines.length*4+4,BG2);
+        tmpDoc.setFontSize(8);tmpDoc.setTextColor(200,200,220);
+        resLines.forEach(function(l,i){tmpDoc.text(l,M+3,y+4+i*4);});
+        y+=resLines.length*4+8;
+        // Ajustes
+        if(d.ajustes_entreno&&d.ajustes_entreno.length){
+          t('AJUSTES ENTRENAMIENTO',M,y,7,GOLD);y+=5;
+          d.ajustes_entreno.forEach(function(a){if(y>270){tmpDoc.addPage();y=M;}var ls=tmpDoc.splitTextToSize('→ '+a,182);r(M,y,196,ls.length*4+3,BG2);tmpDoc.setFontSize(7.5);tmpDoc.setTextColor(200,200,220);ls.forEach(function(l,i){tmpDoc.text(l,M+3,y+3.5+i*4);});y+=ls.length*4+5;});
+        }
+        if(d.ajustes_nutricion&&d.ajustes_nutricion.length){
+          t('AJUSTES NUTRICIÓN',M,y,7,[34,197,94]);y+=5;
+          d.ajustes_nutricion.forEach(function(a){if(y>270){tmpDoc.addPage();y=M;}var ls=tmpDoc.splitTextToSize('→ '+a,182);r(M,y,196,ls.length*4+3,BG2);tmpDoc.setFontSize(7.5);tmpDoc.setTextColor(200,200,220);ls.forEach(function(l,i){tmpDoc.text(l,M+3,y+3.5+i*4);});y+=ls.length*4+5;});
+        }
+        if(d._rawTxt&&(!d.ajustes_entreno||!d.ajustes_entreno.length)){
+          t('ANÁLISIS COMPLETO',M,y,7,GOLD);y+=5;
+          var rawLs=tmpDoc.splitTextToSize(d._rawTxt,182);
+          r(M,y,196,Math.min(rawLs.length,30)*4+4,BG2);
+          tmpDoc.setFontSize(7.5);tmpDoc.setTextColor(200,200,220);
+          rawLs.slice(0,30).forEach(function(l,i){tmpDoc.text(l,M+3,y+4+i*4);});
+          y+=Math.min(rawLs.length,30)*4+8;
+        }
+        if(d.recomendacion){
+          t('DIRECTIVA PRÓXIMA SEMANA',M,y,7,[96,165,250]);y+=5;
+          var rls=tmpDoc.splitTextToSize(d.recomendacion,182);
+          r(M,y,196,rls.length*4+4,[18,18,40]);
+          tmpDoc.setFontSize(8);tmpDoc.setTextColor(180,200,240);
+          rls.forEach(function(l,i){tmpDoc.text(l,M+3,y+4+i*4);});
+        }
+      }
+      // Pie
+      var np=tmpDoc.getNumberOfPages();
+      for(var p=1;p<=np;p++){tmpDoc.setPage(p);r(0,287,W,10,BG);t('SpeciMen Gym App® desarrollado por Cristhian Andrés Serna Salazar © | 2026. Todos los derechos reservados. Prohibida su reproducción total o parcial sin autorización.',W/2,293,4.5,GRAY,'center');}
+      // Convertir a base64
+      pdfBase64=tmpDoc.output('datauristring').split(',')[1];
+      status.textContent='⏳ Enviando email con PDF adjunto...';
+    }
+  }catch(pdfErr){console.warn('PDF adjunto falló:',pdfErr);}
+
   try{
     var fd=new FormData();
     fd.append('data',JSON.stringify({
@@ -5243,12 +5334,15 @@ async function sendIAEmail(){
       nombre:d.nombre||'Atleta',
       cuerpo:textBody,
       htmlBody:htmlBody,
+      pdfBase64:pdfBase64||null,
+      pdfName:'SpeciMen_Analisis_'+( d.fecha||'').replace(/\//g,'-')+'.pdf',
       fecha:d.fecha||''
     }));
     var resp=await fetch(gasUrl,{method:'POST',body:fd});
     var data=await resp.json();
     if(data.ok){
-      status.style.color='var(--green)';status.textContent='✅ Informe enviado a '+dest;
+      status.style.color='var(--green)';
+      status.textContent='✅ Informe'+(pdfBase64?' + PDF':'')+ ' enviado a '+dest;
       setTimeout(function(){closeM('m-email-ia');},1800);
     } else {
       status.style.color='var(--red)';status.textContent='✕ Error: '+(data.error||'No se pudo enviar');
@@ -5738,8 +5832,7 @@ function generarPDF(u){
       doc.setPage(p);
       rect(0,287,W,10,0,BG);
       txt('SpeciMen® Gym App · Informe generado el '+new Date().toLocaleDateString('es-ES'),W/2,292,7,GRAY,'center');
-      txt('Desarrollado por Cristhian Andrés Serna Salazar © | 2026',W/2,292,6.5,GRAY,'center');
-      txt('Todos los derechos reservados. Prohibida su reproducción total o parcial sin autorización.',W/2,296,5.5,[50,50,70],'center');
+      txt('SpeciMen Gym App® desarrollado por Cristhian Andrés Serna Salazar © | 2026. Todos los derechos reservados. Prohibida su reproducción total o parcial sin autorización.',W/2,294,5,[50,50,80],'center');
       txt('Pág. '+p+'/'+totalPages,W-M,292,7,GRAY,'right');
     }
 
