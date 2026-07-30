@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="SpeciMen">
+<meta name="apple-mobile-web-app-title" content="SpeciMen®">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="format-detection" content="telephone=no">
 <meta name="theme-color" content="#0a0a0a">
@@ -32,8 +32,8 @@
 <script>
   var _logoUri = window.__LOGO_DATA_URI__;
   var _manifest={
-    name:"SpeciMen Gym App",short_name:"SpeciMen",
-    description:"Tu entrenador personal y nutricionista IA",
+    name:"SpeciMen® Gym App",short_name:"SpeciMen®",
+    description:"SpeciMen® Gym App · Tu entrenador personal con IA",
     start_url:"./",display:"standalone",
     background_color:"#0a0a0a",theme_color:"#0a0a0a",
     orientation:"portrait",
@@ -48,7 +48,7 @@
   _link.rel='manifest';_link.href=_url;
   document.currentScript.parentNode.appendChild(_link);
 </script>
-<title>SpeciMen Gym App</title>
+<title>SpeciMen® Gym App</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 :root{
@@ -428,7 +428,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 
   <!-- S1: Bienvenida + género -->
   <div id="s1">
-    <div class="onb-logo">SpeciMen</div>
+    <div class="onb-logo">SpeciMen®</div>
     <div class="onb-tag">Gym App · Tu plan personalizado</div>
     <div class="prog-bar"><div class="prog-fill" style="width:20%"></div></div>
     <div class="onb-title">Bienvenido/a 💪</div>
@@ -447,7 +447,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 
   <!-- Login -->
   <div id="s-login" style="display:none;">
-    <div class="onb-logo">SpeciMen</div>
+    <div class="onb-logo">SpeciMen®</div>
     <div class="prog-bar"><div class="prog-fill" style="width:50%"></div></div>
     <div class="onb-title">Bienvenido/a de vuelta</div>
     <div class="onb-sub">Tus datos, historial de sesiones y plan se recuperan automáticamente con tu email y contraseña.</div>
@@ -460,7 +460,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 
   <!-- S2: Datos físicos -->
   <div id="s2" style="display:none;">
-    <div class="onb-logo">SpeciMen</div>
+    <div class="onb-logo">SpeciMen®</div>
     <div class="prog-bar"><div class="prog-fill" style="width:50%"></div></div>
     <div class="onb-title">Tu perfil físico</div>
     <div class="onb-sub">Calculamos tu % grasa (Método Navy EEUU), calorías y macros con Mifflin-St Jeor.</div>
@@ -562,7 +562,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 
   <!-- S3: Restricciones alimentarias -->
   <div id="s3" style="display:none;">
-    <div class="onb-logo">SpeciMen</div>
+    <div class="onb-logo">SpeciMen®</div>
     <div class="prog-bar"><div class="prog-fill" style="width:75%"></div></div>
     <div class="onb-title">Alergias / intolerancias</div>
     <div class="onb-sub">Selecciona los alimentos que debes evitar. Tu plan nutricional los excluirá automáticamente.</div>
@@ -575,7 +575,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 
   <!-- S4: Generando plan -->
   <div id="s4" style="display:none;">
-    <div class="onb-logo">SpeciMen</div>
+    <div class="onb-logo">SpeciMen®</div>
     <div class="prog-bar"><div class="prog-fill" style="width:100%"></div></div>
     <div style="text-align:center;padding:32px 0;">
       <div style="font-size:52px;margin-bottom:14px;">🧬</div>
@@ -3761,10 +3761,28 @@ async function runIA(){
       +'</div>'
       +'<button onclick="openEmailIA()" style="width:100%;margin-top:12px;padding:10px;border-radius:var(--r);border:1px solid var(--border2);background:var(--bg3);color:var(--acc2);font-size:13px;font-weight:600;cursor:pointer;">📧 Enviar este análisis por email</button>'
       +'</div>';
-    _lastIAText='RESUMEN: '+nivLabel+'\n\nSesiones: '+numSes+'/5 · RPE promedio: '+rpeAvg+(pesoCambio?' · Cambio de peso: '+pesoCambio+'kg':'')+'\n\n'
-      +'AJUSTES DE ENTRENAMIENTO:\n'+ajEntreno.map(function(a){return '• '+a;}).join('\n')
-      +'\n\nAJUSTES DE NUTRICIÓN:\n'+ajNutricion.map(function(a){return '• '+a;}).join('\n')
-      +'\n\nPLAN PRÓXIMA SEMANA:\n'+recomendacion;
+    // Guardar en formato objeto (igual que rama IA) para que buildEmailHTML funcione
+    _lastIAText={
+      nivLabel: nivLabel,
+      resumen: 'Sesiones completadas: '+numSes+'/5 · RPE promedio: '+rpeAvg+'/10'+(pesoCambio?' · Cambio de peso: '+pesoCambio+' kg':'')+'. '+( nivel==='bueno'?'Progreso dentro de los parámetros óptimos.':nivel==='regular'?'Progreso aceptable con margen de mejora.':'Se requieren ajustes en adherencia y/o nutrición.'),
+      ajustes_entreno: ajEntreno,
+      ajustes_nutricion: ajNutricion,
+      recomendacion: recomendacion,
+      motor: 'Análisis automático (datos reales)',
+      fecha: new Date().toLocaleDateString('es-ES'),
+      nombre: u.nombre||'Atleta',
+      obj: LABEL_OBJ[u.obj||'recomp'],
+      peso: (lastMed&&lastMed.peso)||u.peso||'—',
+      pesoPrev: (prevMed&&prevMed.peso)||'—',
+      grasa: u.grasa||'—',
+      masaMagra: mac2.masaMagra||'—',
+      kcal: mac2.kcal||'—',
+      prot: mac2.prot||'—',
+      tdee: mac2.tdee||'—',
+      deficit: mac2.deficitReal||'—',
+      sesiones: numSes,
+      rpe: rpeAvg
+    };
     return;
   }
 
@@ -5095,21 +5113,24 @@ function openEmailIA(){
 window.openEmailIA=openEmailIA;
 
 function buildEmailHTML(d){
-  // d = _lastIAText object con todos los datos
   var nivelColor=d.nivLabel&&d.nivLabel.indexOf('óptimo')>=0?'#22c55e':d.nivLabel&&d.nivLabel.indexOf('urgentes')>=0?'#ef4444':'#f0c040';
   var entreno=(d.ajustes_entreno||[]).map(function(a){
-    return '<tr><td style="padding:8px 12px;border-bottom:1px solid #1e1e30;font-size:13px;color:#c8c8e0;line-height:1.6;">→ '+a+'</td></tr>';
+    return '<tr><td style="padding:9px 12px;border-bottom:1px solid #1e1e30;font-size:13px;color:#c8c8e0;line-height:1.7;"><span style="color:#c9a84c;font-weight:700;">→</span> '+a+'</td></tr>';
   }).join('')||'<tr><td style="padding:8px 12px;color:#606080;font-style:italic;">Sin ajustes registrados</td></tr>';
   var nutri=(d.ajustes_nutricion||[]).map(function(a){
-    return '<tr><td style="padding:8px 12px;border-bottom:1px solid #1e1e30;font-size:13px;color:#c8c8e0;line-height:1.6;">→ '+a+'</td></tr>';
+    return '<tr><td style="padding:9px 12px;border-bottom:1px solid #1e1e30;font-size:13px;color:#c8c8e0;line-height:1.7;"><span style="color:#22c55e;font-weight:700;">→</span> '+a+'</td></tr>';
   }).join('')||'<tr><td style="padding:8px 12px;color:#606080;font-style:italic;">Sin ajustes registrados</td></tr>';
+  // Logo base64 desde la app
+  var logoSrc=window.__LOGO_DATA_URI__||'';
+  var logoHtml=logoSrc?'<img src="'+logoSrc+'" width="60" height="60" style="border-radius:50%;margin-bottom:8px;display:block;margin-left:auto;margin-right:auto;" alt="SpeciMen®">':'';
 
   return '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="margin:0;padding:0;background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;">'
     +'<div style="max-width:600px;margin:0 auto;padding:20px;">'
 
-    // Header
+    // Header con logo
     +'<div style="background:linear-gradient(135deg,#c9a84c,#f0c040);border-radius:12px 12px 0 0;padding:20px 24px;text-align:center;">'
-      +'<div style="font-size:22px;font-weight:900;color:#0a0a0a;letter-spacing:1px;">SpeciMen Gym App</div>'
+      +logoHtml
+      +'<div style="font-size:22px;font-weight:900;color:#0a0a0a;letter-spacing:1px;">SpeciMen® Gym App</div>'
       +'<div style="font-size:12px;color:#5a4000;margin-top:4px;">Informe de análisis de progreso semanal</div>'
     +'</div>'
 
@@ -5170,7 +5191,7 @@ function buildEmailHTML(d){
     // Footer
     +'<div style="background:#070710;border:1px solid #222;border-top:none;border-radius:0 0 12px 12px;padding:14px 24px;text-align:center;">'
       +'<div style="font-size:10px;color:#404060;">Hola '+d.nombre+' — Informe generado el '+d.fecha+' con '+d.motor+'</div>'
-      +'<div style="font-size:9px;color:#303050;margin-top:4px;">SpeciMen Gym App · Tu entrenador personal con IA</div>'
+      +'<div style="font-size:9px;color:#303050;margin-top:4px;">SpeciMen® Gym App · Tu entrenador personal con IA</div>'
       +'<div style="font-size:8px;color:#252540;margin-top:6px;border-top:1px solid #111;padding-top:6px;letter-spacing:.03em;">Desarrollado por Cristhian Andres Serna Salazar &nbsp;|&nbsp; 2026</div>'
     +'</div>'
 
@@ -5455,112 +5476,259 @@ function generarPDF(u){
     var mac=u.macros||calcMacros(u);
     var meds=(u.measures||[]).slice().sort(function(a,b){return (a.fecha||'').localeCompare(b.fecha||'');});
     var lastMed=meds.length?meds[meds.length-1]:null;
-    var W=210, M=18, CW=W-M*2;
+    var sessions=(u.sessions||[]).slice().sort(function(a,b){return (a.fecha||'').localeCompare(b.fecha||'');});
+    var W=210, M=14, CW=W-M*2;
     var y=M;
+    var GOLD=[201,168,76], GOLD2=[240,192,76], BG=[12,12,22], BG2=[22,22,38], BG3=[30,30,52],
+        TEXT=[235,235,250], GRAY=[110,110,140], GREEN=[34,197,94], RED=[239,68,68], BLUE=[96,165,250];
 
-    // Colores
-    var GOLD=[201,168,76], BG=[15,15,25], TEXT=[240,240,250], GRAY=[120,120,150];
-
-    function rect(x,_y,w,h,r,col){
-      doc.setFillColor(col[0],col[1],col[2]);
-      doc.roundedRect(x,_y,w,h,r,r,'F');
+    function rect(x,_y,w,h,r,col){doc.setFillColor(col[0],col[1],col[2]);doc.roundedRect(x,_y,w,h,r||0,r||0,'F');}
+    function txt(str,x,_y,size,col,align){doc.setFontSize(size||10);doc.setTextColor(col?col[0]:235,col?col[1]:235,col?col[2]:250);doc.text(String(str||'—'),x,_y,{align:align||'left'});}
+    function sep(){doc.setDrawColor(40,40,70);doc.line(M,y,W-M,y);y+=3;}
+    function section(title,color){
+      if(y>262){doc.addPage();y=M+8;}
+      rect(M,y,CW,7,2,BG2);
+      doc.setFontSize(8);doc.setTextColor(color?color[0]:201,color?color[1]:168,color?color[2]:76);
+      doc.text(title,M+3,y+4.8);
+      y+=10;
     }
-    function txt(str,x,_y,size,col,align){
-      doc.setFontSize(size||11);
-      doc.setTextColor(col?col[0]:240,col?col[1]:240,col?col[2]:250);
-      doc.text(String(str||''),x,_y,{align:align||'left'});
+    function barChart(values, labels, x, _y, w, h, color){
+      var max=Math.max.apply(null,values.map(function(v){return parseFloat(v)||0;}));
+      if(max===0) return;
+      var barW=(w-4)/values.length-2;
+      rect(x,_y,w,h,2,BG3);
+      values.forEach(function(v,i){
+        var val=parseFloat(v)||0;
+        var bh=Math.round((val/max)*(h-8));
+        var bx=x+2+i*(barW+2);
+        var by=_y+h-4-bh;
+        doc.setFillColor(color[0],color[1],color[2]);
+        doc.roundedRect(bx,by,barW,bh,1,1,'F');
+        doc.setFontSize(5);doc.setTextColor(GRAY[0],GRAY[1],GRAY[2]);
+        doc.text(String(labels[i]||''),bx+barW/2,_y+h-1,{align:'center'});
+        doc.setTextColor(TEXT[0],TEXT[1],TEXT[2]);
+        doc.text(String(val),bx+barW/2,by-1,{align:'center'});
+      });
+    }
+    function lineChart(values, x, _y, w, h, color){
+      var nums=values.map(function(v){return parseFloat(v)||0;});
+      var min=Math.min.apply(null,nums), max=Math.max.apply(null,nums);
+      var range=max-min||1;
+      rect(x,_y,w,h,2,BG3);
+      // Grid lines
+      doc.setDrawColor(40,40,70);
+      [0,0.25,0.5,0.75,1].forEach(function(t){
+        var gy=_y+4+(1-t)*(h-8);
+        doc.line(x+2,gy,x+w-2,gy);
+        doc.setFontSize(5);doc.setTextColor(GRAY[0],GRAY[1],GRAY[2]);
+        doc.text((min+t*range).toFixed(1),x+w-1,gy+1,{align:'right'});
+      });
+      if(nums.length<2) return;
+      var pts=nums.map(function(v,i){
+        return {
+          x: x+2+(i/(nums.length-1))*(w-4),
+          y: _y+4+((max-v)/range)*(h-8)
+        };
+      });
+      doc.setDrawColor(color[0],color[1],color[2]);
+      doc.setLineWidth(0.6);
+      for(var i=1;i<pts.length;i++) doc.line(pts[i-1].x,pts[i-1].y,pts[i].x,pts[i].y);
+      // Puntos
+      pts.forEach(function(p){
+        doc.setFillColor(color[0],color[1],color[2]);
+        doc.circle(p.x,p.y,0.8,'F');
+      });
     }
 
-    // ── CABECERA ──────────────────────────────────────
-    rect(0,0,W,36,0,BG);
-    txt('SpeciMen Gym App',M,12,16,GOLD);
-    txt('Informe de progreso personal',M,19,9,GRAY);
-    txt(new Date().toLocaleDateString('es-ES',{weekday:'long',year:'numeric',month:'long',day:'numeric'}),W-M,19,8,GRAY,'right');
-    txt(u.nombre||'Atleta',M,29,13,TEXT);
-    txt(u.email||'',W-M,29,8,GRAY,'right');
-    y=44;
+    // ══════════════════════════════════════════
+    // PÁGINA 1 — CABECERA + FICHA CLÍNICA
+    // ══════════════════════════════════════════
+    rect(0,0,W,42,0,BG);
+    // Logo
+    var logoSrc=window.__LOGO_DATA_URI__||'';
+    if(logoSrc){try{doc.addImage(logoSrc,'WEBP',M,2,18,18);}catch(e){}}
+    txt('SpeciMen® Gym App',M+22,10,18,GOLD);
+    txt('Historia Clínica y Análisis de Progreso',M+22,17,9,GRAY);
+    txt(new Date().toLocaleDateString('es-ES',{weekday:'long',year:'numeric',month:'long',day:'numeric'}),M+22,23,8,[150,150,180]);
+    // Nombre y email del usuario
+    rect(0,28,W,14,0,BG2);
+    txt(u.nombre||'Atleta',M,36,13,TEXT);
+    txt(u.email||'',W-M,36,8,GRAY,'right');
+    y=48;
 
-    // ── FICHA FÍSICA ──────────────────────────────────
-    txt('FICHA FÍSICA',M,y,8,GOLD); y+=5;
+    // FICHA CLÍNICA COMPLETA
+    section('📋 FICHA CLÍNICA COMPLETA',GOLD);
+    var pesoActual=(lastMed&&lastMed.peso)||u.peso||'—';
+    var grasaActual=(lastMed&&lastMed.grasa)||u.grasa||'—';
+    var imc=u.alt?(parseFloat(pesoActual)/Math.pow(u.alt/100,2)).toFixed(1):'—';
+    var imcLabel=parseFloat(imc)<18.5?'Bajo peso':parseFloat(imc)<25?'Normopeso':parseFloat(imc)<30?'Sobrepeso':'Obesidad';
     var fichaItems=[
-      ['Peso',((lastMed&&lastMed.peso)||u.peso||'—')+' kg'],
-      ['Altura',(u.alt||'—')+' cm'],
-      ['Edad',calcEdad(u.fnac)+' años'],
-      ['IMC',((parseFloat((lastMed&&lastMed.peso)||u.peso||0)/Math.pow((u.alt||170)/100,2)).toFixed(1))],
-      ['% Grasa',((lastMed&&lastMed.grasa)||u.grasa||'—')+'%'],
-      ['Masa magra',(mac.masaMagra||'—')+' kg'],
-      ['Cintura',((lastMed&&lastMed.cin)||u.cin||'—')+' cm'],
-      ['Cuello',((lastMed&&lastMed.cue)||u.cue||'—')+' cm'],
+      ['Género',(u.genero==='H'?'Hombre':'Mujer')],['Edad',calcEdad(u.fnac)+' años'],
+      ['Peso actual',pesoActual+' kg'],['Altura',(u.alt||'—')+' cm'],
+      ['IMC',imc+' ('+imcLabel+')'],['% Grasa corporal',grasaActual+'%'],
+      ['Masa magra (est.)',(mac.masaMagra||'—')+' kg'],['Cintura',((lastMed&&lastMed.cin)||u.cin||'—')+' cm'],
+      ['Cuello',((lastMed&&lastMed.cue)||u.cue||'—')+' cm'],['Cadera',((lastMed&&lastMed.cad)||u.cad||'—')+' cm'],
       ['Objetivo',{perdida:'Pérdida de grasa',volumen:'Ganancia muscular',recomp:'Recomposición',mant:'Mantenimiento'}[u.obj||'recomp']],
-      ['Kcal/día',(mac.kcal||'—')+' kcal'],
-      ['Proteína',(mac.prot||'—')+' g/día'],
-      ['Agua',(Math.round((mac.agua||2500)/100)/10)+' L/día'],
+      ['Experiencia',{prin:'Principiante',inter:'Intermedio',avanz:'Avanzado'}[u.exp||'inter']],
     ];
-    var cols=2, colW=CW/cols, rH=7;
+    var cols=3, colW=CW/cols, rH=7;
     fichaItems.forEach(function(item,i){
       var col=i%cols, row=Math.floor(i/cols);
       var x=M+col*colW, iy=y+row*(rH+1);
-      rect(x,iy,colW-2,rH,2,[22,22,35]);
-      txt(item[0],x+3,iy+4.5,7,GRAY);
-      txt(item[1],x+colW-5,iy+4.5,8,TEXT,'right');
+      rect(x,iy,colW-2,rH,2,BG2);
+      txt(item[0],x+2,iy+4.5,6,GRAY);
+      txt(String(item[1]||'—'),x+colW-3,iy+4.5,7,TEXT,'right');
     });
-    y+=Math.ceil(fichaItems.length/cols)*(rH+1)+8;
+    y+=Math.ceil(fichaItems.length/cols)*(rH+1)+6;
 
-    // ── HISTORIAL DE SESIONES ─────────────────────────
-    var sessions=(u.sessions||[]).slice(-15).reverse(); // últimas 15
-    if(sessions.length){
-      txt('HISTORIAL DE SESIONES (últimas '+sessions.length+')',M,y,8,GOLD); y+=5;
-      sessions.forEach(function(s){
-        if(y>270){doc.addPage();y=M;}
-        rect(M,y,CW,8,2,[22,22,35]);
-        var label=(s.tipo||'Sesión').slice(0,30);
-        txt(label,M+3,y+5,8,TEXT);
-        txt(fmtDate(s.fecha),M+CW*0.45,y+5,7,GRAY);
-        txt((s.dur||'—')+' min',M+CW*0.62,y+5,7,GRAY);
-        txt('RPE '+(s.rpe||'—'),M+CW*0.76,y+5,7,GRAY);
+    // MÉTRICAS METABÓLICAS
+    section('⚡ MÉTRICAS METABÓLICAS',GOLD);
+    var metItems=[
+      ['BMR (Mifflin-St.Jeor)',(mac.bmr||'—')+' kcal/día'],
+      ['TDEE estimado',(mac.tdee||'—')+' kcal/día'],
+      ['Target calórico',(mac.kcal||'—')+' kcal/día'],
+      ['Déficit aplicado',(mac.deficitReal||'—')+'%'],
+      ['Proteína objetivo',(mac.prot||'—')+' g/día'],
+      ['Agua objetivo',(Math.round((mac.agua||2500)/100)/10)+' L/día'],
+    ];
+    var mCW=CW/3;
+    metItems.forEach(function(item,i){
+      var col=i%3, row=Math.floor(i/3);
+      var x=M+col*mCW, iy=y+row*(rH+1);
+      rect(x,iy,mCW-2,rH,2,BG2);
+      txt(item[0],x+2,iy+4.5,6,GRAY);
+      txt(String(item[1]),x+mCW-3,iy+4.5,7,GOLD,'right');
+    });
+    y+=Math.ceil(metItems.length/3)*(rH+1)+6;
+
+    // ══════════════════════════════════════════
+    // GRÁFICA DE EVOLUCIÓN DE PESO
+    // ══════════════════════════════════════════
+    if(meds.length>=2){
+      section('📈 EVOLUCIÓN DE PESO (últimas '+(Math.min(meds.length,12))+' mediciones)',GOLD);
+      var pesoVals=meds.slice(-12).map(function(m){return parseFloat(m.peso)||0;}).filter(Boolean);
+      var pesoLabels=meds.slice(-12).map(function(m){return (m.fecha||'').slice(5);});
+      if(pesoVals.length>=2){
+        lineChart(pesoVals,M,y,CW,28,GOLD);
+        y+=31;
+      }
+    }
+
+    // GRÁFICA DE % GRASA
+    if(meds.filter(function(m){return m.grasa;}).length>=2){
+      if(y>230){doc.addPage();y=M+8;}
+      section('📉 EVOLUCIÓN % GRASA CORPORAL',GREEN);
+      var grasaVals=meds.slice(-12).filter(function(m){return m.grasa;}).map(function(m){return parseFloat(m.grasa)||0;});
+      var grasaLabels=meds.slice(-12).filter(function(m){return m.grasa;}).map(function(m){return (m.fecha||'').slice(5);});
+      lineChart(grasaVals,M,y,CW,25,RED);
+      y+=28;
+    }
+
+    // ══════════════════════════════════════════
+    // PÁGINA 2 — HISTORIAL SESIONES + ANÁLISIS
+    // ══════════════════════════════════════════
+    if(sessions.length||_lastIAText){
+      doc.addPage(); y=M+8;
+
+      // Volumen semanal (gráfica de barras)
+      if(sessions.length>=2){
+        section('🏋️ VOLUMEN DE ENTRENAMIENTO POR SESIÓN (últimas '+Math.min(sessions.length,10)+')',GOLD);
+        var volVals=sessions.slice(-10).map(function(s){
+          return (s.exs||[]).reduce(function(t,e){return t+((e.series||[]).reduce(function(tv,sr){return tv+(sr.done?(parseFloat(sr.kg)||0)*(parseInt(sr.reps)||1):0);},0));},0);
+        });
+        var volLabels=sessions.slice(-10).map(function(s){return (s.fecha||'').slice(5);});
+        barChart(volVals,volLabels,M,y,CW,30,GOLD);
+        y+=34;
+      }
+
+      // RPE histórico
+      if(sessions.length>=2){
+        section('💪 RPE HISTÓRICO (intensidad percibida)',GOLD);
+        var rpeVals=sessions.slice(-10).filter(function(s){return s.rpe;}).map(function(s){return parseFloat(s.rpe)||0;});
+        var rpeLabels=sessions.slice(-10).filter(function(s){return s.rpe;}).map(function(s){return (s.fecha||'').slice(5);});
+        if(rpeVals.length>=2){barChart(rpeVals,rpeLabels,M,y,CW,22,BLUE);y+=26;}
+      }
+
+      // Últimas 10 sesiones detalle
+      section('📊 DETALLE DE SESIONES (últimas '+Math.min(sessions.length,10)+')',GOLD);
+      sessions.slice(-10).reverse().forEach(function(s){
+        if(y>270){doc.addPage();y=M+8;}
+        rect(M,y,CW,8,2,BG2);
+        txt((s.tipo||'Sesión').slice(0,28),M+2,y+5,7.5,TEXT);
+        txt(fmtDate(s.fecha),M+CW*0.4,y+5,7,GRAY);
+        txt((s.dur||'—')+' min',M+CW*0.56,y+5,7,GRAY);
+        txt('RPE '+(s.rpe||'—'),M+CW*0.7,y+5,7,s.rpe>7?RED:s.rpe>5?GOLD:GREEN);
         var vol=(s.exs||[]).reduce(function(t,e){return t+((e.series||[]).reduce(function(tv,sr){return tv+(sr.done?(parseFloat(sr.kg)||0)*(parseInt(sr.reps)||1):0);},0));},0);
-        if(vol>0) txt(Math.round(vol)+' kg vol',M+CW-2,y+5,7,GOLD,'right');
+        if(vol>0) txt(Math.round(vol)+' kg',W-M-2,y+5,7,GOLD,'right');
         y+=9;
       });
       y+=4;
+
+      // Análisis IA si existe
+      if(_lastIAText&&typeof _lastIAText==='object'&&_lastIAText.resumen){
+        if(y>230){doc.addPage();y=M+8;}
+        section('🔬 ANÁLISIS CLÍNICO IA ('+(_lastIAText.fecha||'última sesión')+')',GOLD);
+        rect(M,y,CW,8,2,BG2);
+        var nivelC=_lastIAText.nivLabel&&_lastIAText.nivLabel.indexOf('óptimo')>=0?GREEN:_lastIAText.nivLabel&&_lastIAText.nivLabel.indexOf('urgentes')>=0?RED:GOLD;
+        txt('Nivel: '+(_lastIAText.nivLabel||'—'),M+2,y+5,8,nivelC);
+        txt('Motor: '+(_lastIAText.motor||'—'),W-M-2,y+5,7,GRAY,'right');
+        y+=10;
+        // Resumen
+        var resLines=doc.splitTextToSize(_lastIAText.resumen||'',CW-4);
+        rect(M,y,CW,resLines.length*4+4,2,[18,18,32]);
+        doc.setFontSize(8);doc.setTextColor(200,200,220);
+        resLines.forEach(function(l,i){doc.text(l,M+3,y+4+i*4);});
+        y+=resLines.length*4+8;
+        // Ajustes entreno
+        if(_lastIAText.ajustes_entreno&&_lastIAText.ajustes_entreno.length){
+          txt('AJUSTES DE ENTRENAMIENTO',M,y,7,GOLD);y+=5;
+          _lastIAText.ajustes_entreno.forEach(function(a){
+            if(y>278){doc.addPage();y=M+8;}
+            var lines=doc.splitTextToSize('→ '+a,CW-4);
+            rect(M,y,CW,lines.length*4+3,1,BG2);
+            doc.setFontSize(7.5);doc.setTextColor(200,200,220);
+            lines.forEach(function(l,i){doc.text(l,M+3,y+3.5+i*4);});
+            y+=lines.length*4+5;
+          });
+        }
+        // Ajustes nutrición
+        if(_lastIAText.ajustes_nutricion&&_lastIAText.ajustes_nutricion.length){
+          if(y>240){doc.addPage();y=M+8;}
+          txt('AJUSTES DE NUTRICIÓN',M,y,7,GREEN);y+=5;
+          _lastIAText.ajustes_nutricion.forEach(function(a){
+            if(y>278){doc.addPage();y=M+8;}
+            var lines=doc.splitTextToSize('→ '+a,CW-4);
+            rect(M,y,CW,lines.length*4+3,1,BG2);
+            doc.setFontSize(7.5);doc.setTextColor(200,200,220);
+            lines.forEach(function(l,i){doc.text(l,M+3,y+3.5+i*4);});
+            y+=lines.length*4+5;
+          });
+        }
+        // Directiva
+        if(_lastIAText.recomendacion){
+          if(y>240){doc.addPage();y=M+8;}
+          txt('DIRECTIVA PRÓXIMA SEMANA',M,y,7,BLUE);y+=5;
+          var rlines=doc.splitTextToSize(_lastIAText.recomendacion,CW-4);
+          rect(M,y,CW,rlines.length*4+4,2,[18,18,40]);
+          doc.setFontSize(8);doc.setTextColor(180,200,240);
+          rlines.forEach(function(l,i){doc.text(l,M+3,y+4+i*4);});
+          y+=rlines.length*4+8;
+        }
+      }
     }
 
-    // ── EVOLUCIÓN DE MEDIDAS ──────────────────────────
-    if(meds.length){
-      if(y>240){doc.addPage();y=M;}
-      txt('EVOLUCIÓN DE MEDIDAS',M,y,8,GOLD); y+=5;
-      // Cabecera tabla
-      var tCols=['Fecha','Peso','% Grasa','Cintura','Cuello'];
-      var tWidths=[35,25,25,25,25];
-      var tx=M;
-      tCols.forEach(function(h,i){
-        rect(tx,y,tWidths[i]-1,6,1,[30,30,50]);
-        txt(h,tx+1,y+4,6,GOLD);
-        tx+=tWidths[i];
-      });
-      y+=7;
-      meds.slice(-10).forEach(function(m){
-        if(y>275){doc.addPage();y=M;}
-        tx=M;
-        var row=[fmtDate(m.fecha),m.peso?m.peso+' kg':'—',m.grasa?m.grasa+'%':'—',m.cin?m.cin+' cm':'—',m.cue?m.cue+' cm':'—'];
-        row.forEach(function(v,i){
-          txt(v,tx+1,y+4,7,TEXT);
-          tx+=tWidths[i];
-        });
-        doc.setDrawColor(40,40,60);
-        doc.line(M,y+6,M+CW,y+6);
-        y+=7;
-      });
-      y+=4;
+    // ── PIE DE PÁGINA (todas las páginas) ─────
+    var totalPages=doc.getNumberOfPages();
+    for(var p=1;p<=totalPages;p++){
+      doc.setPage(p);
+      rect(0,287,W,10,0,BG);
+      txt('SpeciMen® Gym App · Informe generado el '+new Date().toLocaleDateString('es-ES'),W/2,292,7,GRAY,'center');
+      txt('Desarrollado por Cristhian Andrés Serna Salazar  |  2026',W/2,296,6,[50,50,70],'center');
+      txt('Pág. '+p+'/'+totalPages,W-M,292,7,GRAY,'right');
     }
 
-    // ── PIE DE PÁGINA ─────────────────────────────────
-    rect(0,287,W,10,0,BG);
-    txt('SpeciMen Gym App · Informe generado el '+new Date().toLocaleDateString('es-ES'),W/2,292,7,GRAY,'center');
-    txt('Desarrollado por Cristhian Andres Serna Salazar  |  2026',W/2,296,6,[50,50,70],'center');
-
-    doc.save('SpeciMen_informe_'+u.nombre.split(' ')[0]+'_'+new Date().toISOString().slice(0,10)+'.pdf');
-    toast('✓ PDF generado y descargado');
+    doc.save('SpeciMen_Informe_'+( u.nombre||'usuario').split(' ')[0]+'_'+new Date().toISOString().slice(0,10)+'.pdf');
+    toast('✓ PDF generado correctamente');
   }catch(err){
     console.error('PDF error:',err);
     toast('Error generando PDF: '+err.message,'var(--red)');
