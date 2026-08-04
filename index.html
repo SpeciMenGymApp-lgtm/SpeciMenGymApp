@@ -5531,71 +5531,139 @@ async function sendIAEmail(){
     +'</div>'
     +'</div></body></html>';
 
-  var textBody='SpeciMen® — Análisis '+d.fecha+'\n\n'+d.nivLabel+'\n\nRESUMEN:\n'+d.resumen+'\n\nDatos: Peso '+d.peso+'kg · '+d.grasa+'% grasa · '+d.kcal+' kcal/día\n';
+  var u2=U();
+  var textBody='SpeciMen® — Análisis '+d.fecha+'\n\n'+d.nivLabel+'\n\nRESUMEN:\n'+d.resumen+'\n\n'
+    +'ENTRENAMIENTO:\n'+(d.ajustes_entreno||[]).map(function(a){return '• '+a;}).join('\n')+'\n\n'
+    +'NUTRICIÓN:\n'+(d.ajustes_nutricion||[]).map(function(a){return '• '+a;}).join('\n')+'\n\n'
+    +'DIRECTIVA:\n'+d.recomendacion+'\n\n'
+    +'Datos: Peso '+d.peso+'kg · '+d.grasa+'% grasa · '+d.kcal+' kcal/día · Sesiones '+d.sesiones+'/5 · RPE '+d.rpe;
+
+  // Email HTML más completo — resumen + ajustes + directiva + datos perfil
+  var nivelColor=(d.nivLabel||'').indexOf('óptimo')>=0?'#22c55e':(d.nivLabel||'').indexOf('urgentes')>=0?'#ef4444':'#f0c040';
+  var entHtml=(d.ajustes_entreno||[]).map(function(a){return '<tr><td style="padding:8px 12px;border-bottom:1px solid #1e1e30;font-size:13px;color:#c8c8e0;line-height:1.6;"><span style="color:#c9a84c;font-weight:700;">→</span> '+a+'</td></tr>';}).join('')
+    ||'<tr><td style="padding:8px 12px;color:#606080;font-style:italic;">'+(d._rawTxt?'Ver análisis completo en PDF adjunto':'Sin ajustes')+'</td></tr>';
+  var nutHtml=(d.ajustes_nutricion||[]).map(function(a){return '<tr><td style="padding:8px 12px;border-bottom:1px solid #1e1e30;font-size:13px;color:#c8c8e0;line-height:1.6;"><span style="color:#22c55e;font-weight:700;">→</span> '+a+'</td></tr>';}).join('')
+    ||'<tr><td style="padding:8px 12px;color:#606080;font-style:italic;">'+(d._rawTxt?'Ver análisis completo en PDF adjunto':'Sin ajustes')+'</td></tr>';
+
+  var htmlBody='<!DOCTYPE html><html><head><meta charset="UTF-8"></head>'
+    +'<body style="margin:0;padding:0;background:#0a0a0a;font-family:-apple-system,sans-serif;">'
+    +'<div style="max-width:580px;margin:0 auto;padding:20px;">'
+    // Header
+    +'<div style="background:linear-gradient(135deg,#c9a84c,#f0c040);border-radius:12px 12px 0 0;padding:22px;text-align:center;">'
+      +'<div style="font-size:22px;font-weight:900;color:#0a0a0a;">SpeciMen® Gym App</div>'
+      +'<div style="font-size:11px;color:#5a4000;margin-top:3px;">Análisis de progreso semanal · '+d.fecha+'</div>'
+    +'</div>'
+    // Nivel
+    +'<div style="background:#111118;padding:12px 22px;border-left:1px solid #222;border-right:1px solid #222;display:flex;justify-content:space-between;align-items:center;">'
+      +'<div style="font-size:15px;font-weight:700;color:'+nivelColor+';">'+d.nivLabel+'</div>'
+      +'<div style="font-size:10px;color:#606080;">'+d.motor+'</div>'
+    +'</div>'
+    // Resumen clínico
+    +'<div style="background:#0d0d1a;border-left:1px solid #222;border-right:1px solid #222;padding:16px 22px;">'
+      +'<div style="font-size:10px;font-weight:700;color:#c9a84c;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;">🔬 Resumen clínico</div>'
+      +'<div style="font-size:13px;color:#d0d0e8;line-height:1.8;font-style:italic;border-left:3px solid #c9a84c;padding-left:12px;">'+d.resumen+'</div>'
+    +'</div>'
+    // Datos perfil
+    +'<div style="background:#111118;border-left:1px solid #222;border-right:1px solid #222;padding:12px 22px;">'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">'
+        +'<div style="background:#0d0d1a;border-radius:6px;padding:7px 10px;"><div style="font-size:9px;color:#606080;text-transform:uppercase;">Objetivo</div><div style="font-size:12px;font-weight:700;color:#f0c040;">'+d.obj+'</div></div>'
+        +'<div style="background:#0d0d1a;border-radius:6px;padding:7px 10px;"><div style="font-size:9px;color:#606080;text-transform:uppercase;">Sesiones · RPE</div><div style="font-size:12px;font-weight:700;color:#f0f0fa;">'+d.sesiones+'/5 · '+d.rpe+'</div></div>'
+        +'<div style="background:#0d0d1a;border-radius:6px;padding:7px 10px;"><div style="font-size:9px;color:#606080;text-transform:uppercase;">Peso</div><div style="font-size:12px;font-weight:700;color:#f0f0fa;">'+d.peso+' kg <span style="font-size:10px;color:#606080;">(ant: '+d.pesoPrev+' kg)</span></div></div>'
+        +'<div style="background:#0d0d1a;border-radius:6px;padding:7px 10px;"><div style="font-size:9px;color:#606080;text-transform:uppercase;">% Grasa · Masa magra</div><div style="font-size:12px;font-weight:700;color:#f0f0fa;">'+d.grasa+'% · '+d.masaMagra+' kg</div></div>'
+        +'<div style="background:#0d0d1a;border-radius:6px;padding:7px 10px;"><div style="font-size:9px;color:#606080;text-transform:uppercase;">Kcal objetivo</div><div style="font-size:12px;font-weight:700;color:#f0f0fa;">'+d.kcal+' kcal/día</div></div>'
+        +'<div style="background:#0d0d1a;border-radius:6px;padding:7px 10px;"><div style="font-size:9px;color:#606080;text-transform:uppercase;">Proteína · Déficit</div><div style="font-size:12px;font-weight:700;color:#f0f0fa;">'+d.prot+'g/día · -'+d.deficit+'%</div></div>'
+      +'</div>'
+    +'</div>'
+    // Ajustes entrenamiento
+    +'<div style="background:#0d0d1a;border-left:1px solid #222;border-right:1px solid #222;padding:14px 22px;">'
+      +'<div style="font-size:10px;font-weight:700;color:#c9a84c;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;">🏋️ Ajustes de entrenamiento</div>'
+      +'<table width="100%" cellpadding="0" cellspacing="0">'+entHtml+'</table>'
+    +'</div>'
+    // Ajustes nutrición
+    +'<div style="background:#111118;border-left:1px solid #222;border-right:1px solid #222;padding:14px 22px;">'
+      +'<div style="font-size:10px;font-weight:700;color:#22c55e;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;">🥗 Ajustes de nutrición</div>'
+      +'<table width="100%" cellpadding="0" cellspacing="0">'+nutHtml+'</table>'
+    +'</div>'
+    // Directiva
+    +'<div style="background:#0d0d1a;border-left:1px solid #222;border-right:1px solid #222;padding:14px 22px;">'
+      +'<div style="font-size:10px;font-weight:700;color:#96a5eb;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;">📅 Directiva próxima semana</div>'
+      +'<div style="font-size:13px;color:#d0d0e8;line-height:1.7;background:#111118;border-radius:8px;padding:10px 12px;">'+d.recomendacion+'</div>'
+    +'</div>'
+    // Placeholder para PDF link (se reemplaza si hay link de Drive)
+    +'<div id="pdf-section" style="background:#0d0d1a;border-left:1px solid #222;border-right:1px solid #222;padding:12px 22px;text-align:center;display:none;"></div>'
+    // Footer
+    +'<div style="background:#070710;border:1px solid #222;border-top:none;border-radius:0 0 12px 12px;padding:12px 22px;text-align:center;">'
+      +'<div style="font-size:9px;color:#404060;">'+d.nombre+' · '+d.fecha+'</div>'
+      +'<div style="font-size:7px;color:#252540;margin-top:5px;border-top:1px solid #111;padding-top:5px;">SpeciMen Gym App® desarrollado por Cristhian Andrés Serna Salazar © | 2026<br>Todos los derechos reservados. Prohibida su reproducción total o parcial sin autorización.</div>'
+    +'</div>'
+    +'</div></body></html>';
 
   try{
-    var u2=U();
-    // Si hay PDF y el usuario tiene carpeta de Drive, subir PDF a Drive e incluir link
     var pdfDriveUrl='';
-    if(pdfBase64&&u2&&u2.driveFolderId){
-      try{
-        status.textContent='⏳ Subiendo PDF a tu Drive privado...';
-        var fdPdf=new FormData();
-        fdPdf.append('data',JSON.stringify({
-          action:'uploadPhoto',
-          driveFolderId:u2.driveFolderId,
-          imageBase64:pdfBase64,
-          mimeType:'application/pdf',
-          fileName:'SpeciMen_Analisis_'+(d.fecha||'').replace(/\//g,'-')+'.pdf'
-        }));
-        var respPdf=await fetch(gasUrl,{method:'POST',body:fdPdf});
-        var dataPdf=await respPdf.json();
-        if(dataPdf.ok&&dataPdf.url){
-          pdfDriveUrl=dataPdf.url;
-          console.log('PDF subido a Drive:',pdfDriveUrl);
-        }
-      }catch(driveErr){console.warn('Upload Drive falló:',driveErr.message);}
+    var pdfSent=false;
+
+    if(pdfBase64){
+      var pdfKB=Math.round(pdfBase64.length*0.75/1024);
+      console.log('PDF listo: '+pdfKB+' KB');
+
+      // Opción A: adjuntar directo si es pequeño (<1.5MB real)
+      if(pdfKB<1500){
+        status.textContent='⏳ Enviando email con PDF adjunto ('+pdfKB+' KB)...';
+        var payloadA={
+          action:'sendEmail',to:dest,
+          subject:'📊 Análisis SpeciMen® — '+d.fecha,
+          nombre:d.nombre||'Atleta',
+          cuerpo:textBody,htmlBody:htmlBody,fecha:d.fecha||'',
+          pdfBase64:pdfBase64,
+          pdfName:'SpeciMen_'+( d.nombre||'').split(' ')[0]+'_'+(d.fecha||'').replace(/\//g,'-')+'.pdf'
+        };
+        var fdA=new FormData();fdA.append('data',JSON.stringify(payloadA));
+        try{
+          var respA=await fetch(gasUrl,{method:'POST',body:fdA});
+          var dataA=await respA.json();
+          if(dataA.ok){pdfSent=true;status.style.color='var(--green)';status.textContent='✅ Email + PDF adjunto enviado a '+dest;setTimeout(function(){closeM('m-email-ia');},2000);return;}
+          else{console.warn('Adjunto falló:',dataA.error);}
+        }catch(eA){console.warn('Fetch adjunto falló:',eA.message);}
+      }
+
+      // Opción B: subir a Drive e incluir link
+      if(!pdfSent&&u2&&u2.driveFolderId){
+        status.textContent='⏳ PDF grande — subiendo a Drive...';
+        try{
+          var fdD=new FormData();
+          fdD.append('data',JSON.stringify({action:'uploadPhoto',driveFolderId:u2.driveFolderId,imageBase64:pdfBase64,mimeType:'application/pdf',fileName:'SpeciMen_Analisis_'+(d.fecha||'').replace(/\//g,'-')+'.pdf'}));
+          var respD=await fetch(gasUrl,{method:'POST',body:fdD});
+          var dataD=await respD.json();
+          if(dataD.ok&&dataD.url){
+            pdfDriveUrl=dataD.url;
+            // Añadir botón de descarga al email
+            htmlBody=htmlBody.replace(
+              '<div id="pdf-section" style="background:#0d0d1a;border-left:1px solid #222;border-right:1px solid #222;padding:12px 22px;text-align:center;display:none;"></div>',
+              '<div style="background:#0d0d1a;border-left:1px solid #222;border-right:1px solid #222;padding:14px 22px;text-align:center;">'
+                +'<div style="font-size:11px;color:#c9a84c;margin-bottom:8px;">📄 Informe completo disponible en PDF</div>'
+                +'<a href="'+pdfDriveUrl+'" style="display:inline-block;padding:10px 20px;background:#c9a84c;color:#000;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;">⬇ Descargar PDF completo</a>'
+              +'</div>'
+            );
+            textBody+=' · PDF: '+pdfDriveUrl;
+          }
+        }catch(eD){console.warn('Drive upload falló:',eD.message);}
+      }
     }
 
-    // Si hay link de Drive, añadirlo al email y al texto plano
-    if(pdfDriveUrl){
-      textBody+='📄 Informe completo en PDF: '+pdfDriveUrl;
-      // Añadir link al email HTML
-      htmlBody=htmlBody.replace(
-        '<div style="font-size:11px;color:#c9a84c;">📄 El informe completo se adjunta como PDF</div>',
-        '<div style="font-size:11px;color:#c9a84c;">📄 Informe completo en PDF</div>'
-          +'<a href="'+pdfDriveUrl+'" style="display:inline-block;margin-top:6px;padding:8px 16px;background:#c9a84c;color:#000;border-radius:8px;font-size:11px;font-weight:700;text-decoration:none;">⬇ Descargar PDF</a>'
-      );
-    } else if(pdfBase64){
-      // Fallback: intentar adjuntar directo (puede fallar por tamaño)
-      textBody+='(PDF adjunto)';
-    }
-
-    var payload={
-      action:'sendEmail',
-      to:dest,
-      subject:'📊 Análisis SpeciMen® — '+d.fecha,
-      nombre:d.nombre||'Atleta',
-      cuerpo:textBody,
-      htmlBody:htmlBody,
-      fecha:d.fecha||''
-    };
-    // Solo adjuntar PDF si es pequeño (<800KB en base64 ≈ ~600KB real)
-    if(pdfBase64&&!pdfDriveUrl&&pdfBase64.length<1100000){
-      payload.pdfBase64=pdfBase64;
-      payload.pdfName='SpeciMen_'+(d.nombre||'').split(' ')[0]+'_'+(d.fecha||'').replace(/\//g,'-')+'.pdf';
-    }
-
-    status.textContent='⏳ Enviando email...';
-    var fd=new FormData();fd.append('data',JSON.stringify(payload));
-    var resp=await fetch(gasUrl,{method:'POST',body:fd});
-    var data=await resp.json();
-    if(data.ok){
-      status.style.color='var(--green)';
-      status.textContent='✅ Email enviado'+(pdfDriveUrl?' + PDF en Drive':pdfBase64?' + PDF adjunto':'')+' a '+dest;
-      setTimeout(function(){closeM('m-email-ia');},2000);
-    }else{
-      status.style.color='var(--red)';status.textContent='✕ Error: '+(data.error||'No se pudo enviar');
+    // Enviar email (con o sin PDF en Drive)
+    if(!pdfSent){
+      status.textContent='⏳ Enviando email...';
+      var payload={action:'sendEmail',to:dest,subject:'📊 Análisis SpeciMen® — '+d.fecha,nombre:d.nombre||'Atleta',cuerpo:textBody,htmlBody:htmlBody,fecha:d.fecha||''};
+      var fd=new FormData();fd.append('data',JSON.stringify(payload));
+      var resp=await fetch(gasUrl,{method:'POST',body:fd});
+      var data=await resp.json();
+      if(data.ok){
+        status.style.color='var(--green)';
+        status.textContent='✅ Email enviado'+(pdfDriveUrl?' + PDF en Drive':'')+' a '+dest+(pdfBase64&&!pdfDriveUrl?' (PDF no incluido — registra tu cuenta en la nube para activarlo)':'');
+        setTimeout(function(){closeM('m-email-ia');},2500);
+      }else{
+        status.style.color='var(--red)';status.textContent='✕ Error: '+(data.error||'No se pudo enviar');
+      }
     }
   }catch(e){status.style.color='var(--red)';status.textContent='✕ Error de red: '+e.message;}
 }
