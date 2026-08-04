@@ -16,9 +16,14 @@
   var realUri = document.querySelector('link[rel="apple-touch-icon"]').href;
   document.querySelectorAll('link[href="LOGO_PLACEHOLDER"]').forEach(function(el){ el.href = realUri; });
   window.__LOGO_DATA_URI__ = realUri;
+  // Rellenar topbar y splash inmediatamente sin esperar DOMContentLoaded
+  var splashImg = document.querySelector('#sp img');
+  if (splashImg && splashImg.src.indexOf('LOGO_PLACEHOLDER') >= 0) splashImg.src = realUri;
   document.addEventListener('DOMContentLoaded', function(){
     var tb = document.getElementById('topbar-logo-img');
     if (tb) tb.src = realUri;
+    var sp2 = document.querySelector('#sp img');
+    if (sp2 && sp2.src.indexOf('LOGO_PLACEHOLDER') >= 0) sp2.src = realUri;
   });
 })();
 </script>
@@ -1063,9 +1068,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 
 <div class="toast" id="toast"></div>
 <script>
-// ═══════════════════════════════════════════════
 // SPECIMEN GYM APP — Core JS
-// ═══════════════════════════════════════════════
 var STORE_KEY='specimen_v3';
 // URL del backend de Google Apps Script (Sheets + Drive + Email) — preconfigurada
 // para que la app funcione en la nube desde el primer uso, sin que cada persona
@@ -1153,7 +1156,6 @@ function saveAll(){
   try{
     localStorage.setItem(STORE_KEY,JSON.stringify(APP));
   }catch(e){
-    console.error('Error guardando datos:',e);
     if(e.name==='QuotaExceededError'||e.code===22){
       toast('⚠️ Memoria local llena. Algunos datos antiguos podrían no guardarse.','var(--red)');
     }
@@ -1166,7 +1168,6 @@ function loadAll(){var r=localStorage.getItem(STORE_KEY);if(r)try{var d=JSON.par
 // En vez de eso, muestra un aviso y permite recargar sin perder datos
 // (los datos ya guardados en localStorage permanecen intactos).
 window.addEventListener('error', function(e){
-  console.error('Error no controlado:', e.error||e.message);
   var existing = document.getElementById('crash-overlay');
   if (existing) return; // no duplicar el aviso
   var div = document.createElement('div');
@@ -1179,7 +1180,6 @@ window.addEventListener('error', function(e){
   document.body.appendChild(div);
 });
 window.addEventListener('unhandledrejection', function(e){
-  console.error('Promise rechazada sin manejar:', e.reason);
 });
 
 // ── calcMacros Harris-Benedict ────────────────
@@ -1322,9 +1322,7 @@ function getPlanEjercicio(u){
   }
 }
 
-// ══════════════════════════════════════════════════════
 // GENERACIÓN DE PLAN CON IA + EVIDENCIA CIENTÍFICA
-// ══════════════════════════════════════════════════════
 async function generarPlanIA(){
   var u=U(); if(!u) return;
   var key=ANTHROPIC_KEY||GEMINI_KEY;
@@ -1413,7 +1411,6 @@ async function generarPlanIA(){
   }catch(e){
     if(btn){btn.disabled=false;btn.textContent='🤖 Generar plan con IA';}
     toast('Error: '+e.message,'var(--red)');
-    console.error('Plan IA error:',e);
   }
 }
 window.generarPlanIA=generarPlanIA;
@@ -1557,9 +1554,7 @@ function planM(u){
   ];
 }
 
-// ══════════════════════════════════════════════════════════
 // PLANES POR OBJETIVO — HOMBRE
-// ══════════════════════════════════════════════════════════
 
 // ── HOMBRE · PÉRDIDA DE GRASA ─────────────────────────
 // Más cardio HIIT, supersets, menos volumen por sesión,
@@ -1568,11 +1563,9 @@ function planH_perdida(u){
   var exp=u.exp||'inter';
   return[
 
-    // ══════════════════════════════════════════════════════
     // LUNES — DÍA TESTOSTERONA 🟥
     // Objetivo: señal anabólica fuerte → protege músculo en déficit calórico
     // Ciencia: el entrenamiento de fuerza pesado mantiene masa magra incluso con déficit 20%
-    // ══════════════════════════════════════════════════════
     {dia:'Lunes',nombre:'🟥 Testosterona — Pecho · Tríceps · Hombro Fuerza',color:'#ef4444',tipo:'fuerza',exs:[
       // Bloque 1: Fuerza pesada (compuestos — activación máxima SNC)
       {id:'press-banca',n:'Press Banca con Barra',s:4,r:'5-6',rir:3,mus:'Pecho/Deltoides anterior',nota:'PESADO — señal anabólica. Descanso completo 3-4 min entre series'},
@@ -1587,11 +1580,9 @@ function planH_perdida(u){
       {id:'caminata',n:'Cardio SUAVE post-sesión',s:1,r:'10-15 min',rir:0,mus:'Cardiovascular',nota:'❗Solo suave — no HIIT hoy. Subir cortisol anularía la señal anabólica'}
     ]},
 
-    // ══════════════════════════════════════════════════════
     // MARTES — DÍA METABÓLICO 🟦
     // Objetivo: vaciar glucógeno + maximizar gasto calórico
     // Ciencia: superseries con <60s descanso → EPOC elevado durante 24-48h post-sesión
-    // ══════════════════════════════════════════════════════
     {dia:'Martes',nombre:'🟦 Metabólico — Espalda · Bíceps · HIIT',color:'#3b82f6',tipo:'fuerza',exs:[
       // Superserie A: Dorsal (4 rondas sin descanso entre A1 y A2)
       {id:'jalon-m',n:'A1 · Jalón al Pecho (agarre ancho)',s:4,r:'12-15',rir:1,mus:'Dorsal/Bíceps',nota:'SUPERSERIE con A2 — sin descanso. Descanso 60s tras completar la ronda'},
@@ -1606,11 +1597,9 @@ function planH_perdida(u){
       {id:'eliptica',n:'Escaladora HIIT — 20 min',s:1,r:'20 min',rir:0,mus:'Cardiovascular/EPOC',nota:'Protocolo: 40s fuerte · 20s suave · repetir. La escaladora es superior a la cinta para grasa visceral'}
     ]},
 
-    // ══════════════════════════════════════════════════════
     // MIÉRCOLES — DÍA NEURAL + HOMBROS + CORE 🟨
     // Objetivo: potenciar sistema nervioso (más fuerza futura) + core fuerte + metabolismo activo
     // Ciencia: el trabajo neurológico (<5 reps) mejora el reclutamiento de fibras sin añadir volumen extra
-    // ══════════════════════════════════════════════════════
     {dia:'Miércoles',nombre:'🟨 Neural + Hombros · Core · Cardio corto',color:'#f59e0b',tipo:'fuerza',exs:[
       // Bloque 1: Neurológico pesado
       {id:'press-militar',n:'Press Militar con Barra (pie)',s:5,r:'3-5',rir:3,mus:'Deltoides/Tríceps/Core',nota:'PESADO. Descanso 3-4 min. Estabilización de core activa durante todo el movimiento'},
@@ -1626,12 +1615,10 @@ function planH_perdida(u){
       {id:'caminata',n:'HIIT Corto post-sesión',s:1,r:'10-12 min',rir:0,mus:'Cardiovascular',nota:'Bicicleta estática o cinta: 30s fuerte · 30s suave · 10 rondas'}
     ]},
 
-    // ══════════════════════════════════════════════════════
     // JUEVES — DÍA QUEMA GRASA EXTREMA (PIERNAS) 🟩
     // Objetivo: máxima activación muscular → mayor gasto energético total
     // Ciencia: el cuádriceps y glúteo son los músculos más grandes del cuerpo.
     // Una sesión de piernas pesada puede quemar 400-600 kcal adicionales en 24-48h (EPOC)
-    // ══════════════════════════════════════════════════════
     {dia:'Jueves',nombre:'🟩 Quema Grasa Extrema — Piernas completas',color:'#22c55e',tipo:'fuerza',exs:[
       // Compuestos pesados primero (activación máxima del eje hormonal)
       {id:'sentadilla',n:'Sentadilla con Barra (trasera)',s:4,r:'5-6',rir:3,mus:'Cuádriceps/Glúteo/Core',nota:'❗DÍA CLAVE para grasa visceral. Sentadilla es el ejercicio más efectivo para la composición corporal'},
@@ -1649,11 +1636,9 @@ function planH_perdida(u){
       {id:'caminata',n:'Cardio LISS largo — Caminata inclinada',s:1,r:'20-25 min',rir:0,mus:'Cardiovascular/Grasa oxidativa',nota:'12-15% inclinación · 5-6 km/h. LISS post-piernas maximiza oxidación de ácidos grasos'}
     ]},
 
-    // ══════════════════════════════════════════════════════
     // VIERNES — DÍA FULLBODY METABÓLICO + CARDIO 🟪
     // Objetivo: segundo estímulo metabólico de la semana — mantener quema activa
     // Ciencia: 5 días de entrenamiento/semana es óptimo para pérdida de grasa sin sobreentrenamiento
-    // ══════════════════════════════════════════════════════
     {dia:'Viernes',nombre:'🟪 FullBody Metabólico — Circuito + Cardio',color:'#6c4fff',tipo:'fuerza',exs:[
       // Circuito fullbody (movimientos compuestos, descanso mínimo)
       {id:'goblet',n:'Sentadilla Goblet (mancuerna)',s:3,r:'15-20',rir:1,mus:'Cuádriceps/Glúteo/Core',nota:'Circuito — 60s descanso entre rondas. Excelente para días de menor energía'},
@@ -1666,19 +1651,15 @@ function planH_perdida(u){
       {id:'eliptica',n:'Cardio Moderado — Elíptica o Bici',s:1,r:'25-30 min',rir:0,mus:'Cardiovascular',nota:'Zona 2 (puedes hablar). Mantiene quema calórica sin comprometer recuperación'}
     ]},
 
-    // ══════════════════════════════════════════════════════
     // SÁBADO — NEAT + DESCANSO ACTIVO
     // NEAT (Non-Exercise Activity Thermogenesis) = 15-30% del gasto calórico diario
-    // ══════════════════════════════════════════════════════
     {dia:'Sábado',nombre:'🚶 NEAT + Cardio activo suave',color:'#14b8a6',tipo:'descanso',exs:[
       {id:'caminar',n:'Caminata moderada (exterior o cinta)',s:1,r:'45-60 min',rir:0,mus:'NEAT/Recuperación activa',nota:'Ritmo moderado — puedes hablar. Sin inclinación alta hoy. El NEAT diario puede sumar 300-500 kcal extra'},
       {id:'movilidad',n:'Movilidad y estiramientos (opcional)',s:1,r:'15-20 min',rir:0,mus:'Recuperación/Flexibilidad',nota:'Cadenas posterior, pectoral, cadera. Mejora la calidad del entreno siguiente'}
     ]},
 
-    // ══════════════════════════════════════════════════════
     // DOMINGO — DESCANSO COMPLETO
     // La recuperación es donde ocurre la adaptación real
-    // ══════════════════════════════════════════════════════
     {dia:'Domingo',nombre:'😴 Descanso completo — Supercompensación',color:'#3a3a5c',tipo:'descanso',exs:[
       {id:'movilidad',n:'Foam rolling y movilidad suave (opcional)',s:1,r:'15 min',rir:0,mus:'Recuperación',nota:'Solo si te apetece. El descanso completo es OBLIGATORIO — sin él no hay adaptación'}
     ]}
@@ -1775,9 +1756,7 @@ function planH_mant(u){
   ];
 }
 
-// ══════════════════════════════════════════════════════════
 // PLANES POR OBJETIVO — MUJER
-// ══════════════════════════════════════════════════════════
 
 // ── MUJER · PÉRDIDA DE GRASA ──────────────────────────
 // Mayor cardio, supersets glúteo-pierna, circuitos metabólicos
@@ -4312,9 +4291,7 @@ function calcGrasaAuto(){
 window.calcGrasaAuto=calcGrasaAuto;
 // ── FIN calcGrasaAuto ─────────────────────────────────────────
 
-// ════════════════════════════════════════════════════════════════
 // BÚSQUEDA DE ALIMENTOS — USDA FoodData Central + base local
-// ════════════════════════════════════════════════════════════════
 
 // Base de datos local offline (alimentos más comunes en fitness)
 var FOOD_LOCAL=[
@@ -4464,7 +4441,6 @@ async function foodSearchUSDA(q){
     div.innerHTML=existing+html;
   }catch(e){
     // Silently fail — local results are shown anyway
-    console.log('USDA offline:',e.message);
   }
 }
 
@@ -4514,9 +4490,7 @@ window.foodSelect=foodSelect;
 window.foodUpdateMacros=foodUpdateMacros;
 window.foodConfirmAdd=foodConfirmAdd;
 
-// ════════════════════════════════════════════════════════════════
 // BÚSQUEDA DE EJERCICIOS — Wger.de API + base local ampliada
-// ════════════════════════════════════════════════════════════════
 
 var EX_LOCAL=[
   // PECHO
@@ -4688,7 +4662,6 @@ async function exSearchWger(q){
     }).join('');
     div.innerHTML=existing+html;
   }catch(e){
-    console.log('Wger offline:',e.message);
   }
 }
 
@@ -4714,9 +4687,7 @@ window.exSrchDebounce=exSrchDebounce;
 window.exSelectAndAdd=exSelectAndAdd;
 
 
-// ════════════════════════════════════════════════════════════════
 // KONGO — Entrenador Personal IA
-// ════════════════════════════════════════════════════════════════
 
 var _kongo={
   msgs:[],      // {role:'user'|'assistant', content:'...', ts:Date}
@@ -4996,10 +4967,6 @@ function isCardioEx(e){var t=getExTipo(e);return t==='hiit'||t==='tiempo';}
 window.isCardioEx=isCardioEx;
 window.getExTipo=getExTipo;
 
-// ══════════════════════════════════════════════
-// FIX 2: Poder añadir ejercicios propios al plan
-// FIX 6: Flexibilidad para hacer un día en otro día
-// ══════════════════════════════════════════════
 
 // Abre modal para elegir un día del plan y hacer esa sesión hoy
 function openFlexDia(){
@@ -5323,7 +5290,6 @@ async function sendIAEmail(){
       pts.forEach(function(p){doc2.setFillColor(col[0],col[1],col[2]);doc2.circle(p.x,p.y,0.9,'F');});
     }
 
-    // ═══════════════ PÁG 1: FICHA + MÉTRICAS + GRÁFICAS ═══════════════
     rr(0,0,W,30,0,BG);
     tt('SpeciMen® Gym App',M,11,16,GOLD);
     tt('Historia Clínica y Análisis de Progreso',M,18,9,GRAY);
@@ -5372,7 +5338,6 @@ async function sendIAEmail(){
       lineChart2(gVals,M,y,CW,24,RED);y+=27;
     }
 
-    // ═══════════════ PÁG 2: SESIONES + ANÁLISIS IA ═══════════════
     doc2.addPage();y=M+6;
 
     if(sessions2.length>=2){
@@ -5416,7 +5381,6 @@ async function sendIAEmail(){
       y+=6;
     }
 
-    // ═══════════════ ANÁLISIS IA COMPLETO ═══════════════
     if(d&&d.resumen){
       if(y>230){doc2.addPage();y=M+6;}
       sec('🔬 ANÁLISIS CLÍNICO IA ('+( d.fecha||'')+' · '+( d.motor||'')+' )',GOLD);
@@ -5486,52 +5450,12 @@ async function sendIAEmail(){
     }
     pdfBase64=doc2.output('datauristring').split(',')[1];
     var pdfKB=Math.round(pdfBase64.length*0.75/1024);
-    console.log('PDF generado: '+pdfKB+' KB, '+np2+' páginas');
     status.textContent='⏳ Enviando email con PDF ('+pdfKB+' KB, '+np2+' págs)...';
 
   }catch(pdfErr){
-    console.warn('PDF falló:',pdfErr.message);
     status.textContent='⏳ Enviando email (PDF no disponible: '+pdfErr.message+')...';
   }
 
-  // ── Email simple — solo resumen básico ───────────────────────
-  var nivelColor=(d.nivLabel||'').indexOf('óptimo')>=0?'#22c55e':(d.nivLabel||'').indexOf('urgentes')>=0?'#ef4444':'#f0c040';
-  var htmlBody='<!DOCTYPE html><html><head><meta charset="UTF-8"></head>'
-    +'<body style="margin:0;padding:0;background:#0a0a0a;font-family:-apple-system,sans-serif;">'
-    +'<div style="max-width:580px;margin:0 auto;padding:20px;">'
-    +'<div style="background:linear-gradient(135deg,#c9a84c,#f0c040);border-radius:12px 12px 0 0;padding:22px;text-align:center;">'
-      +'<div style="font-size:22px;font-weight:900;color:#0a0a0a;">SpeciMen® Gym App</div>'
-      +'<div style="font-size:11px;color:#5a4000;margin-top:3px;">Análisis de progreso semanal — '+d.fecha+'</div>'
-    +'</div>'
-    +'<div style="background:#111118;padding:14px 22px;border-left:1px solid #222;border-right:1px solid #222;">'
-      +'<div style="font-size:15px;font-weight:700;color:'+nivelColor+';">'+d.nivLabel+'</div>'
-      +'<div style="font-size:10px;color:#606080;margin-top:2px;">'+d.motor+'</div>'
-    +'</div>'
-    +'<div style="background:#0d0d1a;border-left:1px solid #222;border-right:1px solid #222;padding:16px 22px;">'
-      +'<div style="font-size:10px;font-weight:700;color:#c9a84c;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;">🔬 Resumen clínico</div>'
-      +'<div style="font-size:13px;color:#d0d0e8;line-height:1.8;font-style:italic;border-left:3px solid #c9a84c;padding-left:12px;">'+d.resumen+'</div>'
-    +'</div>'
-    +'<div style="background:#111118;border-left:1px solid #222;border-right:1px solid #222;padding:14px 22px;">'
-      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
-        +'<div style="background:#0d0d1a;border-radius:8px;padding:8px 10px;"><div style="font-size:9px;color:#606080;text-transform:uppercase;">Objetivo</div><div style="font-size:12px;font-weight:700;color:#f0c040;">'+d.obj+'</div></div>'
-        +'<div style="background:#0d0d1a;border-radius:8px;padding:8px 10px;"><div style="font-size:9px;color:#606080;text-transform:uppercase;">Sesiones</div><div style="font-size:12px;font-weight:700;color:#f0f0fa;">'+d.sesiones+'/5 · RPE '+d.rpe+'</div></div>'
-        +'<div style="background:#0d0d1a;border-radius:8px;padding:8px 10px;"><div style="font-size:9px;color:#606080;text-transform:uppercase;">Peso actual</div><div style="font-size:12px;font-weight:700;color:#f0f0fa;">'+d.peso+' kg <span style="font-size:10px;color:#606080;">(ant: '+d.pesoPrev+' kg)</span></div></div>'
-        +'<div style="background:#0d0d1a;border-radius:8px;padding:8px 10px;"><div style="font-size:9px;color:#606080;text-transform:uppercase;">Kcal · Déficit</div><div style="font-size:12px;font-weight:700;color:#f0f0fa;">'+d.kcal+' kcal · -'+d.deficit+'%</div></div>'
-      +'</div>'
-    +'</div>'
-    +(pdfBase64
-      ?'<div style="background:#0d0d1a;border-left:1px solid #222;border-right:1px solid #222;padding:12px 22px;text-align:center;">'
-        +'<div style="font-size:11px;color:#c9a84c;">📄 El informe completo se adjunta como PDF</div>'
-        +'<div style="font-size:10px;color:#606080;margin-top:3px;">Incluye: ficha clínica · gráficas · historial · ajustes detallados</div>'
-      +'</div>'
-      :'')
-    +'<div style="background:#070710;border:1px solid #222;border-top:none;border-radius:0 0 12px 12px;padding:12px 22px;text-align:center;">'
-      +'<div style="font-size:9px;color:#404060;">Hola '+d.nombre+' · '+d.fecha+'</div>'
-      +'<div style="font-size:7px;color:#252540;margin-top:5px;border-top:1px solid #111;padding-top:5px;">SpeciMen Gym App® desarrollado por Cristhian Andrés Serna Salazar © | 2026<br>Todos los derechos reservados. Prohibida su reproducción total o parcial sin autorización.</div>'
-    +'</div>'
-    +'</div></body></html>';
-
-  var u2=U();
   var textBody='SpeciMen® — Análisis '+d.fecha+'\n\n'+d.nivLabel+'\n\nRESUMEN:\n'+d.resumen+'\n\n'
     +'ENTRENAMIENTO:\n'+(d.ajustes_entreno||[]).map(function(a){return '• '+a;}).join('\n')+'\n\n'
     +'NUTRICIÓN:\n'+(d.ajustes_nutricion||[]).map(function(a){return '• '+a;}).join('\n')+'\n\n'
@@ -5604,7 +5528,6 @@ async function sendIAEmail(){
 
     if(pdfBase64){
       var pdfKB=Math.round(pdfBase64.length*0.75/1024);
-      console.log('PDF listo: '+pdfKB+' KB');
 
       // Opción A: adjuntar directo si es pequeño (<1.5MB real)
       if(pdfKB<1500){
@@ -5811,9 +5734,7 @@ function saveEditPerfil(){
 }
 window.saveEditPerfil=saveEditPerfil;
 
-// ══════════════════════════════════════════════════════
 // EXPORTAR / IMPORTAR DATOS
-// ══════════════════════════════════════════════════════
 
 // ── JSON: respaldo completo ───────────────────────────
 function exportarJSON(){
@@ -5965,9 +5886,7 @@ function generarPDF(u){
       });
     }
 
-    // ══════════════════════════════════════════
     // PÁGINA 1 — CABECERA + FICHA CLÍNICA
-    // ══════════════════════════════════════════
     rect(0,0,W,42,0,BG);
     // Logo
     var logoSrc=window.__LOGO_DATA_URI__||'';
@@ -6026,9 +5945,7 @@ function generarPDF(u){
     });
     y+=Math.ceil(metItems.length/3)*(rH+1)+6;
 
-    // ══════════════════════════════════════════
     // GRÁFICA DE EVOLUCIÓN DE PESO
-    // ══════════════════════════════════════════
     if(meds.length>=2){
       section('📈 EVOLUCIÓN DE PESO (últimas '+(Math.min(meds.length,12))+' mediciones)',GOLD);
       var pesoVals=meds.slice(-12).map(function(m){return parseFloat(m.peso)||0;}).filter(Boolean);
@@ -6049,9 +5966,7 @@ function generarPDF(u){
       y+=28;
     }
 
-    // ══════════════════════════════════════════
     // PÁGINA 2 — HISTORIAL SESIONES + ANÁLISIS
-    // ══════════════════════════════════════════
     if(sessions.length||_lastIAText){
       doc.addPage(); y=M+8;
 
@@ -6155,7 +6070,6 @@ function generarPDF(u){
     doc.save('SpeciMen_Informe_'+( u.nombre||'usuario').split(' ')[0]+'_'+new Date().toISOString().slice(0,10)+'.pdf');
     toast('✓ PDF generado correctamente');
   }catch(err){
-    console.error('PDF error:',err);
     toast('Error generando PDF: '+err.message,'var(--red)');
   }
 }
@@ -6330,7 +6244,6 @@ function initKongoListeners(){
 }
 
 
-
 // ── Toggle kg/time en ejercicio ─────────────────
 function toggleExKg(){
   var type=$('ex-rep-type')?$('ex-rep-type').value:'reps';
@@ -6393,7 +6306,6 @@ function selectAltEx(exIdx, newName){
 }
 window.selectAltEx=selectAltEx;
 
-// ── FIX 7: Añadir/quitar series en ejercicio activo ─
 function addSerieEx(exIdx){
   if(!APP.exTemp||!APP.exTemp[exIdx]) return;
   var ex=APP.exTemp[exIdx];
@@ -6411,7 +6323,6 @@ function removeSerieEx(exIdx){
 }
 window.removeSerieEx=removeSerieEx;
 
-// ── FIX 10: Editar sesión desde historial ──────────
 function editHistSession(sIdx){
   var u=U(); if(!u) return;
   var s=u.sessions[sIdx]; if(!s) return;
@@ -6539,7 +6450,6 @@ function deleteHistSession(sIdx){
 }
 window.deleteHistSession=deleteHistSession;
 
-// ── FIX 11: Hora inicio en historial ────────────────
 function addHoraInicioHist(sIdx){
   var u=U(); if(!u) return;
   var s=u.sessions[sIdx]; if(!s) return;
