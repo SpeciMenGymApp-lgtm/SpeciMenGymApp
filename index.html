@@ -367,7 +367,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 #kongo-input-bar{position:absolute;bottom:calc(52px + var(--safe));left:0;right:0;
   background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);
   padding:8px 14px 8px;
-  display:flex;flex-direction:column;gap:6px;z-index:50;}
+  display:flex;flex-direction:column;gap:6px;z-index:99;}
 /* Chips de preguntas rápidas */
 #kongo-quick{display:grid;grid-template-columns:1fr 1fr;
   gap:6px;padding-bottom:4px;display:none;}
@@ -1128,10 +1128,23 @@ function U(){return APP.users[APP.cur]||{};}
 var SES_DRAFT_KEY='specimen_ses_draft';
 function saveSesionDraft(){
   try{
-    if(APP.exTemp&&APP.exTemp.length){
-      var draft={exTemp:APP.exTemp,diaIdx:APP._sesionDiaIdx||0,ts:Date.now()};
-      localStorage.setItem(SES_DRAFT_KEY,JSON.stringify(draft));
-    }
+    // 5.0: el borrador guardaba solo exTemp. Fecha, tipo, semana, mesociclo,
+    // peso corporal, duracion, RPE, fatiga y notas viven en el DOM y se
+    // perdian enteros al recuperar. Ahora tambien van dentro.
+    var hayEjercicios = APP.exTemp && APP.exTemp.length;
+    var campos = (typeof leerCamposSesion==='function') ? leerCamposSesion() : {};
+    var hayCampos = ['sf-peso','sf-dur','sf-rpe','sf-fat','sf-notas'].some(function(k){
+      return campos[k] && String(campos[k]).trim();
+    });
+    if(!hayEjercicios && !hayCampos){ return; }
+    var draft={
+      exTemp: APP.exTemp || [],
+      tipo: APP._exTempTipo || (campos['sf-tipo']||''),
+      diaIdx: APP._sesionDiaIdx||0,
+      campos: campos,
+      ts: Date.now()
+    };
+    localStorage.setItem(SES_DRAFT_KEY,JSON.stringify(draft));
   }catch(e){}
 }
 function clearSesionDraft(){try{localStorage.removeItem(SES_DRAFT_KEY);}catch(e){}}
@@ -1140,32 +1153,75 @@ function checkSesionDraft(){
     var raw=localStorage.getItem(SES_DRAFT_KEY);
     if(!raw) return;
     var d=JSON.parse(raw);
-    // Solo recuperar si el borrador es de menos de 4 horas
-    if(!d||!d.exTemp||!d.exTemp.length||Date.now()-d.ts>4*3600*1000){clearSesionDraft();return;}
+    if(!d || Date.now()-d.ts>24*3600*1000){clearSesionDraft();return;}
+    var nEx=(d.exTemp||[]).length;
+    // Series realmente anotadas, para que el aviso diga algo util
+    var nSeries=0;
+    (d.exTemp||[]).forEach(function(ex){
+      (ex.series||[]).forEach(function(s){ if(s.done||s.kg||s.reps) nSeries++; });
+    });
+    if(!nEx && !nSeries) { clearSesionDraft(); return; }
     var mins=Math.round((Date.now()-d.ts)/60000);
+    var cuando = mins<60 ? ('hace '+mins+' min')
+               : mins<1440 ? ('hace '+Math.round(mins/60)+' h')
+               : ('hace '+Math.round(mins/1440)+' d');
     var banner=document.createElement('div');
     banner.id='ses-recover-banner';
     banner.style.cssText='position:fixed;bottom:calc(60px + env(safe-area-inset-bottom));left:12px;right:12px;background:#1a1a0a;border:1px solid var(--acc);border-radius:12px;padding:12px 14px;z-index:400;display:flex;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(0,0,0,.5);';
-    banner.innerHTML='<div style="flex:1;"><div style="font-size:13px;font-weight:700;color:var(--acc2);">⚡ Sesión interrumpida</div>'
-      +'<div style="font-size:11px;color:var(--t2);margin-top:2px;">Hace '+mins+' min · '+d.exTemp.length+' ejercicios</div></div>'
+    banner.innerHTML='<div style="flex:1;"><div style="font-size:13px;font-weight:700;color:var(--acc2);">⚡ Sesión sin guardar</div>'
+      +'<div style="font-size:11px;color:var(--t2);margin-top:2px;">'+(d.tipo?d.tipo+' · ':'')+cuando+' · '+nSeries+' series anotadas</div></div>'
       +'<button onclick="recoverSesionDraft()" style="background:var(--acc2);color:#000;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;">Recuperar</button>'
-      +'<button onclick="this.parentElement.remove();clearSesionDraft();" style="background:var(--bg3);color:var(--t2);border:none;border-radius:8px;padding:8px 10px;font-size:12px;cursor:pointer;">✕</button>';
+      +'<button onclick="descartarSesionDraft()" style="background:var(--bg3);color:var(--t2);border:none;border-radius:8px;padding:8px 10px;font-size:12px;cursor:pointer;">✕</button>';
     document.body.appendChild(banner);
   }catch(e){}
 }
+// Descartar pide confirmacion: antes la X borraba el borrador sin preguntar.
+function descartarSesionDraft(){
+  if(!confirm('¿Descartar la sesión sin guardar? Esta acción no se puede deshacer.')) return;
+  var b=document.getElementById('ses-recover-banner');
+  if(b) b.remove();
+  clearSesionDraft();
+}
+window.descartarSesionDraft=descartarSesionDraft;
+
 function recoverSesionDraft(){
   try{
     var raw=localStorage.getItem(SES_DRAFT_KEY);
-    if(!raw) return;
+    if(!raw){toast('No hay borrador que recuperar','var(--amber)');return;}
     var d=JSON.parse(raw);
-    APP.exTemp=d.exTemp||[];
-    APP._sesionDiaIdx=d.diaIdx||0;
     var banner=document.getElementById('ses-recover-banner');
     if(banner) banner.remove();
+
+    // ORDEN CRITICO. Antes se restauraba exTemp y despues se llamaba a
+    // goTo('sesion'), que ejecuta populateTipoSesion() -> loadDayExercises()
+    // y sobrescribia lo recien restaurado con una plantilla vacia: por eso
+    // "Recuperar" borraba la sesion en lugar de traerla de vuelta.
+    // Ahora se navega primero y se restaura despues.
+    APP._sesionDiaIdx=d.diaIdx||0;
     goTo('sesion');
-    renderExList&&renderExList();
-    toast('✓ Sesión recuperada');
-  }catch(e){toast('No se pudo recuperar la sesión');}
+
+    // Tipo de entreno antes que nada, para que el select no lo pise
+    if(d.tipo){
+      var sel=$('sf-tipo');
+      if(sel){
+        var existe=[].slice.call(sel.options).some(function(o){return o.value===d.tipo;});
+        if(existe) sel.value=d.tipo;
+      }
+    }
+    APP.exTemp=d.exTemp||[];
+    APP._exTempTipo=d.tipo||'';
+    escribirCamposSesion(d.campos);
+    renderExList();
+
+    var nSeries=0;
+    (APP.exTemp||[]).forEach(function(ex){
+      (ex.series||[]).forEach(function(s){ if(s.done||s.kg||s.reps) nSeries++; });
+    });
+    toast('✓ Sesión recuperada · '+nSeries+' series');
+  }catch(e){
+    diagLog('DRAFT',e.message);
+    toast('No se pudo recuperar la sesión','var(--red)');
+  }
 }
 window.recoverSesionDraft=recoverSesionDraft;
 
@@ -3224,6 +3280,14 @@ function initApp(){
   checkSesionDraft();
   // Guardar borrador cada 5 segundos (+ inmediatamente en cada input/check)
   setInterval(saveSesionDraft, 5000);
+  // 5.0: los campos de cabecera tambien disparan el guardado del borrador.
+  ['sf-fecha','sf-sem','sf-meso','sf-peso','sf-dur','sf-rpe','sf-fat','sf-notas'].forEach(function(id){
+    var el=$(id);
+    if(el){
+      el.addEventListener('input',saveSesionDraft);
+      el.addEventListener('change',saveSesionDraft);
+    }
+  });
   renderHome();
   document.querySelectorAll('.bn').forEach(function(b){
     b.addEventListener('click',function(){goTo(this.getAttribute('data-s'));});
@@ -3398,6 +3462,12 @@ function goTo(id){
   var bn=document.querySelector('.bn[data-s="'+id+'"]');
   if(bn)bn.classList.add('on');
   $('pg-title').textContent=TITLES[id]||id;
+  // FIX 5.0: el credito legal es position:fixed con z-index 98 y quedaba por
+  // encima de la barra de escritura de Kongo (z-index 50), tapandola. Antes
+  // solo se ocultaba al enfocar el input, asi que al entrar en la pantalla se
+  // veia el texto legal montado sobre el campo. En Kongo se oculta siempre.
+  var _credito=document.getElementById('dev-credit');
+  if(_credito) _credito.style.display=(id==='kongo')?'none':'';
   var ct=$('content');
   // Kongo usa position:absolute — el content no necesita ajustes
   if(id!=='kongo') ct.scrollTop=0;
@@ -3735,45 +3805,140 @@ function populateTipoSesion(){
   var dow=new Date().getDay(); var idxMap=[6,0,1,2,3,4,5]; var idx=idxMap[dow];
   if(APP._sesionDiaIdx!==undefined&&APP._sesionDiaIdx!==null) idx=APP._sesionDiaIdx;
   var diaH=(u.planEj||[])[idx];
-  if(diaH&&diaH.tipo!=='descanso') sel.value=diaH.nombre;
+  // 5.0: si hay una sesion a medias, manda esa — no la preseleccion por dia
+  // de la semana. Antes volver a la pestaña reescribia el select y con el la
+  // sesion en curso.
+  if(haySesionEnCurso() && APP._exTempTipo){
+    sel.value=APP._exTempTipo;
+  } else if(diaH&&diaH.tipo!=='descanso'){
+    sel.value=diaH.nombre;
+  }
   // Cargar ejercicios cuando cambia el tipo
-  sel.onchange=function(){ loadDayExercises(); };
-  loadDayExercises();
+  sel.onchange=function(){ cambiarTipoSesion(); };
+  loadDayExercises(false);   // false = respeta la sesion en curso
 }
-
 // Carga un día específico por índice (llamado desde el botón del plan)
 function loadSesionDia(diaIdx){
   var u=U(); if(!u||!u.planEj) return;
   var d=u.planEj[diaIdx]; if(!d||d.tipo==='descanso') return;
   var sel=$('sf-tipo');
-  if(sel) sel.value=d.nombre;
-  loadDayExercises();
+  if(!sel) return;
+  // 5.0: aqui la eleccion es explicita, pero si hay series anotadas de otro
+  // dia se pregunta antes de descartarlas en vez de borrarlas sin avisar.
+  if(haySesionEnCurso() && APP._exTempTipo && APP._exTempTipo!==d.nombre){
+    if(!confirm('Tienes series anotadas en "'+APP._exTempTipo+'".\n\nEmpezar "'+d.nombre+'" las descartará. ¿Continuar?')){
+      return;
+    }
+  }
+  sel.value=d.nombre;
+  loadDayExercises(true);
+  saveSesionDraft();
 }
+window.loadSesionDia=loadSesionDia;
 window.loadSesionDia=loadSesionDia;
 
 // Carga los ejercicios del día seleccionado en APP.exTemp
-function loadDayExercises(){
+// ── PERSISTENCIA DE LA SESIÓN EN CURSO — reescrito en 5.0 ──────────────────
+// Bug original: populateTipoSesion() terminaba llamando a loadDayExercises(),
+// y esa funcion hacia SIEMPRE `APP.exTemp = plan.map(...)`, es decir, tiraba
+// la sesion en curso y la sustituia por una plantilla vacia.
+//
+// Como goTo('sesion') llama a populateTipoSesion(), bastaba con salir a otra
+// pestaña y volver para perder todas las series ya anotadas. Y el boton
+// "Recuperar" era todavia peor: restauraba el borrador y acto seguido llamaba
+// a goTo('sesion'), que lo borraba antes de pintarlo. De ahi que recuperar
+// pareciera borrarlo todo.
+//
+// Ahora exTemp solo se regenera cuando de verdad hay que regenerarlo: cambio
+// de tipo de entreno explicito, y con confirmacion si ya habia datos.
+
+// ¿Hay algo anotado que merezca la pena conservar?
+function haySesionEnCurso(){
+  if(!APP.exTemp || !APP.exTemp.length) return false;
+  for(var i=0;i<APP.exTemp.length;i++){
+    var ex=APP.exTemp[i];
+    if(ex.notas) return true;
+    if(ex.extra) return true;
+    var ss=ex.series||[];
+    for(var j=0;j<ss.length;j++){
+      if(ss[j].done || (ss[j].kg!=='' && ss[j].kg!=null) || (ss[j].reps!=='' && ss[j].reps!=null)) return true;
+    }
+  }
+  return false;
+}
+window.haySesionEnCurso=haySesionEnCurso;
+
+// Campos de cabecera de la sesion. Antes no se guardaban en el borrador, asi
+// que aunque se recuperasen los ejercicios se perdian fecha, RPE, notas...
+var SES_CAMPOS=['sf-fecha','sf-tipo','sf-sem','sf-meso','sf-peso','sf-dur','sf-rpe','sf-fat','sf-notas'];
+
+function leerCamposSesion(){
+  var o={};
+  SES_CAMPOS.forEach(function(id){ var el=$(id); if(el) o[id]=el.value; });
+  return o;
+}
+function escribirCamposSesion(campos){
+  if(!campos) return;
+  SES_CAMPOS.forEach(function(id){
+    var el=$(id);
+    if(el && campos[id]!==undefined && campos[id]!=='') el.value=campos[id];
+  });
+}
+
+function loadDayExercises(forzar){
   var u=U();
-  var tipoSel=$('sf-tipo').value;
+  var sel=$('sf-tipo');
+  if(!sel) return;
+  var tipoSel=sel.value;
   var diaData=(u.planEj||[]).find(function(d){return d.nombre===tipoSel;});
   if(!diaData) return;
-  // Inicializar exTemp con los ejercicios del plan (series vacías)
+
+  // Si ya hay una sesion en curso para este mismo tipo, NO se toca.
+  if(!forzar && APP._exTempTipo===tipoSel && APP.exTemp && APP.exTemp.length){
+    var $sub0=$('ses-sub');
+    if($sub0) $sub0.textContent=diaData.nombre+' · '+APP.exTemp.length+' ejercicios';
+    renderExList();
+    return;
+  }
+  // Si hay datos anotados de OTRO dia, se avisa antes de descartarlos.
+  if(!forzar && haySesionEnCurso() && APP._exTempTipo && APP._exTempTipo!==tipoSel){
+    renderExList();
+    return;
+  }
+
   APP.exTemp=(diaData.exs||[]).map(function(e){
     return {
       id:e.id, n:e.n, mus:e.mus,
-      seriesPlan:e.s,        // series del plan (número)
-      repsPlan:e.r,          // reps del plan ("8-12")
+      seriesPlan:e.s,
+      repsPlan:e.r,
       rir:e.rir,
-      series:buildSeries(e.s, e.r), // array de {kg:'', reps:'', done:false}
+      series:buildSeries(e.s, e.r),
       notas:'',
-      extra:false            // false = viene del plan
+      extra:false
     };
   });
-  // Actualizar subtítulo
+  APP._exTempTipo=tipoSel;
   var $sub=$('ses-sub');
   if($sub) $sub.textContent=diaData.nombre+' · '+diaData.exs.length+' ejercicios';
   renderExList();
 }
+window.loadDayExercises=loadDayExercises;
+
+// Cambio manual de tipo de entreno: si hay trabajo anotado, se pregunta.
+function cambiarTipoSesion(){
+  var sel=$('sf-tipo');
+  if(!sel) return;
+  var nuevo=sel.value;
+  if(haySesionEnCurso() && APP._exTempTipo && APP._exTempTipo!==nuevo){
+    if(!confirm('Tienes series anotadas en "'+APP._exTempTipo+'".\n\nCambiar de entreno las descartará. ¿Continuar?')){
+      sel.value=APP._exTempTipo;   // revertir el select
+      return;
+    }
+  }
+  loadDayExercises(true);
+  saveSesionDraft();
+}
+window.cambiarTipoSesion=cambiarTipoSesion;
 
 // Construye el array de series vacías para un ejercicio
 function buildSeries(numSeries, repsPlan){
@@ -4006,6 +4171,7 @@ function saveSesion(){
   if(!u.sessions)u.sessions=[];
   u.sessions.push(ses);
   APP.exTemp=[];
+  APP._exTempTipo=null;  // 5.0: sesion cerrada, la siguiente visita carga limpia
   ['sf-peso','sf-dur','sf-rpe','sf-fat','sf-notas'].forEach(function(id){$(id).value='';});
   renderExList(); saveAll();
   // Calcular resumen
@@ -4427,32 +4593,85 @@ async function runIA(){
     }
     // ── Parser de texto plano — sin riesgo de JSON corruption ────
     // Parser robusto: captura contenido hasta el siguiente encabezado o fin de texto
-    function extractLine(label){
-      // Busca el label y captura todo hasta el siguiente label conocido o fin
-      var labels='NIVEL|RESUMEN|ENTRENO1|ENTRENO2|NUTRICION1|NUTRICION2|PLAN|ENTRENAMIENTO|NUTRICION|AJUSTE';
-      var re=new RegExp(label+'[:\\s]+([\\s\\S]+?)(?=(?:'+labels+')[:\\s]|$)','i');
-      var m=txt.match(re);
-      if(m) return m[1].replace(/\n+/g,' ').trim();
-      return '';
+    // ── PARSER DE LA RESPUESTA IA — reescrito en 5.0 ──────────────────────
+    // El anterior usaba una sola expresion regular con lookahead perezoso:
+    //   (?=(?:NIVEL|RESUMEN|ENTRENO1|...|ENTRENAMIENTO|NUTRICION|PLAN)[:\s])
+    // Al ir con la bandera /i y sin limite de palabra, cortaba la captura en
+    // cuanto aparecia una de esas palabras DENTRO del texto normal. Por eso
+    // "Aumentar la frecuencia de entrenamiento a 3 sesiones" se quedaba en
+    // "Aumentar la frecuencia de": la palabra "entrenamiento" hacia de
+    // etiqueta falsa. Lo mismo con "el plan", "la nutricion", "el nivel"...
+    //
+    // Ahora se parsea por lineas: una etiqueta solo cuenta si abre la linea y
+    // va seguida de dos puntos, que es el formato que pide el prompt. El texto
+    // de cada valor puede ocupar varias lineas y nunca se corta a mitad.
+    var _ETIQUETAS = [
+      ['nivel',      ['NIVEL','LEVEL']],
+      ['resumen',    ['RESUMEN','ANALISIS','ANÁLISIS','SUMMARY']],
+      ['entreno1',   ['ENTRENO1','ENTRENO 1','ENTRENAMIENTO1','ENTRENAMIENTO 1','AJUSTE1','AJUSTE 1','TRAINING1','TRAINING 1']],
+      ['entreno2',   ['ENTRENO2','ENTRENO 2','ENTRENAMIENTO2','ENTRENAMIENTO 2','AJUSTE2','AJUSTE 2','TRAINING2','TRAINING 2']],
+      ['nutricion1', ['NUTRICION1','NUTRICION 1','NUTRICIÓN1','NUTRICIÓN 1','NUTRITION1','NUTRITION 1']],
+      ['nutricion2', ['NUTRICION2','NUTRICION 2','NUTRICIÓN2','NUTRICIÓN 2','NUTRITION2','NUTRITION 2']],
+      ['plan',       ['PLAN','DIRECTIVA','RECOMENDACION','RECOMENDACIÓN','NEXT WEEK']]
+    ];
+    function _normEtq(s){
+      return String(s||'').toUpperCase()
+        .replace(/[ÁÀÄÂ]/g,'A').replace(/[ÉÈËÊ]/g,'E').replace(/[ÍÌÏÎ]/g,'I')
+        .replace(/[ÓÒÖÔ]/g,'O').replace(/[ÚÙÜÛ]/g,'U').replace(/\s+/g,' ').trim();
     }
-    // Parser ultra-robusto — captura cualquier estructura que devuelva el modelo
+    function parsearIA(texto){
+      var out = {};
+      var lineas = String(texto||'').split(/\r?\n/);
+      var actual = null;
+      lineas.forEach(function(linea){
+        var m = linea.match(/^\s*[*#>\-•\s]*([A-Za-zÁÉÍÓÚÑáéíóúñ ]{3,30}?)\s*[:：]\s*(.*)$/);
+        var abrio = false;
+        if (m) {
+          var etq = _normEtq(m[1]).replace(/[*#>•]/g,'').trim();
+          for (var i = 0; i < _ETIQUETAS.length; i++) {
+            var clave = _ETIQUETAS[i][0];
+            var alias = _ETIQUETAS[i][1];
+            for (var j = 0; j < alias.length; j++) {
+              if (_normEtq(alias[j]) === etq) {
+                actual = clave;
+                out[clave] = (m[2] || '').trim();
+                abrio = true;
+                break;
+              }
+            }
+            if (abrio) break;
+          }
+        }
+        // Continuacion del valor anterior (respuestas que ocupan varias lineas)
+        if (!abrio && actual && linea.trim()) {
+          out[actual] = ((out[actual] || '') + ' ' + linea.trim()).trim();
+        }
+      });
+      return out;
+    }
+    var _p = parsearIA(txt);
+    // Compatibilidad: extractLine/extractAny siguen existiendo por si alguna
+    // rama antigua las llama, pero ahora leen del parseo por lineas.
     function extractAny(){
       var args=[].slice.call(arguments);
-      for(var i=0;i<args.length;i++){var v=extractLine(args[i]);if(v) return v;}
+      for(var i=0;i<args.length;i++){
+        var a=_normEtq(args[i]);
+        for(var k=0;k<_ETIQUETAS.length;k++){
+          var alias=_ETIQUETAS[k][1];
+          for(var j=0;j<alias.length;j++){
+            if(_normEtq(alias[j])===a && _p[_ETIQUETAS[k][0]]) return _p[_ETIQUETAS[k][0]];
+          }
+        }
+      }
       return '';
     }
+    function extractLine(label){ return extractAny(label); }
     var aj={
-      nivel: extractAny('NIVEL')||'regular',
-      resumen: extractAny('RESUMEN','ANÁLISIS','ANALISIS','SUMMARY')||'Análisis completado.',
-      ajustes_entreno: [
-        extractAny('ENTRENO1','ENTRENAMIENTO1','ENTRENAMIENTO 1','AJUSTE ENTRENO 1','AJUSTE1','TRAINING1','TRAINING 1'),
-        extractAny('ENTRENO2','ENTRENAMIENTO2','ENTRENAMIENTO 2','AJUSTE ENTRENO 2','AJUSTE2','TRAINING2','TRAINING 2')
-      ].filter(Boolean),
-      ajustes_nutricion: [
-        extractAny('NUTRICION1','NUTRICIÓN1','NUTRICION 1','NUTRICIÓN 1','NUTRITION1','NUTRITION 1'),
-        extractAny('NUTRICION2','NUTRICIÓN2','NUTRICION 2','NUTRICIÓN 2','NUTRITION2','NUTRITION 2')
-      ].filter(Boolean),
-      recomendacion: extractAny('PLAN','DIRECTIVA','RECOMENDACION','RECOMENDACIÓN','PRÓXIMA SEMANA','NEXT WEEK')||''
+      nivel: _p.nivel||'regular',
+      resumen: _p.resumen||'Análisis completado.',
+      ajustes_entreno: [_p.entreno1, _p.entreno2].filter(Boolean),
+      ajustes_nutricion: [_p.nutricion1, _p.nutricion2].filter(Boolean),
+      recomendacion: _p.plan||''
     };
     // Fallback 1: extraer por viñetas/numeración bajo secciones
     if(!aj.ajustes_entreno.length||!aj.ajustes_nutricion.length){
