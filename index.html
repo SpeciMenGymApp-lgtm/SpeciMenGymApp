@@ -6066,8 +6066,18 @@ async function sendIAEmail(){
     // FIX 5.0: acepta rr(x,y,w,h,col) y rr(x,y,w,h,radio,col) — antes las 10 llamadas
     // con 6 argumentos pasaban un numero como color y jsPDF escribia "NaN" en el stream.
     function rr(x,_y,w,h,a,b){var col=Array.isArray(a)?a:(Array.isArray(b)?b:[22,22,38]);var r=Array.isArray(a)?2:(typeof a==='number'?a:2);doc2.setFillColor(col[0],col[1],col[2]);doc2.roundedRect(x,_y,w,h,r,r,'F');}
-    function tt(str,x,_y,sz,col,al){doc2.setFontSize(sz||10);doc2.setTextColor(col?col[0]:235,col?col[1]:235,col?col[2]:250);doc2.text(String(str||'—'),x,_y,{align:al||'left'});}
-    function sec(title,col){if(y>262){doc2.addPage();y=M+6;}rr(M,y,CW,7,2,BG2);doc2.setFontSize(8);doc2.setTextColor(col?col[0]:201,col?col[1]:168,col?col[2]:76);doc2.text(title,M+3,y+4.8);y+=10;}
+    function tt(str,x,_y,sz,col,al){doc2.setFontSize(sz||10);doc2.setTextColor(col?col[0]:235,col?col[1]:235,col?col[2]:250);doc2.text(_pdfTxt(str)||'-',x,_y,{align:al||'left'});}
+    // 5.0: el titulo de seccion tambien se sanea y se recorta al ancho util,
+    // para que un encabezado largo no se salga de la barra dorada.
+    function sec(title,col){
+      if(y>262){doc2.addPage();y=M+6;}
+      rr(M,y,CW,7.5,2,BG2);
+      doc2.setFontSize(8);
+      doc2.setTextColor(col?col[0]:201,col?col[1]:168,col?col[2]:76);
+      var t=doc2.splitTextToSize(_pdfTxt(title).toUpperCase(),CW-6)[0]||'';
+      doc2.text(t,M+3,y+5);
+      y+=11;
+    }
     function barChart2(vals,labs,x,_y,w,h,col){
       var max=Math.max.apply(null,vals.map(function(v){return parseFloat(v)||0;}));if(!max)return;
       var bw=(w-4)/vals.length-2;
@@ -6188,22 +6198,34 @@ async function sendIAEmail(){
       });
       // Notas de la ultima medida, si las hay
       if(lastMed2&&lastMed2.notas){
-        if(y>268){doc2.addPage();y=M+6;}
-        var nl=doc2.splitTextToSize('Notas ultima medida: '+lastMed2.notas,CW-4);
-        rr(M,y,CW,nl.length*4+4,1,BG2);
-        doc2.setFontSize(6.5);doc2.setTextColor(190,190,215);
-        nl.forEach(function(l,i){doc2.text(l,M+3,y+4+i*4);});
-        y+=nl.length*4+6;
+        if(y>264){doc2.addPage();y=M+6;}
+        doc2.setFontSize(6.8);   // 5.0: fijar tamaño ANTES de medir el texto
+        var nl=doc2.splitTextToSize(_pdfTxt('Notas ultima medida: '+lastMed2.notas),CW-6);
+        rr(M,y,CW,nl.length*3.6+4,2,BG2);
+        doc2.setTextColor(190,190,215);
+        nl.forEach(function(l,i){doc2.text(l,M+3,y+4.5+i*3.6);});
+        y+=nl.length*3.6+7;
       }
-      // Fotos de progreso: se listan los enlaces de Drive registrados.
+      // Fotos de progreso. Ahora el backend las adjunta al correo, asi que
+      // aqui solo se referencian; la URL se recorta para no salirse del margen.
       var _conFoto=meds2.filter(function(m){return m.fotoUrl;});
       if(_conFoto.length){
-        if(y>262){doc2.addPage();y=M+6;}
-        tt('FOTOS DE PROGRESO REGISTRADAS',M,y,7,GOLD);y+=5;
+        if(y>258){doc2.addPage();y=M+6;}
+        sec('FOTOS DE PROGRESO',GOLD);
+        doc2.setFontSize(6.5);
+        doc2.setTextColor(150,150,180);
+        doc2.text(_pdfTxt('Las '+Math.min(_conFoto.length,4)+' mas recientes van adjuntas a este correo. Copia completa en tu carpeta privada de Drive.'),M+1,y);
+        y+=6;
         _conFoto.slice(-8).forEach(function(m){
-          if(y>278){doc2.addPage();y=M+6;}
-          rr(M,y,CW,6,1,BG2);
-          tt(fmtDate(m.fecha)+'  ·  '+m.fotoUrl,M+2,y+4,5.5,[150,150,200]);
+          if(y>274){doc2.addPage();y=M+6;}
+          rr(M,y,CW,6,2,BG2);
+          doc2.setFontSize(6.5);
+          doc2.setTextColor(200,200,225);
+          doc2.text(_pdfTxt(fmtDate(m.fecha)),M+3,y+4);
+          doc2.setTextColor(130,130,170);
+          var _u=String(m.fotoUrl||'');
+          if(_u.length>78) _u=_u.slice(0,75)+'...';
+          doc2.text(_pdfTxt(_u),M+34,y+4);
           y+=7;
         });
         y+=4;
@@ -6211,61 +6233,93 @@ async function sendIAEmail(){
       y+=6;
     }
 
+    // ── BLOQUE DE ANÁLISIS IA — reescrito en 5.0 ──────────────────────────
+    // El fallo estaba en el orden: se llamaba a splitTextToSize ANTES de
+    // setFontSize, asi que jsPDF partia el texto midiendolo con el tamaño de
+    // letra de la seccion anterior. Si ese tamaño era menor (5.5 del listado
+    // de fotos), creia que todo cabia en una linea, devolvia una sola y luego
+    // la dibujaba a 8 puntos: de ahi el texto que se sale del margen y las
+    // frases cortadas a mitad. `parr()` fija el tamaño primero y ademas
+    // controla los saltos de pagina linea a linea.
+    function parr(texto, size, colTexto, colFondo, vinneta){
+      var t = _pdfTxt(texto);
+      if (!t) return;
+      doc2.setFontSize(size);                       // ANTES de medir
+      var sangria = vinneta ? 5 : 0;
+      var anchoUtil = CW - 6 - sangria;
+      var lineas = doc2.splitTextToSize(t, anchoUtil);
+      var lh = Math.max(3.4, size * 0.46);          // interlineado proporcional
+      var alto = lineas.length * lh + 4;
+      if (y + alto > 276) { doc2.addPage(); y = M + 6; }
+      if (colFondo) rr(M, y, CW, alto, 2, colFondo);
+      if (vinneta) {
+        doc2.setFontSize(size);
+        doc2.setTextColor(colTexto[0], colTexto[1], colTexto[2]);
+        doc2.text('-', M + 3, y + lh + 0.5);
+      }
+      doc2.setFontSize(size);
+      doc2.setTextColor(colTexto[0], colTexto[1], colTexto[2]);
+      lineas.forEach(function (l, i) {
+        doc2.text(l, M + 3 + sangria, y + lh + 0.5 + i * lh);
+      });
+      y += alto + 2;
+    }
+    // Rotulo de subseccion, con espacio garantizado debajo.
+    function rotulo(texto, col) {
+      if (y > 266) { doc2.addPage(); y = M + 6; }
+      doc2.setFontSize(7.5);
+      doc2.setTextColor(col[0], col[1], col[2]);
+      doc2.text(_pdfTxt(texto), M, y + 3);
+      y += 7;
+    }
+
     if(d&&d.resumen){
-      if(y>230){doc2.addPage();y=M+6;}
-      sec('🔬 ANÁLISIS CLÍNICO IA ('+( d.fecha||'')+' · '+( d.motor||'')+' )',GOLD);
-      rr(M,y,CW,8,2,BG2);
+      if(y>226){doc2.addPage();y=M+6;}
+      sec('ANALISIS CLINICO IA  ('+( d.fecha||'')+'  ·  '+( d.motor||'')+')',GOLD);
+
       var nc=(d.nivLabel||'').indexOf('óptimo')>=0?GREEN:(d.nivLabel||'').indexOf('urgentes')>=0?RED:GOLD;
-      tt('NIVEL: '+(d.nivLabel||'—'),M+2,y+5,8,nc);y+=11;
+      rr(M,y,CW,9,2,BG2);
+      doc2.setFontSize(8.5);
+      doc2.setTextColor(nc[0],nc[1],nc[2]);
+      doc2.text(_pdfTxt('NIVEL:  '+(d.nivLabel||'—')).toUpperCase(),M+3,y+6);
+      y+=13;
 
-      // Resumen
-      var rl2=doc2.splitTextToSize(d.resumen||'',CW-4);
-      rr(M,y,CW,rl2.length*4+4,2,[18,18,32]);doc2.setFontSize(8);doc2.setTextColor(200,200,220);
-      rl2.forEach(function(l,i){doc2.text(l,M+3,y+4+i*4);});y+=rl2.length*4+7;
+      rotulo('RESUMEN',GOLD);
+      parr(d.resumen||'',8,[205,205,225],[18,18,32]);
 
-      // Texto crudo completo si hay
+      if(d.ajustes_entreno&&d.ajustes_entreno.length){
+        rotulo('AJUSTES DE ENTRENAMIENTO',GOLD);
+        d.ajustes_entreno.forEach(function(a){ parr(a,7.5,[200,200,220],BG2,true); });
+        y+=2;
+      }
+
+      if(d.ajustes_nutricion&&d.ajustes_nutricion.length){
+        rotulo('AJUSTES DE NUTRICION',GREEN);
+        d.ajustes_nutricion.forEach(function(a){ parr(a,7.5,[200,200,220],BG2,true); });
+        y+=2;
+      }
+
+      if(d.recomendacion){
+        rotulo('DIRECTIVA PROXIMA SEMANA',BLUE);
+        parr(d.recomendacion,8,[185,205,245],[18,18,40]);
+        y+=2;
+      }
+
+      // La respuesta cruda va al final: es material de apoyo, no el informe.
+      // Antes iba justo debajo del resumen y repetia todo lo que viene luego.
       var rawUse=d._rawTxt||'';
       if(rawUse&&rawUse.length>20){
-        if(y>230){doc2.addPage();y=M+6;}
-        tt('RESPUESTA COMPLETA DE LA IA:',M,y,7,GOLD);y+=5;
-        var rawL2=doc2.splitTextToSize(rawUse,CW-4);
-        rr(M,y,CW,Math.min(rawL2.length,60)*4+4,2,BG2);doc2.setFontSize(7.5);doc2.setTextColor(200,200,220);
-        rawL2.slice(0,60).forEach(function(l,i){
-          if(y+4+i*4>278){doc2.addPage();y=M+6;}
-          doc2.text(l,M+3,y+4+i*4);
+        if(y>226){doc2.addPage();y=M+6;}
+        rotulo('TRANSCRIPCION COMPLETA DE LA IA',GRAY);
+        doc2.setFontSize(6.8);
+        var rawL2=doc2.splitTextToSize(_pdfTxt(rawUse),CW-6);
+        rawL2.slice(0,90).forEach(function(l){
+          if(y>274){doc2.addPage();y=M+6;doc2.setFontSize(6.8);}
+          doc2.setTextColor(150,150,175);
+          doc2.text(l,M+3,y+3);
+          y+=3.4;
         });
-        y+=Math.min(rawL2.length,60)*4+7;
-      }
-
-      // Ajustes entreno
-      if(d.ajustes_entreno&&d.ajustes_entreno.length){
-        if(y>240){doc2.addPage();y=M+6;}
-        tt('🏋️ AJUSTES DE ENTRENAMIENTO',M,y,7,GOLD);y+=5;
-        d.ajustes_entreno.forEach(function(a){
-          if(y>272){doc2.addPage();y=M+6;}
-          var ls=doc2.splitTextToSize('→ '+a,CW-4);
-          rr(M,y,CW,ls.length*4+3,2,BG2);doc2.setFontSize(7.5);doc2.setTextColor(200,200,220);
-          ls.forEach(function(l,i){doc2.text(l,M+3,y+3.5+i*4);});y+=ls.length*4+5;
-        });
-      }
-      // Ajustes nutrición
-      if(d.ajustes_nutricion&&d.ajustes_nutricion.length){
-        if(y>240){doc2.addPage();y=M+6;}
-        tt('🥗 AJUSTES DE NUTRICIÓN',M,y,7,GREEN);y+=5;
-        d.ajustes_nutricion.forEach(function(a){
-          if(y>272){doc2.addPage();y=M+6;}
-          var ls=doc2.splitTextToSize('→ '+a,CW-4);
-          rr(M,y,CW,ls.length*4+3,2,BG2);doc2.setFontSize(7.5);doc2.setTextColor(200,200,220);
-          ls.forEach(function(l,i){doc2.text(l,M+3,y+3.5+i*4);});y+=ls.length*4+5;
-        });
-      }
-      // Directiva
-      if(d.recomendacion){
-        if(y>240){doc2.addPage();y=M+6;}
-        tt('📅 DIRECTIVA PRÓXIMA SEMANA',M,y,7,BLUE);y+=5;
-        var dls2=doc2.splitTextToSize(d.recomendacion,CW-4);
-        rr(M,y,CW,dls2.length*4+4,2,[18,18,40]);doc2.setFontSize(8);doc2.setTextColor(180,200,240);
-        dls2.forEach(function(l,i){doc2.text(l,M+3,y+4+i*4);});
+        y+=4;
       }
     }
 
@@ -6637,6 +6691,35 @@ window.importarJSON=importarJSON;
 // standalone no hace absolutamente nada (sin error, sin archivo). Aqui
 // detectamos ese caso y abrimos un visor dentro de la app con el PDF real,
 // desde el que el usuario puede compartir o guardar en Archivos.
+// ── SANEADO DE TEXTO PARA PDF 5.0 ──────────────────────────────────────────
+// Las fuentes estandar de jsPDF (Helvetica) solo cubren Latin-1 / WinAnsi.
+// Cualquier emoji o simbolo fuera de ese rango sale como basura: por eso el
+// informe mostraba "O=Y" donde iba un microscopio y "!'" donde iba una flecha.
+// Aqui se sustituye lo sustituible y se elimina lo que no tiene equivalente.
+// Los acentos y la ñ SI estan en Latin-1, asi que se conservan intactos.
+function _pdfTxt(s){
+  return String(s == null ? '' : s)
+    // Simbolos con equivalente legible
+    .replace(/[→⇒➡➔]/g, '>')
+    .replace(/[←⇐]/g, '<')
+    .replace(/[✓✔✅]/g, 'OK')
+    .replace(/[✗✘❌]/g, 'X')
+    .replace(/[▲⚠❗‼]/g, '!')
+    .replace(/[•●▪◦]/g, '-')
+    .replace(/[–—―]/g, '-')
+    .replace(/[“”„]/g, '"')
+    .replace(/[‘’‚]/g, "'")
+    .replace(/…/g, '...')
+    .replace(/≤/g, '<=').replace(/≥/g, '>=')
+    .replace(/≈/g, '~').replace(/×/g, 'x')
+    // Emoji (pares suplentes) y bloques de simbolos sin equivalente
+    .replace(/[^\x09\x0A\x20-\x7E\xA0-\xFF]/g, '')
+    // Espacios sobrantes que dejan las sustituciones
+    .replace(/[ \t]{2,}/g, ' ')
+    .replace(/^[\s-]+|\s+$/g, '');
+}
+window._pdfTxt = _pdfTxt;
+
 function entregarPDF(doc, filename){
   var esIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
               (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -6696,14 +6779,14 @@ function generarPDF(u){
         TEXT=[235,235,250], GRAY=[110,110,140], GREEN=[34,197,94], RED=[239,68,68], BLUE=[96,165,250];
 
     function rect(x,_y,w,h,r,col){doc.setFillColor(col[0],col[1],col[2]);doc.roundedRect(x,_y,w,h,r||0,r||0,'F');}
-    function txt(str,x,_y,size,col,align){doc.setFontSize(size||10);doc.setTextColor(col?col[0]:235,col?col[1]:235,col?col[2]:250);doc.text(String(str||'—'),x,_y,{align:align||'left'});}
+    function txt(str,x,_y,size,col,align){doc.setFontSize(size||10);doc.setTextColor(col?col[0]:235,col?col[1]:235,col?col[2]:250);doc.text(_pdfTxt(str)||'-',x,_y,{align:align||'left'});}
     function sep(){doc.setDrawColor(40,40,70);doc.line(M,y,W-M,y);y+=3;}
     function section(title,color){
       if(y>262){doc.addPage();y=M+8;}
-      rect(M,y,CW,7,2,BG2);
+      rect(M,y,CW,7.5,2,BG2);
       doc.setFontSize(8);doc.setTextColor(color?color[0]:201,color?color[1]:168,color?color[2]:76);
-      doc.text(title,M+3,y+4.8);
-      y+=10;
+      doc.text(doc.splitTextToSize(_pdfTxt(title).toUpperCase(),CW-6)[0]||'',M+3,y+5);
+      y+=11;
     }
     function barChart(values, labels, x, _y, w, h, color){
       var max=Math.max.apply(null,values.map(function(v){return parseFloat(v)||0;}));
@@ -6875,53 +6958,56 @@ function generarPDF(u){
 
       // Análisis IA si existe
       if(_lastIAText&&typeof _lastIAText==='object'&&_lastIAText.resumen){
-        if(y>230){doc.addPage();y=M+8;}
-        section('🔬 ANÁLISIS CLÍNICO IA ('+(_lastIAText.fecha||'última sesión')+')',GOLD);
-        rect(M,y,CW,8,2,BG2);
+        // 5.0: mismo arreglo que en el informe por email — el tamaño de letra
+        // se fija ANTES de partir el texto, no despues.
+        var parr2=function(texto,size,colTexto,colFondo,vinneta){
+          var t=_pdfTxt(texto); if(!t) return;
+          doc.setFontSize(size);
+          var sangria=vinneta?5:0;
+          var lineas=doc.splitTextToSize(t,CW-6-sangria);
+          var lh=Math.max(3.4,size*0.46);
+          var alto=lineas.length*lh+4;
+          if(y+alto>276){doc.addPage();y=M+8;}
+          if(colFondo) rect(M,y,CW,alto,2,colFondo);
+          doc.setFontSize(size);
+          doc.setTextColor(colTexto[0],colTexto[1],colTexto[2]);
+          if(vinneta) doc.text('-',M+3,y+lh+0.5);
+          lineas.forEach(function(l,i){doc.text(l,M+3+sangria,y+lh+0.5+i*lh);});
+          y+=alto+2;
+        };
+        var rotulo2=function(texto,col){
+          if(y>266){doc.addPage();y=M+8;}
+          doc.setFontSize(7.5);
+          doc.setTextColor(col[0],col[1],col[2]);
+          doc.text(_pdfTxt(texto),M,y+3);
+          y+=7;
+        };
+
+        if(y>226){doc.addPage();y=M+8;}
+        section('ANALISIS CLINICO IA  ('+(_lastIAText.fecha||'última sesión')+')',GOLD);
+        rect(M,y,CW,9,2,BG2);
         var nivelC=_lastIAText.nivLabel&&_lastIAText.nivLabel.indexOf('óptimo')>=0?GREEN:_lastIAText.nivLabel&&_lastIAText.nivLabel.indexOf('urgentes')>=0?RED:GOLD;
-        txt('Nivel: '+(_lastIAText.nivLabel||'—'),M+2,y+5,8,nivelC);
-        txt('Motor: '+(_lastIAText.motor||'—'),W-M-2,y+5,7,GRAY,'right');
-        y+=10;
-        // Resumen
-        var resLines=doc.splitTextToSize(_lastIAText.resumen||'',CW-4);
-        rect(M,y,CW,resLines.length*4+4,2,[18,18,32]);
-        doc.setFontSize(8);doc.setTextColor(200,200,220);
-        resLines.forEach(function(l,i){doc.text(l,M+3,y+4+i*4);});
-        y+=resLines.length*4+8;
-        // Ajustes entreno
+        txt('NIVEL: '+(_lastIAText.nivLabel||'—'),M+3,y+6,8.5,nivelC);
+        txt('Motor: '+(_lastIAText.motor||'—'),W-M-3,y+6,7,GRAY,'right');
+        y+=13;
+
+        rotulo2('RESUMEN',GOLD);
+        parr2(_lastIAText.resumen||'',8,[205,205,225],[18,18,32]);
+
         if(_lastIAText.ajustes_entreno&&_lastIAText.ajustes_entreno.length){
-          txt('AJUSTES DE ENTRENAMIENTO',M,y,7,GOLD);y+=5;
-          _lastIAText.ajustes_entreno.forEach(function(a){
-            if(y>278){doc.addPage();y=M+8;}
-            var lines=doc.splitTextToSize('→ '+a,CW-4);
-            rect(M,y,CW,lines.length*4+3,1,BG2);
-            doc.setFontSize(7.5);doc.setTextColor(200,200,220);
-            lines.forEach(function(l,i){doc.text(l,M+3,y+3.5+i*4);});
-            y+=lines.length*4+5;
-          });
+          rotulo2('AJUSTES DE ENTRENAMIENTO',GOLD);
+          _lastIAText.ajustes_entreno.forEach(function(a){ parr2(a,7.5,[200,200,220],BG2,true); });
+          y+=2;
         }
-        // Ajustes nutrición
         if(_lastIAText.ajustes_nutricion&&_lastIAText.ajustes_nutricion.length){
-          if(y>240){doc.addPage();y=M+8;}
-          txt('AJUSTES DE NUTRICIÓN',M,y,7,GREEN);y+=5;
-          _lastIAText.ajustes_nutricion.forEach(function(a){
-            if(y>278){doc.addPage();y=M+8;}
-            var lines=doc.splitTextToSize('→ '+a,CW-4);
-            rect(M,y,CW,lines.length*4+3,1,BG2);
-            doc.setFontSize(7.5);doc.setTextColor(200,200,220);
-            lines.forEach(function(l,i){doc.text(l,M+3,y+3.5+i*4);});
-            y+=lines.length*4+5;
-          });
+          rotulo2('AJUSTES DE NUTRICION',GREEN);
+          _lastIAText.ajustes_nutricion.forEach(function(a){ parr2(a,7.5,[200,200,220],BG2,true); });
+          y+=2;
         }
-        // Directiva
         if(_lastIAText.recomendacion){
-          if(y>240){doc.addPage();y=M+8;}
-          txt('DIRECTIVA PRÓXIMA SEMANA',M,y,7,BLUE);y+=5;
-          var rlines=doc.splitTextToSize(_lastIAText.recomendacion,CW-4);
-          rect(M,y,CW,rlines.length*4+4,2,[18,18,40]);
-          doc.setFontSize(8);doc.setTextColor(180,200,240);
-          rlines.forEach(function(l,i){doc.text(l,M+3,y+4+i*4);});
-          y+=rlines.length*4+8;
+          rotulo2('DIRECTIVA PROXIMA SEMANA',BLUE);
+          parr2(_lastIAText.recomendacion,8,[185,205,245],[18,18,40]);
+          y+=2;
         }
       }
     }
