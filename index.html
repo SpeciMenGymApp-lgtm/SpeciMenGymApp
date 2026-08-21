@@ -3064,8 +3064,8 @@ $('btn-login').addEventListener('click',function(){
       // Historial recuperado de la nube, traducido al formato local.
       var sesNube=(res.sessions||[]).map(function(s){
         return {id:s.clienteId||s.id, fecha:s.fecha, tipo:s.tipo, dur:s.duracion,
-                rpe:s.rpe, fatiga:s.fatiga, notas:s.notas, peso:s.pesoCorporal,
-                sem:s.semana, meso:s.meso, ejercicios:s.ejercicios||[], _cloud:true};
+                rpe:s.rpe, fat:s.fatiga, notas:s.notas, peso:s.pesoCorporal,
+                sem:s.semana, meso:s.meso, exs:s.ejercicios||[], _cloud:true};
       });
       var medNube=(res.measures||[]).map(function(m){
         return {id:m.clienteId||m.id, fecha:m.fecha, peso:m.peso, grasa:m.grasaPct,
@@ -3141,7 +3141,7 @@ function syncNube(silencioso){
   var sesiones = (u.sessions||[]).map(function(s){
     return {clienteId:s.id||(s.fecha+'|'+(s.tipo||'')), fecha:s.fecha, tipo:s.tipo,
             duracion:s.dur, rpe:s.rpe, fatiga:s.fatiga, notas:s.notas,
-            pesoCorporal:s.peso, semana:s.sem, meso:s.meso, ejercicios:s.ejercicios||[]};
+            pesoCorporal:s.peso, semana:s.sem, meso:s.meso, ejercicios:s.exs||[]};
   });
   var medidas = (u.measures||[]).map(function(m){
     return {clienteId:m.id||m.fecha, fecha:m.fecha, peso:m.peso, grasaPct:m.grasa,
@@ -6053,285 +6053,10 @@ async function sendIAEmail(){
   try{
     var jsPDFcls=window.jspdf?window.jspdf.jsPDF:window.jsPDF;
     if(!jsPDFcls) throw new Error('jsPDF no disponible');
-    status.textContent='⏳ Generando PDF completo...';
-    var u=U();
-    var mac2=u?u.macros||calcMacros(u):{};
-    var meds2=(u&&u.measures||[]).slice().sort(function(a,b){return (a.fecha||'').localeCompare(b.fecha||'');});
-    var lastMed2=meds2.length?meds2[meds2.length-1]:null;
-    var sessions2=(u&&u.sessions||[]).slice().sort(function(a,b){return (a.fecha||'').localeCompare(b.fecha||'');});
+    status.textContent='⏳ Generando informe...';
+    // 5.0: misma maquetacion que el PDF de descarga — un solo diseño.
     var doc2=new jsPDFcls({orientation:'portrait',unit:'mm',format:'a4'});
-    var W=210,M=14,CW=W-M*2,y=M;
-    var GOLD=[201,168,76],BG=[12,12,22],BG2=[22,22,38],BG3=[30,30,52],
-        TEXT=[235,235,250],GRAY=[110,110,140],GREEN=[34,197,94],RED=[239,68,68],BLUE=[96,165,250];
-    // FIX 5.0: acepta rr(x,y,w,h,col) y rr(x,y,w,h,radio,col) — antes las 10 llamadas
-    // con 6 argumentos pasaban un numero como color y jsPDF escribia "NaN" en el stream.
-    function rr(x,_y,w,h,a,b){var col=Array.isArray(a)?a:(Array.isArray(b)?b:[22,22,38]);var r=Array.isArray(a)?2:(typeof a==='number'?a:2);doc2.setFillColor(col[0],col[1],col[2]);doc2.roundedRect(x,_y,w,h,r,r,'F');}
-    function tt(str,x,_y,sz,col,al){doc2.setFontSize(sz||10);doc2.setTextColor(col?col[0]:235,col?col[1]:235,col?col[2]:250);doc2.text(_pdfTxt(str)||'-',x,_y,{align:al||'left'});}
-    // 5.0: el titulo de seccion tambien se sanea y se recorta al ancho util,
-    // para que un encabezado largo no se salga de la barra dorada.
-    function sec(title,col){
-      if(y>262){doc2.addPage();y=M+6;}
-      rr(M,y,CW,7.5,2,BG2);
-      doc2.setFontSize(8);
-      doc2.setTextColor(col?col[0]:201,col?col[1]:168,col?col[2]:76);
-      var t=doc2.splitTextToSize(_pdfTxt(title).toUpperCase(),CW-6)[0]||'';
-      doc2.text(t,M+3,y+5);
-      y+=11;
-    }
-    function barChart2(vals,labs,x,_y,w,h,col){
-      var max=Math.max.apply(null,vals.map(function(v){return parseFloat(v)||0;}));if(!max)return;
-      var bw=(w-4)/vals.length-2;
-      rr(x,_y,w,h,BG3);
-      vals.forEach(function(v,i){
-        var val=parseFloat(v)||0;
-        var bh=Math.round((val/max)*(h-10));
-        var bx=x+2+i*(bw+2),by=_y+h-6-bh;
-        doc2.setFillColor(col[0],col[1],col[2]);doc2.roundedRect(bx,by,bw,bh,1,1,'F');
-        doc2.setFontSize(4.5);doc2.setTextColor(GRAY[0],GRAY[1],GRAY[2]);
-        doc2.text(String(labs[i]||'').slice(0,5),bx+bw/2,_y+h-1,{align:'center'});
-        doc2.setTextColor(TEXT[0],TEXT[1],TEXT[2]);
-        if(val>0)doc2.text(Math.round(val)+'',bx+bw/2,by-1,{align:'center'});
-      });
-    }
-    function lineChart2(vals,x,_y,w,h,col){
-      var nums=vals.map(function(v){return parseFloat(v)||0;});
-      var min=Math.min.apply(null,nums),max=Math.max.apply(null,nums),rng=max-min||1;
-      rr(x,_y,w,h,BG3);
-      doc2.setDrawColor(40,40,70);
-      [0,0.5,1].forEach(function(t){var gy=_y+4+(1-t)*(h-8);doc2.line(x+2,gy,x+w-2,gy);doc2.setFontSize(4.5);doc2.setTextColor(GRAY[0],GRAY[1],GRAY[2]);doc2.text((min+t*rng).toFixed(1),x+w-1,gy+1.5,{align:'right'});});
-      if(nums.length<2)return;
-      var pts=nums.map(function(v,i){return{x:x+2+(i/(nums.length-1))*(w-4),y:_y+4+((max-v)/rng)*(h-8)};});
-      doc2.setDrawColor(col[0],col[1],col[2]);doc2.setLineWidth(0.7);
-      for(var i=1;i<pts.length;i++)doc2.line(pts[i-1].x,pts[i-1].y,pts[i].x,pts[i].y);
-      pts.forEach(function(p){doc2.setFillColor(col[0],col[1],col[2]);doc2.circle(p.x,p.y,0.9,'F');});
-    }
-
-    rr(0,0,W,30,0,BG);
-    tt('SpeciMen® Gym App',M,11,16,GOLD);
-    tt('Historia Clínica y Análisis de Progreso',M,18,9,GRAY);
-    tt(new Date().toLocaleDateString('es-ES',{weekday:'long',year:'numeric',month:'long',day:'numeric'}),W-M,11,7,GRAY,'right');
-    if(u){tt(u.nombre||'Atleta',W-M,18,8,TEXT,'right');}
-    y=36;
-
-    sec('📋 FICHA CLÍNICA COMPLETA',GOLD);
-    if(u){
-      var pw=(lastMed2&&lastMed2.peso)||u.peso||'—';
-      var gr=(lastMed2&&lastMed2.grasa)||u.grasa||'—';
-      var imc2=(parseFloat(pw)/Math.pow((u.alt||170)/100,2)).toFixed(1);
-      var imcLab=parseFloat(imc2)<18.5?'Bajo peso':parseFloat(imc2)<25?'Normopeso':parseFloat(imc2)<30?'Sobrepeso':'Obesidad';
-      var fi=[
-        ['Género',(u.genero==='H'?'Hombre':'Mujer')],['Edad',calcEdad(u.fnac)+' años'],['Fecha nac.',fmtFechaNac(u.fnac)],
-        ['Peso actual',pw+' kg'],['Altura',(u.alt||'—')+' cm'],['IMC',imc2+' '+imcLab],
-        ['% Grasa',gr+'%'],['Masa magra',(mac2.masaMagra||'—')+' kg'],['Cintura',((lastMed2&&lastMed2.cin)||u.cin||'—')+' cm'],
-        ['Cuello',((lastMed2&&lastMed2.cue)||u.cue||'—')+' cm'],['Cadera',((lastMed2&&lastMed2.cad)||u.cad||'—')+' cm'],
-        ['Objetivo',{perdida:'Pérdida de grasa',volumen:'Ganancia muscular',recomp:'Recomposición',mant:'Mantenimiento'}[u.obj||'recomp']]
-      ];
-      var cw3=CW/3,rH=7;
-      fi.forEach(function(it,i){var col=i%3,row=Math.floor(i/3),x=M+col*cw3,iy=y+row*(rH+1);rr(x,iy,cw3-2,rH,2,BG2);tt(it[0],x+2,iy+4.5,6,GRAY);tt(it[1],x+cw3-3,iy+4.5,7,TEXT,'right');});
-      y+=Math.ceil(fi.length/3)*(rH+1)+6;
-    }
-
-    sec('⚡ MÉTRICAS METABÓLICAS',GOLD);
-    var met=[
-      ['BMR Mifflin',(mac2.bmr||'—')+' kcal/día'],['TDEE estimado',(mac2.tdee||'—')+' kcal/día'],
-      ['Target calórico',(mac2.kcal||'—')+' kcal/día'],['Déficit aplicado',(mac2.deficitReal||'—')+'%'],
-      ['Proteína',(mac2.prot||'—')+' g/día'],['Agua',(Math.round((mac2.agua||2500)/100)/10)+' L/día']
-    ];
-    var cw2=CW/3;
-    met.forEach(function(it,i){var col=i%3,row=Math.floor(i/3),x=M+col*cw2,iy=y+row*8;rr(x,iy,cw2-2,7,2,BG2);tt(it[0],x+2,iy+4.5,6,GRAY);tt(it[1],x+cw2-3,iy+4.5,7,GOLD,'right');});
-    y+=Math.ceil(met.length/3)*9+6;
-
-    // Gráficas evolución
-    if(meds2.length>=2){
-      sec('📈 EVOLUCIÓN DE PESO',GOLD);
-      var pVals=meds2.slice(-12).map(function(m){return parseFloat(m.peso)||0;}).filter(Boolean);
-      if(pVals.length>=2){lineChart2(pVals,M,y,CW,26,GOLD);y+=29;}
-    }
-    if(meds2.filter(function(m){return m.grasa;}).length>=2){
-      if(y>240){doc2.addPage();y=M+6;}
-      sec('📉 EVOLUCIÓN % GRASA',RED);
-      var gVals=meds2.slice(-12).filter(function(m){return m.grasa;}).map(function(m){return parseFloat(m.grasa)||0;});
-      lineChart2(gVals,M,y,CW,24,RED);y+=27;
-    }
-
-    doc2.addPage();y=M+6;
-
-    if(sessions2.length>=2){
-      sec('🏋️ VOLUMEN POR SESIÓN (últimas '+Math.min(sessions2.length,12)+')',GOLD);
-      var vVals=sessions2.slice(-12).map(function(s){return(s.exs||[]).reduce(function(t,e){return t+((e.series||[]).reduce(function(tv,sr){return tv+(sr.done?(parseFloat(sr.kg)||0)*(parseInt(sr.reps)||1):0);},0));},0);});
-      var vLabs=sessions2.slice(-12).map(function(s){return(s.fecha||'').slice(5);});
-      barChart2(vVals,vLabs,M,y,CW,30,GOLD);y+=34;
-
-      sec('📊 HISTORIAL DE SESIONES (últimas '+Math.min(sessions2.length,15)+')',GOLD);
-      sessions2.slice(-15).reverse().forEach(function(s){
-        if(y>272){doc2.addPage();y=M+6;}
-        rr(M,y,CW,8,2,BG2);
-        tt((s.tipo||'Sesión').slice(0,30),M+2,y+5,7.5,TEXT);
-        tt(fmtDate(s.fecha),M+CW*0.42,y+5,7,GRAY);
-        tt((s.dur||'—')+' min',M+CW*0.58,y+5,7,GRAY);
-        var rpeColor=parseFloat(s.rpe)>=8?RED:parseFloat(s.rpe)>=6?GOLD:GREEN;
-        tt('RPE '+(s.rpe||'—'),M+CW*0.73,y+5,7,rpeColor);
-        var vol=(s.exs||[]).reduce(function(t,e){return t+((e.series||[]).reduce(function(tv,sr){return tv+(sr.done?(parseFloat(sr.kg)||0)*(parseInt(sr.reps)||1):0);},0));},0);
-        if(vol>0)tt(Math.round(vol)+' kg',W-M-2,y+5,7,GOLD,'right');
-        y+=9;
-      });
-      y+=4;
-    }
-
-    // Evolución de medidas tabla
-    if(meds2.length){
-      if(y>240){doc2.addPage();y=M+6;}
-      sec('📏 EVOLUCIÓN DE MEDIDAS',GOLD);
-      // 5.0: tabla completa — antes faltaban Pecho y Pantorrilla, que se
-      // registraban en la app pero nunca llegaban al informe.
-      var tCols2=['Fecha','Peso','%Gr','Cintura','Cuello','Cadera','Pecho','Brazo','Muslo','Pant.'];
-      var tW2=[26,18,15,19,17,17,17,17,17,19];
-      var tx2=M;
-      tCols2.forEach(function(h,i){rr(tx2,y,tW2[i]-1,6,1,BG3);tt(h,tx2+1,y+4,5,GOLD);tx2+=tW2[i];});
-      y+=7;
-      meds2.slice(-12).forEach(function(m){
-        if(y>278){doc2.addPage();y=M+6;}
-        tx2=M;
-        [fmtDate(m.fecha),m.peso?m.peso+'kg':'—',m.grasa?m.grasa+'%':'—',m.cin?m.cin:'—',m.cue?m.cue:'—',m.cad?m.cad:'—',m.pec?m.pec:'—',m.bra?m.bra:'—',m.mus?m.mus:'—',m.pan?m.pan:'—'].forEach(function(v,i){tt(v,tx2+1,y+4,5.8,TEXT);tx2+=tW2[i];});
-        doc2.setDrawColor(35,35,55);doc2.line(M,y+6,W-M,y+6);
-        y+=7;
-      });
-      // Notas de la ultima medida, si las hay
-      if(lastMed2&&lastMed2.notas){
-        if(y>264){doc2.addPage();y=M+6;}
-        doc2.setFontSize(6.8);   // 5.0: fijar tamaño ANTES de medir el texto
-        var nl=doc2.splitTextToSize(_pdfTxt('Notas ultima medida: '+lastMed2.notas),CW-6);
-        rr(M,y,CW,nl.length*3.6+4,2,BG2);
-        doc2.setTextColor(190,190,215);
-        nl.forEach(function(l,i){doc2.text(l,M+3,y+4.5+i*3.6);});
-        y+=nl.length*3.6+7;
-      }
-      // Fotos de progreso. Ahora el backend las adjunta al correo, asi que
-      // aqui solo se referencian; la URL se recorta para no salirse del margen.
-      var _conFoto=meds2.filter(function(m){return m.fotoUrl;});
-      if(_conFoto.length){
-        if(y>258){doc2.addPage();y=M+6;}
-        sec('FOTOS DE PROGRESO',GOLD);
-        doc2.setFontSize(6.5);
-        doc2.setTextColor(150,150,180);
-        doc2.text(_pdfTxt('Las '+Math.min(_conFoto.length,4)+' mas recientes van adjuntas a este correo. Copia completa en tu carpeta privada de Drive.'),M+1,y);
-        y+=6;
-        _conFoto.slice(-8).forEach(function(m){
-          if(y>274){doc2.addPage();y=M+6;}
-          rr(M,y,CW,6,2,BG2);
-          doc2.setFontSize(6.5);
-          doc2.setTextColor(200,200,225);
-          doc2.text(_pdfTxt(fmtDate(m.fecha)),M+3,y+4);
-          doc2.setTextColor(130,130,170);
-          var _u=String(m.fotoUrl||'');
-          if(_u.length>78) _u=_u.slice(0,75)+'...';
-          doc2.text(_pdfTxt(_u),M+34,y+4);
-          y+=7;
-        });
-        y+=4;
-      }
-      y+=6;
-    }
-
-    // ── BLOQUE DE ANÁLISIS IA — reescrito en 5.0 ──────────────────────────
-    // El fallo estaba en el orden: se llamaba a splitTextToSize ANTES de
-    // setFontSize, asi que jsPDF partia el texto midiendolo con el tamaño de
-    // letra de la seccion anterior. Si ese tamaño era menor (5.5 del listado
-    // de fotos), creia que todo cabia en una linea, devolvia una sola y luego
-    // la dibujaba a 8 puntos: de ahi el texto que se sale del margen y las
-    // frases cortadas a mitad. `parr()` fija el tamaño primero y ademas
-    // controla los saltos de pagina linea a linea.
-    function parr(texto, size, colTexto, colFondo, vinneta){
-      var t = _pdfTxt(texto);
-      if (!t) return;
-      doc2.setFontSize(size);                       // ANTES de medir
-      var sangria = vinneta ? 5 : 0;
-      var anchoUtil = CW - 6 - sangria;
-      var lineas = doc2.splitTextToSize(t, anchoUtil);
-      var lh = Math.max(3.4, size * 0.46);          // interlineado proporcional
-      var alto = lineas.length * lh + 4;
-      if (y + alto > 276) { doc2.addPage(); y = M + 6; }
-      if (colFondo) rr(M, y, CW, alto, 2, colFondo);
-      if (vinneta) {
-        doc2.setFontSize(size);
-        doc2.setTextColor(colTexto[0], colTexto[1], colTexto[2]);
-        doc2.text('-', M + 3, y + lh + 0.5);
-      }
-      doc2.setFontSize(size);
-      doc2.setTextColor(colTexto[0], colTexto[1], colTexto[2]);
-      lineas.forEach(function (l, i) {
-        doc2.text(l, M + 3 + sangria, y + lh + 0.5 + i * lh);
-      });
-      y += alto + 2;
-    }
-    // Rotulo de subseccion, con espacio garantizado debajo.
-    function rotulo(texto, col) {
-      if (y > 266) { doc2.addPage(); y = M + 6; }
-      doc2.setFontSize(7.5);
-      doc2.setTextColor(col[0], col[1], col[2]);
-      doc2.text(_pdfTxt(texto), M, y + 3);
-      y += 7;
-    }
-
-    if(d&&d.resumen){
-      if(y>226){doc2.addPage();y=M+6;}
-      sec('ANALISIS CLINICO IA  ('+( d.fecha||'')+'  ·  '+( d.motor||'')+')',GOLD);
-
-      var nc=(d.nivLabel||'').indexOf('óptimo')>=0?GREEN:(d.nivLabel||'').indexOf('urgentes')>=0?RED:GOLD;
-      rr(M,y,CW,9,2,BG2);
-      doc2.setFontSize(8.5);
-      doc2.setTextColor(nc[0],nc[1],nc[2]);
-      doc2.text(_pdfTxt('NIVEL:  '+(d.nivLabel||'—')).toUpperCase(),M+3,y+6);
-      y+=13;
-
-      rotulo('RESUMEN',GOLD);
-      parr(d.resumen||'',8,[205,205,225],[18,18,32]);
-
-      if(d.ajustes_entreno&&d.ajustes_entreno.length){
-        rotulo('AJUSTES DE ENTRENAMIENTO',GOLD);
-        d.ajustes_entreno.forEach(function(a){ parr(a,7.5,[200,200,220],BG2,true); });
-        y+=2;
-      }
-
-      if(d.ajustes_nutricion&&d.ajustes_nutricion.length){
-        rotulo('AJUSTES DE NUTRICION',GREEN);
-        d.ajustes_nutricion.forEach(function(a){ parr(a,7.5,[200,200,220],BG2,true); });
-        y+=2;
-      }
-
-      if(d.recomendacion){
-        rotulo('DIRECTIVA PROXIMA SEMANA',BLUE);
-        parr(d.recomendacion,8,[185,205,245],[18,18,40]);
-        y+=2;
-      }
-
-      // La respuesta cruda va al final: es material de apoyo, no el informe.
-      // Antes iba justo debajo del resumen y repetia todo lo que viene luego.
-      var rawUse=d._rawTxt||'';
-      if(rawUse&&rawUse.length>20){
-        if(y>226){doc2.addPage();y=M+6;}
-        rotulo('TRANSCRIPCION COMPLETA DE LA IA',GRAY);
-        doc2.setFontSize(6.8);
-        var rawL2=doc2.splitTextToSize(_pdfTxt(rawUse),CW-6);
-        rawL2.slice(0,90).forEach(function(l){
-          if(y>274){doc2.addPage();y=M+6;doc2.setFontSize(6.8);}
-          doc2.setTextColor(150,150,175);
-          doc2.text(l,M+3,y+3);
-          y+=3.4;
-        });
-        y+=4;
-      }
-    }
-
-    // ── Pie en todas las páginas ──────────────────────────────────
-    var np2=doc2.getNumberOfPages();
-    var pieT='SpeciMen Gym App® desarrollado por Cristhian Andrés Serna Salazar © | 2026. Todos los derechos reservados.';
-    for(var p2=1;p2<=np2;p2++){
-      doc2.setPage(p2);
-      rr(0,287,W,10,0,BG);
-      tt(pieT,W/2,292,5,GRAY,'center');
-      tt('Pág. '+p2+'/'+np2,W-M,292,5,GRAY,'right');
-    }
+    var np2=construirInformePDF(doc2,u2,d);
     pdfBase64=doc2.output('datauristring').split(',')[1];
     var pdfKB=Math.round(pdfBase64.length*0.75/1024);
     status.textContent='⏳ Enviando email con PDF ('+pdfKB+' KB, '+np2+' págs)...';
@@ -6720,6 +6445,617 @@ function _pdfTxt(s){
 }
 window._pdfTxt = _pdfTxt;
 
+// ═══════════════════════════════════════════════════════════════════════════
+// INFORME PDF 5.0 — generador unico
+// ---------------------------------------------------------------------------
+// Antes habia dos generadores casi identicos (descarga y email) con dos
+// diseños que se desincronizaban. Ahora los dos llaman aqui.
+//
+// El diseño anterior era oscuro, a 5,5-8 puntos y sin aire: ilegible en
+// pantalla e inutil impreso. Este es al reves — papel blanco, tinta oscura,
+// cuerpo de 9-10 puntos, y cada grafico lleva debajo una linea que explica
+// que significa, que era lo que faltaba para poder entenderlo.
+// ═══════════════════════════════════════════════════════════════════════════
+
+var INF = {
+  W: 210, H: 297, M: 16, CW: 178,
+  TINTA:  [26, 26, 46],     // texto principal
+  TINTA2: [92, 92, 116],    // texto secundario
+  TINTA3: [148, 148, 168],  // texto terciario / ejes
+  LINEA:  [224, 224, 234],  // bordes y rejilla
+  CARD:   [246, 246, 250],  // relleno de tarjeta
+  CARD2:  [237, 237, 245],  // relleno alternativo
+  BANDA:  [20, 20, 43],     // banda de cabecera
+  ORO:    [201, 168, 76],
+  MORADO: [108, 79, 255],
+  VERDE:  [27, 138, 75],
+  ROJO:   [192, 57, 43],
+  AMBAR:  [184, 134, 11],
+  AZUL:   [37, 99, 160]
+};
+
+function construirInformePDF(doc, u, ia) {
+  var C = INF, W = C.W, M = C.M, CW = C.CW;
+  var y = 0, pagina = 1;
+
+  // ── Primitivas ──────────────────────────────────────────────────────────
+  function F(c){ doc.setFillColor(c[0], c[1], c[2]); }
+  function D(c){ doc.setDrawColor(c[0], c[1], c[2]); }
+  function T(c){ doc.setTextColor(c[0], c[1], c[2]); }
+  function fuente(size, bold){ doc.setFontSize(size); doc.setFont('helvetica', bold ? 'bold' : 'normal'); }
+  // Guardia: si la version de jsPDF servida por el CDN no expone el patron
+  // de guiones, se dibuja continuo en vez de romper todo el informe.
+  function guiones(on){ try{ if(doc.setLineDashPattern) doc.setLineDashPattern(on?[1.2,1.2]:[],0); }catch(e){} }
+
+  function caja(x, yy, w, h, relleno, borde, r){
+    if (relleno) { F(relleno); doc.roundedRect(x, yy, w, h, r || 2, r || 2, 'F'); }
+    if (borde)   { D(borde); doc.setLineWidth(0.3); doc.roundedRect(x, yy, w, h, r || 2, r || 2, 'S'); }
+  }
+
+  // Escribe respetando el margen. El tamaño se fija SIEMPRE antes de medir.
+  function escribir(txt, x, yy, size, col, opts){
+    opts = opts || {};
+    fuente(size, opts.bold);
+    T(col || C.TINTA);
+    doc.text(_pdfTxt(txt) || '', x, yy, { align: opts.align || 'left' });
+  }
+
+  function parrafo(txt, size, col, opts){
+    opts = opts || {};
+    var t = _pdfTxt(txt); if (!t) return;
+    fuente(size, opts.bold);
+    var ancho = opts.ancho || CW;
+    var lineas = doc.splitTextToSize(t, ancho);
+    var lh = size * 0.48;
+    hueco(lineas.length * lh + 2);
+    T(col || C.TINTA2);
+    lineas.forEach(function (l, i) { doc.text(l, opts.x || M, y + lh * (i + 1)); });
+    y += lineas.length * lh + (opts.gap === undefined ? 3 : opts.gap);
+  }
+
+  // Nota explicativa bajo un grafico — es lo que vuelve el informe entendible.
+  function nota(txt){
+    var t = _pdfTxt(txt); if (!t) return;
+    fuente(7.6, false);
+    var lineas = doc.splitTextToSize(t, CW - 6);
+    hueco(lineas.length * 3.7 + 3);
+    D(C.MORADO); doc.setLineWidth(1.2);
+    doc.line(M + 1, y + 1, M + 1, y + lineas.length * 3.7 + 1);
+    T(C.TINTA2);
+    lineas.forEach(function (l, i) { doc.text(l, M + 5, y + 3.4 + i * 3.7); });
+    y += lineas.length * 3.7 + 6;
+  }
+
+  function nuevaPagina(){ doc.addPage(); pagina++; y = M + 6; }
+  function hueco(alto){ if (y + alto > C.H - 20) nuevaPagina(); }
+
+  function seccion(titulo, subtitulo){
+    hueco(subtitulo ? 20 : 15);
+    y += 3;
+    F(C.MORADO); doc.rect(M, y, 3.2, 6.4, 'F');
+    escribir(titulo.toUpperCase(), M + 6, y + 5, 11, C.TINTA, { bold: true });
+    y += 8.5;
+    if (subtitulo) { escribir(subtitulo, M + 6, y, 8, C.TINTA3); y += 5; }
+    D(C.LINEA); doc.setLineWidth(0.3); doc.line(M, y, W - M, y);
+    y += 6;
+  }
+
+  // Tarjeta de dato destacado
+  function kpi(x, yy, w, etiqueta, valor, pie, col){
+    caja(x, yy, w, 20, C.CARD, C.LINEA, 2);
+    escribir(etiqueta.toUpperCase(), x + 4, yy + 5.5, 6.6, C.TINTA3, { bold: true });
+    escribir(valor, x + 4, yy + 13, 14, col || C.TINTA, { bold: true });
+    if (pie) escribir(pie, x + 4, yy + 17.5, 6.8, C.TINTA2);
+  }
+
+  function fila4(items){
+    hueco(24);
+    var w = (CW - 9) / 4;
+    items.forEach(function (it, i) { kpi(M + i * (w + 3), y, w, it[0], it[1], it[2], it[3]); });
+    y += 24;
+  }
+
+  // ── Gráficos ────────────────────────────────────────────────────────────
+
+  // Línea con ejes, rejilla, etiquetas de valor y línea de meta opcional.
+  function graficoLinea(vals, etiquetas, opt){
+    opt = opt || {};
+    var nums = vals.map(function (v) { return parseFloat(v) || 0; }).filter(function (v) { return v > 0; });
+    if (nums.length < 2) return false;
+    var h = opt.alto || 46, gx = M + 16, gw = CW - 20;
+    hueco(h + 14);
+    var col = opt.color || C.MORADO;
+    var min = Math.min.apply(null, nums), max = Math.max.apply(null, nums);
+    if (opt.meta) { min = Math.min(min, opt.meta); max = Math.max(max, opt.meta); }
+    var pad = (max - min) * 0.18 || 1;
+    min -= pad; max += pad;
+    var rng = max - min || 1;
+
+    caja(M, y, CW, h, [252, 252, 254], C.LINEA, 2);
+
+    // Rejilla horizontal + escala
+    fuente(6.6, false);
+    [0, 0.25, 0.5, 0.75, 1].forEach(function (t) {
+      var gy = y + 5 + (1 - t) * (h - 14);
+      D(C.LINEA); doc.setLineWidth(0.2); doc.line(gx, gy, gx + gw, gy);
+      T(C.TINTA3);
+      doc.text((min + t * rng).toFixed(1), gx - 2, gy + 1.2, { align: 'right' });
+    });
+
+    // Línea de meta
+    if (opt.meta) {
+      var my = y + 5 + (1 - (opt.meta - min) / rng) * (h - 14);
+      D(C.VERDE); doc.setLineWidth(0.5);
+      guiones(true);
+      doc.line(gx, my, gx + gw, my);
+      guiones(false);
+      escribir('meta ' + opt.meta + (opt.unidad || ''), gx + gw, my - 1.5, 6.4, C.VERDE, { align: 'right' });
+    }
+
+    var pts = nums.map(function (v, i) {
+      return {
+        x: gx + (nums.length === 1 ? gw / 2 : (i / (nums.length - 1)) * gw),
+        y: y + 5 + (1 - (v - min) / rng) * (h - 14),
+        v: v
+      };
+    });
+
+    // Relleno bajo la curva
+    F([col[0], col[1], col[2]]);
+    D(col); doc.setLineWidth(0.8);
+    for (var i = 1; i < pts.length; i++) doc.line(pts[i - 1].x, pts[i - 1].y, pts[i].x, pts[i].y);
+    pts.forEach(function (p) { F(col); doc.circle(p.x, p.y, 1.1, 'F'); });
+
+    // Primer y último valor, rotulados
+    fuente(7.2, true);
+    T(col);
+    doc.text(String(pts[0].v), pts[0].x, pts[0].y - 3, { align: 'left' });
+    var ult = pts[pts.length - 1];
+    doc.text(String(ult.v) + (opt.unidad || ''), ult.x, ult.y - 3, { align: 'right' });
+
+    // Etiquetas del eje X: solo primera y última, para no amontonar
+    if (etiquetas && etiquetas.length) {
+      fuente(6.4, false); T(C.TINTA3);
+      doc.text(_pdfTxt(etiquetas[0] || ''), gx, y + h - 2);
+      doc.text(_pdfTxt(etiquetas[etiquetas.length - 1] || ''), gx + gw, y + h - 2, { align: 'right' });
+    }
+    y += h + 4;
+    return true;
+  }
+
+  // Barra apilada horizontal: composición corporal, macros...
+  function barraApilada(segmentos, opt){
+    opt = opt || {};
+    var h = opt.alto || 13;
+    hueco(h + 16);
+    var total = segmentos.reduce(function (a, s) { return a + (s.v || 0); }, 0) || 1;
+    var x = M;
+    segmentos.forEach(function (s) {
+      var w = (s.v / total) * CW;
+      F(s.col); doc.rect(x, y, w, h, 'F');
+      if (w > 16) {
+        fuente(7.4, true); T([255, 255, 255]);
+        doc.text(Math.round((s.v / total) * 100) + '%', x + w / 2, y + h / 2 + 2.4, { align: 'center' });
+      }
+      x += w;
+    });
+    y += h + 5;
+    // Leyenda
+    fuente(7.6, false);
+    var lx = M;
+    segmentos.forEach(function (s) {
+      F(s.col); doc.roundedRect(lx, y - 2.6, 3, 3, 0.6, 0.6, 'F');
+      T(C.TINTA);
+      var etq = _pdfTxt(s.n + '  ' + (s.txt || ''));
+      doc.text(etq, lx + 4.5, y);
+      lx += doc.getTextWidth(etq) + 11;
+    });
+    y += 6;
+  }
+
+  // Barras divergentes: cambio en cm por zona. Verde a la izquierda = bajada.
+  function barrasDelta(items, opt){
+    opt = opt || {};
+    if (!items.length) return;
+    hueco(items.length * 8 + 10);
+    var maxAbs = Math.max.apply(null, items.map(function (i) { return Math.abs(i.d); })) || 1;
+    var ejeX = M + 46, semi = (CW - 52) / 2;
+    // Eje cero
+    D(C.LINEA); doc.setLineWidth(0.4);
+    doc.line(ejeX + semi, y - 1, ejeX + semi, y + items.length * 8 - 1);
+    items.forEach(function (it, i) {
+      var yy = y + i * 8;
+      escribir(it.n, M, yy + 4, 8, C.TINTA);
+      var w = (Math.abs(it.d) / maxAbs) * semi * 0.92;
+      var baja = it.d < 0;
+      var col = baja ? (opt.invertir ? C.ROJO : C.VERDE) : (opt.invertir ? C.VERDE : C.ROJO);
+      if (Math.abs(it.d) < 0.05) col = C.TINTA3;
+      F(col);
+      if (baja) doc.roundedRect(ejeX + semi - w, yy, w, 5.2, 1, 1, 'F');
+      else      doc.roundedRect(ejeX + semi, yy, w, 5.2, 1, 1, 'F');
+      escribir((it.d > 0 ? '+' : '') + it.d.toFixed(1) + ' cm', W - M, yy + 4, 7.6, col, { align: 'right', bold: true });
+    });
+    y += items.length * 8 + 5;
+  }
+
+  // Rejilla de puntos: sesiones hechas sobre planificadas. Se entiende de un vistazo.
+  function adherencia(hechas, previstas){
+    previstas = Math.max(previstas, hechas, 1);
+    hueco(24);
+    var porFila = 20, r = 2.1, sep = 4.6;
+    var filas = Math.ceil(previstas / porFila);
+    for (var i = 0; i < previstas; i++) {
+      var fx = M + 2 + (i % porFila) * sep;
+      var fy = y + 3 + Math.floor(i / porFila) * sep;
+      if (i < hechas) { F(C.VERDE); doc.circle(fx, fy, r, 'F'); }
+      else { F([232, 232, 240]); doc.circle(fx, fy, r, 'F'); }
+    }
+    y += filas * sep + 4;
+    var pct = Math.round((hechas / previstas) * 100);
+    var colP = pct >= 80 ? C.VERDE : pct >= 50 ? C.AMBAR : C.ROJO;
+    escribir(hechas + ' de ' + previstas + ' sesiones  ·  ' + pct + '% de adherencia',
+             M, y, 9.5, colP, { bold: true });
+    y += 6;
+  }
+
+  // Barras verticales con media marcada.
+  function barrasVertical(vals, etiquetas, opt){
+    opt = opt || {};
+    var nums = vals.map(function (v) { return parseFloat(v) || 0; });
+    if (!nums.length) return false;
+    var h = opt.alto || 42, gx = M + 14, gw = CW - 18;
+    hueco(h + 10);
+    var max = Math.max.apply(null, nums) || 1;
+    var col = opt.color || C.AZUL;
+    caja(M, y, CW, h, [252, 252, 254], C.LINEA, 2);
+    var bw = Math.min(11, (gw / nums.length) - 2);
+    var media = nums.reduce(function (a, b) { return a + b; }, 0) / nums.length;
+
+    // Línea de media
+    var my = y + 4 + (1 - media / max) * (h - 13);
+    D(C.AMBAR); doc.setLineWidth(0.4);
+    guiones(true);
+    doc.line(gx, my, gx + gw, my);
+    guiones(false);
+    escribir('media ' + Math.round(media), gx + gw, my - 1.4, 6.4, C.AMBAR, { align: 'right' });
+
+    nums.forEach(function (v, i) {
+      var bh = Math.max(0.8, (v / max) * (h - 13));
+      var bx = gx + i * (gw / nums.length) + ((gw / nums.length) - bw) / 2;
+      var by = y + 4 + (h - 13) - bh;
+      F(col); doc.roundedRect(bx, by, bw, bh, 0.8, 0.8, 'F');
+      fuente(5.8, false); T(C.TINTA3);
+      if (etiquetas && etiquetas[i]) doc.text(_pdfTxt(String(etiquetas[i])), bx + bw / 2, y + h - 2, { align: 'center' });
+    });
+    y += h + 4;
+    return true;
+  }
+
+  // ── Datos ───────────────────────────────────────────────────────────────
+  var mac = (u && u.macros) || (u ? calcMacros(u) : {});
+  var meds = ((u && u.measures) || []).slice().sort(function (a, b) {
+    return String(a.fecha || '').localeCompare(String(b.fecha || ''));
+  });
+  var ses = ((u && u.sessions) || []).slice().sort(function (a, b) {
+    return String(a.fecha || '').localeCompare(String(b.fecha || ''));
+  });
+  var ultima = meds.length ? meds[meds.length - 1] : null;
+  var primera = meds.length ? meds[0] : null;
+  var esH = u && u.genero === 'H';
+
+  var pesoAct = parseFloat((ultima && ultima.peso) || (u && u.peso)) || 0;
+  var pesoIni = parseFloat((primera && primera.peso) || (u && u.peso)) || pesoAct;
+  var grasaAct = parseFloat((ultima && ultima.grasa) || (u && u.grasa)) || 0;
+  var grasaIni = parseFloat((primera && primera.grasa) || grasaAct) || grasaAct;
+  var deltaPeso = pesoAct - pesoIni;
+  var deltaGrasa = grasaAct - grasaIni;
+
+  // ── CABECERA ────────────────────────────────────────────────────────────
+  F(C.BANDA); doc.rect(0, 0, W, 30, 'F');
+  F(C.ORO); doc.rect(0, 30, W, 1.2, 'F');
+  if (window.__LOGO_PNG__) { try { doc.addImage(window.__LOGO_PNG__, 'PNG', M, 6, 17, 17); } catch (e) {} }
+  escribir('SpeciMen® Gym App', M + 21, 14, 15, C.ORO, { bold: true });
+  escribir('Informe de progreso y composición corporal', M + 21, 20.5, 8.4, [170, 170, 200]);
+  escribir((u && u.nombre) || 'Atleta', W - M, 14, 11, [255, 255, 255], { align: 'right', bold: true });
+  escribir(new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' }),
+           W - M, 20.5, 7.6, [170, 170, 200], { align: 'right' });
+  y = 40;
+
+  // ── 1. RESUMEN ──────────────────────────────────────────────────────────
+  var objTxt = { perdida: 'Pérdida de grasa', volumen: 'Ganancia muscular',
+                 recomp: 'Recomposición corporal', mant: 'Mantenimiento' }[(u && u.obj) || 'recomp'];
+  seccion('Resumen', 'Objetivo actual: ' + objTxt + '  ·  ' + (meds.length || 0) + ' mediciones  ·  ' + ses.length + ' sesiones registradas');
+
+  fila4([
+    ['Peso actual', pesoAct ? pesoAct.toFixed(1) + ' kg' : '—',
+      deltaPeso ? (deltaPeso > 0 ? '+' : '') + deltaPeso.toFixed(1) + ' kg desde el inicio' : 'sin histórico',
+      deltaPeso < 0 ? C.VERDE : deltaPeso > 0 ? C.AMBAR : C.TINTA],
+    ['% Grasa', grasaAct ? grasaAct.toFixed(1) + '%' : '—',
+      deltaGrasa ? (deltaGrasa > 0 ? '+' : '') + deltaGrasa.toFixed(1) + ' puntos' : 'sin histórico',
+      deltaGrasa < 0 ? C.VERDE : deltaGrasa > 0 ? C.AMBAR : C.TINTA],
+    ['Masa magra', (mac.masaMagra || '—') + ' kg', 'músculo, hueso y agua', C.AZUL],
+    ['Objetivo diario', (mac.kcal || '—') + ' kcal', (mac.prot || '—') + ' g de proteína', C.MORADO]
+  ]);
+
+  if (mac.tdee && mac.kcal) {
+    var dif = mac.tdee - mac.kcal;
+    nota(dif > 0
+      ? 'Gastas alrededor de ' + mac.tdee + ' kcal al día y el plan te asigna ' + mac.kcal + '. Esa diferencia de ' + dif +
+        ' kcal es el déficit que produce la pérdida de grasa: a este ritmo son unos ' + (mac.perdidaSemanalKg || '0.5') +
+        ' kg por semana. Perder mucho más rápido suele significar perder músculo también.'
+      : 'Gastas alrededor de ' + mac.tdee + ' kcal al día y el plan te asigna ' + mac.kcal +
+        ', un superávit de ' + Math.abs(dif) + ' kcal para favorecer la ganancia muscular.');
+  }
+
+  // ── 2. COMPOSICIÓN CORPORAL ─────────────────────────────────────────────
+  if (pesoAct && grasaAct) {
+    seccion('Composición corporal', 'De qué está hecho tu peso actual');
+    var kgGrasa = pesoAct * grasaAct / 100;
+    var kgMagra = pesoAct - kgGrasa;
+    barraApilada([
+      { n: 'Masa magra', v: kgMagra, col: C.AZUL,  txt: kgMagra.toFixed(1) + ' kg' },
+      { n: 'Masa grasa', v: kgGrasa, col: C.AMBAR, txt: kgGrasa.toFixed(1) + ' kg' }
+    ]);
+    var rangoSano = esH ? '10-20%' : '18-28%';
+    var objetivoG = esH ? 12 : 20;
+    nota('Tu peso son ' + kgMagra.toFixed(1) + ' kg de masa magra y ' + kgGrasa.toFixed(1) + ' kg de grasa. '
+      + 'El rango saludable para ' + (esH ? 'un hombre' : 'una mujer') + ' está en ' + rangoSano + '. '
+      + 'El plan busca reducir la parte ámbar manteniendo la azul: si baja el peso pero también la masa magra, '
+      + 'hay que subir proteína o bajar el déficit.');
+
+    if (mac.semanasObj) {
+      escribir('Tiempo estimado para llegar al ' + objetivoG + '% de grasa: ' + mac.semanasObj + ' semanas',
+               M, y + 2, 9, C.TINTA, { bold: true });
+      y += 8;
+    }
+  }
+
+  // ── 3. EVOLUCIÓN ────────────────────────────────────────────────────────
+  var etqFechas = meds.map(function (m) { return fmtDate(m.fecha); });
+  var pesos = meds.map(function (m) { return parseFloat(m.peso) || 0; });
+  if (pesos.filter(Boolean).length >= 2) {
+    seccion('Evolución del peso', 'Últimas ' + Math.min(meds.length, 12) + ' mediciones');
+    graficoLinea(pesos.slice(-12), etqFechas.slice(-12), { color: C.MORADO, unidad: ' kg' });
+    var tendencia = deltaPeso < -0.3 ? 'bajando' : deltaPeso > 0.3 ? 'subiendo' : 'estable';
+    nota('El peso va ' + tendencia + ': de ' + pesoIni.toFixed(1) + ' kg a ' + pesoAct.toFixed(1) + ' kg. '
+      + 'Fíjate en la tendencia de varias semanas, no en el salto de un día a otro: el peso diario oscila '
+      + '1-2 kg por agua, sal y contenido intestinal, y eso no es grasa.');
+  }
+
+  var grasas = meds.filter(function (m) { return m.grasa; });
+  if (grasas.length >= 2) {
+    seccion('Evolución del % de grasa', 'Método Navy (cintura, cuello y cadera)');
+    graficoLinea(grasas.map(function (m) { return parseFloat(m.grasa) || 0; }).slice(-12),
+                 grasas.map(function (m) { return fmtDate(m.fecha); }).slice(-12),
+                 { color: C.AMBAR, unidad: '%', meta: esH ? 12 : 20 });
+    nota('La línea verde discontinua es el objetivo de referencia. El porcentaje de grasa es el dato que mejor '
+      + 'refleja el progreso real: puedes mantener el peso y estar mejorando si esta línea baja.');
+  }
+
+  // ── 4. CAMBIOS EN MEDIDAS ───────────────────────────────────────────────
+  if (meds.length >= 2) {
+    var zonas = [
+      { k: 'cin', n: 'Cintura' }, { k: 'cad', n: 'Cadera' }, { k: 'pec', n: 'Pecho' },
+      { k: 'bra', n: 'Brazo' },   { k: 'mus', n: 'Muslo' },  { k: 'pan', n: 'Pantorrilla' },
+      { k: 'cue', n: 'Cuello' }
+    ];
+    var deltas = [];
+    zonas.forEach(function (z) {
+      var a = parseFloat(primera[z.k]), b = parseFloat(ultima[z.k]);
+      if (a && b) deltas.push({ n: z.n, d: b - a });
+    });
+    if (deltas.length) {
+      seccion('Cambios en medidas', 'Diferencia entre la primera y la última medición');
+      barrasDelta(deltas);
+      var cintura = deltas.filter(function (d) { return d.n === 'Cintura'; })[0];
+      nota('Barra verde hacia la izquierda = la medida ha bajado. '
+        + (cintura
+            ? (cintura.d < 0
+                ? 'La cintura ha bajado ' + Math.abs(cintura.d).toFixed(1) + ' cm, que es el mejor indicador de pérdida de grasa visceral — más fiable que la báscula.'
+                : 'La cintura ha subido ' + cintura.d.toFixed(1) + ' cm; conviene revisar porciones y sodio antes de tocar el entrenamiento.')
+            : 'La cintura es la medida más informativa: registra ese dato en cada medición.'));
+    }
+  }
+
+  // ── 5. NUTRICIÓN ────────────────────────────────────────────────────────
+  if (mac.kcal) {
+    seccion('Objetivo nutricional', (mac.kcal || '—') + ' kcal al día  ·  dieta ' + ((u && u.dieta) || 'equilibrada'));
+    barraApilada([
+      { n: 'Proteína', v: (mac.prot || 0) * 4,  col: C.AZUL,   txt: (mac.prot || 0) + ' g' },
+      { n: 'Carbohidratos', v: (mac.carbs || 0) * 4, col: C.MORADO, txt: (mac.carbs || 0) + ' g' },
+      { n: 'Grasas', v: (mac.grasa || 0) * 9,  col: C.AMBAR,  txt: (mac.grasa || 0) + ' g' }
+    ]);
+    nota('Los porcentajes son sobre las calorías totales, no sobre los gramos: la grasa aporta 9 kcal por gramo '
+      + 'y la proteína e hidratos 4, por eso una porción pequeña de grasa ocupa más franja de la que parece. '
+      + 'La proteína (' + (mac.prot || 0) + ' g) es la prioridad: es lo que protege el músculo mientras pierdes grasa.');
+
+    fila4([
+      ['Metabolismo basal', (mac.bmr || '—') + '', 'kcal en reposo', C.TINTA],
+      ['Gasto total', (mac.tdee || '—') + '', 'kcal con actividad', C.TINTA],
+      ['Agua diaria', ((Math.round((mac.agua || 2500) / 100) / 10) + ' L'), 'objetivo de hidratación', C.AZUL],
+      ['IMC', (mac.imc || '—') + '', 'orientativo, ignora el músculo', C.TINTA3]
+    ]);
+  }
+
+  // Alergias — dato de seguridad que no aparecía en el informe anterior.
+  var rst = (typeof normalizarRests === 'function') ? normalizarRests((u && u.rests) || []) : [];
+  if (rst.length) {
+    hueco(20);
+    caja(M, y, CW, 16, [253, 245, 245], C.ROJO, 2);
+    escribir('ALERGIAS E INTOLERANCIAS DECLARADAS', M + 4, y + 6, 7.4, C.ROJO, { bold: true });
+    escribir(rst.map(nombreAlergeno).join('  ·  '), M + 4, y + 12, 8.4, C.TINTA, { bold: true });
+    y += 21;
+    nota('El plan de comidas excluye estos alimentos automáticamente. Aun así, revisa las etiquetas: '
+      + 'la app no puede garantizar la ausencia de trazas.');
+  }
+
+  // ── 6. ENTRENAMIENTO ────────────────────────────────────────────────────
+  if (ses.length) {
+    seccion('Entrenamiento', 'Adherencia y carga de trabajo');
+
+    // Semanas transcurridas desde la primera sesión, para estimar lo previsto.
+    var dias = Math.max(1, Math.round((new Date(ses[ses.length - 1].fecha) - new Date(ses[0].fecha)) / 86400000) + 1);
+    var semanas = Math.max(1, Math.round(dias / 7));
+    var porSemana = ((u && u.planEj) || []).filter(function (d) { return d.exs && d.exs.length; }).length || 4;
+    var previstas = semanas * porSemana;
+
+    escribir('Sesiones completadas', M, y + 3, 9, C.TINTA, { bold: true });
+    y += 7;
+    adherencia(ses.length, previstas);
+    var pctAdh = Math.round((ses.length / Math.max(previstas, 1)) * 100);
+    nota(pctAdh >= 80
+      ? 'Adherencia alta. Con esta consistencia el plan funciona como está diseñado; los ajustes deben ir a carga e intensidad.'
+      : pctAdh >= 50
+        ? 'Adherencia intermedia. Antes de tocar la dieta o subir pesos, el mayor margen de mejora está en completar las sesiones previstas.'
+        : 'Adherencia baja: se han completado ' + ses.length + ' de ' + previstas + ' sesiones estimadas. '
+          + 'Con esta frecuencia el gasto calórico real es menor que el planificado, así que el déficit y el progreso no serán los esperados. '
+          + 'Bajar el objetivo a 3 sesiones cortas por semana y cumplirlas rinde más que planificar 5 y hacer 1.');
+
+    var vols = ses.slice(-12).map(function (s) {
+      return (s.exs || []).reduce(function (a, e) { return a + (e.volumenTotal || 0); }, 0);
+    });
+    if (vols.filter(Boolean).length >= 2) {
+      escribir('Volumen por sesión (kg totales movidos)', M, y + 3, 9, C.TINTA, { bold: true });
+      y += 7;
+      barrasVertical(vols, ses.slice(-12).map(function (s) { return fmtDate(s.fecha).slice(0, 6); }), { color: C.AZUL });
+      nota('Volumen = peso x repeticiones x series, sumado en toda la sesión. Es la medida más directa del trabajo '
+        + 'realizado. Para ganar músculo debería subir poco a poco entre semanas; si cae varias sesiones seguidas, '
+        + 'suele indicar fatiga acumulada o descanso insuficiente.');
+    }
+
+    var rpes = ses.filter(function (s) { return s.rpe; }).map(function (s) { return parseFloat(s.rpe); });
+    if (rpes.length >= 2) {
+      var rpeMed = (rpes.reduce(function (a, b) { return a + b; }, 0) / rpes.length).toFixed(1);
+      var durs = ses.filter(function (s) { return s.dur; }).map(function (s) { return parseFloat(s.dur); });
+      var durMed = durs.length ? Math.round(durs.reduce(function (a, b) { return a + b; }, 0) / durs.length) : 0;
+      fila4([
+        ['Sesiones', String(ses.length), 'en ' + semanas + ' semanas', C.TINTA],
+        ['RPE medio', rpeMed, rpeMed >= 8.5 ? 'muy exigente' : rpeMed >= 7 ? 'rango óptimo' : 'margen para subir', rpeMed >= 8.5 ? C.AMBAR : C.VERDE],
+        ['Duración media', durMed ? durMed + ' min' : '—', 'por sesión', C.TINTA],
+        ['Volumen medio', vols.length ? Math.round(vols.reduce(function (a, b) { return a + b; }, 0) / vols.length) + ' kg' : '—', 'por sesión', C.AZUL]
+      ]);
+      nota('El RPE mide cuánto te has esforzado de 1 a 10. Entre 7 y 8,5 es donde se gana músculo sin acumular '
+        + 'una fatiga que impida entrenar al día siguiente. Por encima de 9 de forma sostenida, el rendimiento cae.');
+    }
+  }
+
+  // ── 7. ANÁLISIS IA ──────────────────────────────────────────────────────
+  if (ia && ia.resumen) {
+    seccion('Análisis del entrenador IA', (ia.fecha || '') + (ia.motor ? '  ·  ' + ia.motor : ''));
+    var nivCol = (ia.nivLabel || '').indexOf('óptimo') >= 0 ? C.VERDE
+               : (ia.nivLabel || '').indexOf('urgentes') >= 0 ? C.ROJO : C.AMBAR;
+    hueco(14);
+    caja(M, y, CW, 11, C.CARD, nivCol, 2);
+    F(nivCol); doc.rect(M, y, 2.5, 11, 'F');
+    escribir((ia.nivLabel || '—').toUpperCase(), M + 6, y + 7.2, 10, nivCol, { bold: true });
+    y += 16;
+
+    parrafo(ia.resumen, 9.5, C.TINTA, { gap: 7 });
+
+    function listaAjustes(titulo, arr, col) {
+      if (!arr || !arr.length) return;
+      hueco(12);
+      escribir(titulo, M, y + 3, 8.6, col, { bold: true });
+      y += 8;
+      arr.forEach(function (a) {
+        var t = _pdfTxt(a); if (!t) return;
+        fuente(9, false);
+        var lineas = doc.splitTextToSize(t, CW - 10);
+        var alto = lineas.length * 4.3 + 5;
+        hueco(alto + 2);
+        caja(M, y, CW, alto, C.CARD, null, 2);
+        F(col); doc.circle(M + 4, y + 4.6, 1.1, 'F');
+        T(C.TINTA);
+        lineas.forEach(function (l, i) { doc.text(l, M + 8.5, y + 5.6 + i * 4.3); });
+        y += alto + 2.5;
+      });
+      y += 3;
+    }
+    listaAjustes('AJUSTES DE ENTRENAMIENTO', ia.ajustes_entreno, C.MORADO);
+    listaAjustes('AJUSTES DE NUTRICIÓN', ia.ajustes_nutricion, C.VERDE);
+
+    if (ia.recomendacion) {
+      hueco(20);
+      escribir('PLAN PARA LOS PRÓXIMOS 7 DÍAS', M, y + 3, 8.6, C.AZUL, { bold: true });
+      y += 8;
+      fuente(9.5, false);
+      var rl = doc.splitTextToSize(_pdfTxt(ia.recomendacion), CW - 10);
+      var altoR = rl.length * 4.6 + 7;
+      hueco(altoR);
+      caja(M, y, CW, altoR, [240, 246, 253], C.AZUL, 2);
+      T(C.TINTA);
+      rl.forEach(function (l, i) { doc.text(l, M + 5, y + 6.5 + i * 4.6); });
+      y += altoR + 4;
+    }
+  }
+
+  // ── 8. TABLA DE MEDIDAS ─────────────────────────────────────────────────
+  if (meds.length) {
+    seccion('Registro de medidas', 'Todas las mediciones en centímetros');
+    var cols = ['Fecha', 'Peso', '%Gr', 'Cint.', 'Cuello', 'Cadera', 'Pecho', 'Brazo', 'Muslo', 'Pant.'];
+    var anchos = [26, 17, 14, 17, 17, 17, 17, 17, 17, 19];
+    hueco(14);
+    var cx = M;
+    F(C.CARD2); doc.rect(M, y, CW, 7, 'F');
+    cols.forEach(function (h, i) {
+      escribir(h, cx + 2, y + 4.8, 7, C.TINTA2, { bold: true });
+      cx += anchos[i];
+    });
+    y += 7;
+    meds.slice(-14).forEach(function (m, idx) {
+      hueco(7);
+      if (idx % 2) { F([250, 250, 253]); doc.rect(M, y, CW, 6.4, 'F'); }
+      cx = M;
+      [fmtDate(m.fecha), m.peso ? m.peso + ' kg' : '—', m.grasa ? m.grasa + '%' : '—',
+       m.cin || '—', m.cue || '—', m.cad || '—', m.pec || '—', m.bra || '—',
+       m.mus || '—', m.pan || '—'].forEach(function (v, i) {
+        escribir(String(v), cx + 2, y + 4.4, 7.4, i === 0 ? C.TINTA2 : C.TINTA);
+        cx += anchos[i];
+      });
+      D(C.LINEA); doc.setLineWidth(0.2); doc.line(M, y + 6.4, W - M, y + 6.4);
+      y += 6.4;
+    });
+    y += 6;
+
+    if (ultima && ultima.notas) {
+      parrafo('Notas de la última medición: ' + ultima.notas, 8.4, C.TINTA2);
+    }
+  }
+
+  // ── 9. FOTOS ────────────────────────────────────────────────────────────
+  var conFoto = meds.filter(function (m) { return m.fotoUrl; });
+  if (conFoto.length) {
+    seccion('Fotos de progreso', conFoto.length + ' registradas en tu carpeta privada de Drive');
+    conFoto.slice(-8).forEach(function (m) {
+      hueco(7);
+      escribir(fmtDate(m.fecha), M + 2, y + 4, 8, C.TINTA, { bold: true });
+      var url = String(m.fotoUrl || '');
+      if (url.length > 72) url = url.slice(0, 69) + '...';
+      escribir(url, M + 34, y + 4, 7, C.AZUL);
+      D(C.LINEA); doc.setLineWidth(0.2); doc.line(M, y + 6, W - M, y + 6);
+      y += 7;
+    });
+    y += 4;
+  }
+
+  // ── PIE EN TODAS LAS PÁGINAS ────────────────────────────────────────────
+  var total = doc.getNumberOfPages();
+  for (var p = 1; p <= total; p++) {
+    doc.setPage(p);
+    D(C.LINEA); doc.setLineWidth(0.3);
+    doc.line(M, C.H - 14, W - M, C.H - 14);
+    fuente(6.4, false); T(C.TINTA3);
+    doc.text(_pdfTxt('SpeciMen Gym App® · Cristhian Andrés Serna Salazar © 2026 · Todos los derechos reservados'),
+             M, C.H - 9.5);
+    doc.text('Página ' + p + ' de ' + total, W - M, C.H - 9.5, { align: 'right' });
+    doc.text(_pdfTxt('Documento orientativo. No sustituye el criterio de un médico, endocrino o dietista-nutricionista.'),
+             M, C.H - 5.8);
+  }
+  return total;
+}
+window.construirInformePDF = construirInformePDF;
+
+
 function entregarPDF(doc, filename){
   var esIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
               (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -6765,268 +7101,21 @@ function exportarPDF(){
 }
 window.exportarPDF=exportarPDF;
 
+// 5.0: la maquetacion vive ahora en construirInformePDF, compartida con el
+// informe que se envia por email. Antes habia dos generadores casi identicos
+// que se fueron desincronizando.
 function generarPDF(u){
   try{
     var jsPDF=window.jspdf?window.jspdf.jsPDF:window.jsPDF;
     var doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-    var mac=u.macros||calcMacros(u);
-    var meds=(u.measures||[]).slice().sort(function(a,b){return (a.fecha||'').localeCompare(b.fecha||'');});
-    var lastMed=meds.length?meds[meds.length-1]:null;
-    var sessions=(u.sessions||[]).slice().sort(function(a,b){return (a.fecha||'').localeCompare(b.fecha||'');});
-    var W=210, M=14, CW=W-M*2;
-    var y=M;
-    var GOLD=[201,168,76], GOLD2=[240,192,76], BG=[12,12,22], BG2=[22,22,38], BG3=[30,30,52],
-        TEXT=[235,235,250], GRAY=[110,110,140], GREEN=[34,197,94], RED=[239,68,68], BLUE=[96,165,250];
-
-    function rect(x,_y,w,h,r,col){doc.setFillColor(col[0],col[1],col[2]);doc.roundedRect(x,_y,w,h,r||0,r||0,'F');}
-    function txt(str,x,_y,size,col,align){doc.setFontSize(size||10);doc.setTextColor(col?col[0]:235,col?col[1]:235,col?col[2]:250);doc.text(_pdfTxt(str)||'-',x,_y,{align:align||'left'});}
-    function sep(){doc.setDrawColor(40,40,70);doc.line(M,y,W-M,y);y+=3;}
-    function section(title,color){
-      if(y>262){doc.addPage();y=M+8;}
-      rect(M,y,CW,7.5,2,BG2);
-      doc.setFontSize(8);doc.setTextColor(color?color[0]:201,color?color[1]:168,color?color[2]:76);
-      doc.text(doc.splitTextToSize(_pdfTxt(title).toUpperCase(),CW-6)[0]||'',M+3,y+5);
-      y+=11;
-    }
-    function barChart(values, labels, x, _y, w, h, color){
-      var max=Math.max.apply(null,values.map(function(v){return parseFloat(v)||0;}));
-      if(max===0) return;
-      var barW=(w-4)/values.length-2;
-      rect(x,_y,w,h,2,BG3);
-      values.forEach(function(v,i){
-        var val=parseFloat(v)||0;
-        var bh=Math.round((val/max)*(h-8));
-        var bx=x+2+i*(barW+2);
-        var by=_y+h-4-bh;
-        doc.setFillColor(color[0],color[1],color[2]);
-        doc.roundedRect(bx,by,barW,bh,1,1,'F');
-        doc.setFontSize(5);doc.setTextColor(GRAY[0],GRAY[1],GRAY[2]);
-        doc.text(String(labels[i]||''),bx+barW/2,_y+h-1,{align:'center'});
-        doc.setTextColor(TEXT[0],TEXT[1],TEXT[2]);
-        doc.text(String(val),bx+barW/2,by-1,{align:'center'});
-      });
-    }
-    function lineChart(values, x, _y, w, h, color){
-      var nums=values.map(function(v){return parseFloat(v)||0;});
-      var min=Math.min.apply(null,nums), max=Math.max.apply(null,nums);
-      var range=max-min||1;
-      rect(x,_y,w,h,2,BG3);
-      // Grid lines
-      doc.setDrawColor(40,40,70);
-      [0,0.25,0.5,0.75,1].forEach(function(t){
-        var gy=_y+4+(1-t)*(h-8);
-        doc.line(x+2,gy,x+w-2,gy);
-        doc.setFontSize(5);doc.setTextColor(GRAY[0],GRAY[1],GRAY[2]);
-        doc.text((min+t*range).toFixed(1),x+w-1,gy+1,{align:'right'});
-      });
-      if(nums.length<2) return;
-      var pts=nums.map(function(v,i){
-        return {
-          x: x+2+(i/(nums.length-1))*(w-4),
-          y: _y+4+((max-v)/range)*(h-8)
-        };
-      });
-      doc.setDrawColor(color[0],color[1],color[2]);
-      doc.setLineWidth(0.6);
-      for(var i=1;i<pts.length;i++) doc.line(pts[i-1].x,pts[i-1].y,pts[i].x,pts[i].y);
-      // Puntos
-      pts.forEach(function(p){
-        doc.setFillColor(color[0],color[1],color[2]);
-        doc.circle(p.x,p.y,0.8,'F');
-      });
-    }
-
-    // PÁGINA 1 — CABECERA + FICHA CLÍNICA
-    rect(0,0,W,42,0,BG);
-    // Logo
-    // FIX 5.0: jsPDF 2.5.1 no soporta WEBP — el logo se perdia siempre en
-    // silencio. Lo reconvertimos a PNG con un canvas antes de incrustarlo.
-    var logoSrc=window.__LOGO_PNG__||'';
-    if(logoSrc){try{doc.addImage(logoSrc,'PNG',M,2,18,18);}catch(e){diagLog('PDF-LOGO',e.message);}}
-    txt('SpeciMen® Gym App',M+22,10,18,GOLD);
-    txt('Historia Clínica y Análisis de Progreso',M+22,17,9,GRAY);
-    txt(new Date().toLocaleDateString('es-ES',{weekday:'long',year:'numeric',month:'long',day:'numeric'}),M+22,23,8,[150,150,180]);
-    // Nombre y email del usuario
-    rect(0,28,W,14,0,BG2);
-    txt(u.nombre||'Atleta',M,36,13,TEXT);
-    txt(u.email||'',W-M,36,8,GRAY,'right');
-    y=48;
-
-    // FICHA CLÍNICA COMPLETA
-    section('📋 FICHA CLÍNICA COMPLETA',GOLD);
-    var pesoActual=(lastMed&&lastMed.peso)||u.peso||'—';
-    var grasaActual=(lastMed&&lastMed.grasa)||u.grasa||'—';
-    var imc=u.alt?(parseFloat(pesoActual)/Math.pow(u.alt/100,2)).toFixed(1):'—';
-    var imcLabel=parseFloat(imc)<18.5?'Bajo peso':parseFloat(imc)<25?'Normopeso':parseFloat(imc)<30?'Sobrepeso':'Obesidad';
-    var fichaItems=[
-      ['Género',(u.genero==='H'?'Hombre':'Mujer')],['Edad',calcEdad(u.fnac)+' años'],
-      ['Peso actual',pesoActual+' kg'],['Altura',(u.alt||'—')+' cm'],
-      ['IMC',imc+' ('+imcLabel+')'],['% Grasa corporal',grasaActual+'%'],
-      ['Masa magra (est.)',(mac.masaMagra||'—')+' kg'],['Cintura',((lastMed&&lastMed.cin)||u.cin||'—')+' cm'],
-      ['Cuello',((lastMed&&lastMed.cue)||u.cue||'—')+' cm'],['Cadera',((lastMed&&lastMed.cad)||u.cad||'—')+' cm'],
-      ['Objetivo',{perdida:'Pérdida de grasa',volumen:'Ganancia muscular',recomp:'Recomposición',mant:'Mantenimiento'}[u.obj||'recomp']],
-      ['Experiencia',{prin:'Principiante',inter:'Intermedio',avanz:'Avanzado'}[u.exp||'inter']],
-    ];
-    var cols=3, colW=CW/cols, rH=7;
-    fichaItems.forEach(function(item,i){
-      var col=i%cols, row=Math.floor(i/cols);
-      var x=M+col*colW, iy=y+row*(rH+1);
-      rect(x,iy,colW-2,rH,2,BG2);
-      txt(item[0],x+2,iy+4.5,6,GRAY);
-      txt(String(item[1]||'—'),x+colW-3,iy+4.5,7,TEXT,'right');
-    });
-    y+=Math.ceil(fichaItems.length/cols)*(rH+1)+6;
-
-    // MÉTRICAS METABÓLICAS
-    section('⚡ MÉTRICAS METABÓLICAS',GOLD);
-    var metItems=[
-      ['BMR (Mifflin-St.Jeor)',(mac.bmr||'—')+' kcal/día'],
-      ['TDEE estimado',(mac.tdee||'—')+' kcal/día'],
-      ['Target calórico',(mac.kcal||'—')+' kcal/día'],
-      ['Déficit aplicado',(mac.deficitReal||'—')+'%'],
-      ['Proteína objetivo',(mac.prot||'—')+' g/día'],
-      ['Agua objetivo',(Math.round((mac.agua||2500)/100)/10)+' L/día'],
-    ];
-    var mCW=CW/3;
-    metItems.forEach(function(item,i){
-      var col=i%3, row=Math.floor(i/3);
-      var x=M+col*mCW, iy=y+row*(rH+1);
-      rect(x,iy,mCW-2,rH,2,BG2);
-      txt(item[0],x+2,iy+4.5,6,GRAY);
-      txt(String(item[1]),x+mCW-3,iy+4.5,7,GOLD,'right');
-    });
-    y+=Math.ceil(metItems.length/3)*(rH+1)+6;
-
-    // GRÁFICA DE EVOLUCIÓN DE PESO
-    if(meds.length>=2){
-      section('📈 EVOLUCIÓN DE PESO (últimas '+(Math.min(meds.length,12))+' mediciones)',GOLD);
-      var pesoVals=meds.slice(-12).map(function(m){return parseFloat(m.peso)||0;}).filter(Boolean);
-      var pesoLabels=meds.slice(-12).map(function(m){return (m.fecha||'').slice(5);});
-      if(pesoVals.length>=2){
-        lineChart(pesoVals,M,y,CW,28,GOLD);
-        y+=31;
-      }
-    }
-
-    // GRÁFICA DE % GRASA
-    if(meds.filter(function(m){return m.grasa;}).length>=2){
-      if(y>230){doc.addPage();y=M+8;}
-      section('📉 EVOLUCIÓN % GRASA CORPORAL',GREEN);
-      var grasaVals=meds.slice(-12).filter(function(m){return m.grasa;}).map(function(m){return parseFloat(m.grasa)||0;});
-      var grasaLabels=meds.slice(-12).filter(function(m){return m.grasa;}).map(function(m){return (m.fecha||'').slice(5);});
-      lineChart(grasaVals,M,y,CW,25,RED);
-      y+=28;
-    }
-
-    // PÁGINA 2 — HISTORIAL SESIONES + ANÁLISIS
-    if(sessions.length||_lastIAText){
-      doc.addPage(); y=M+8;
-
-      // Volumen semanal (gráfica de barras)
-      if(sessions.length>=2){
-        section('🏋️ VOLUMEN DE ENTRENAMIENTO POR SESIÓN (últimas '+Math.min(sessions.length,10)+')',GOLD);
-        var volVals=sessions.slice(-10).map(function(s){
-          return (s.exs||[]).reduce(function(t,e){return t+((e.series||[]).reduce(function(tv,sr){return tv+(sr.done?(parseFloat(sr.kg)||0)*(parseInt(sr.reps)||1):0);},0));},0);
-        });
-        var volLabels=sessions.slice(-10).map(function(s){return (s.fecha||'').slice(5);});
-        barChart(volVals,volLabels,M,y,CW,30,GOLD);
-        y+=34;
-      }
-
-      // RPE histórico
-      if(sessions.length>=2){
-        section('💪 RPE HISTÓRICO (intensidad percibida)',GOLD);
-        var rpeVals=sessions.slice(-10).filter(function(s){return s.rpe;}).map(function(s){return parseFloat(s.rpe)||0;});
-        var rpeLabels=sessions.slice(-10).filter(function(s){return s.rpe;}).map(function(s){return (s.fecha||'').slice(5);});
-        if(rpeVals.length>=2){barChart(rpeVals,rpeLabels,M,y,CW,22,BLUE);y+=26;}
-      }
-
-      // Últimas 10 sesiones detalle
-      section('📊 DETALLE DE SESIONES (últimas '+Math.min(sessions.length,10)+')',GOLD);
-      sessions.slice(-10).reverse().forEach(function(s){
-        if(y>270){doc.addPage();y=M+8;}
-        rect(M,y,CW,8,2,BG2);
-        txt((s.tipo||'Sesión').slice(0,28),M+2,y+5,7.5,TEXT);
-        txt(fmtDate(s.fecha),M+CW*0.4,y+5,7,GRAY);
-        txt((s.dur||'—')+' min',M+CW*0.56,y+5,7,GRAY);
-        txt('RPE '+(s.rpe||'—'),M+CW*0.7,y+5,7,s.rpe>7?RED:s.rpe>5?GOLD:GREEN);
-        var vol=(s.exs||[]).reduce(function(t,e){return t+((e.series||[]).reduce(function(tv,sr){return tv+(sr.done?(parseFloat(sr.kg)||0)*(parseInt(sr.reps)||1):0);},0));},0);
-        if(vol>0) txt(Math.round(vol)+' kg',W-M-2,y+5,7,GOLD,'right');
-        y+=9;
-      });
-      y+=4;
-
-      // Análisis IA si existe
-      if(_lastIAText&&typeof _lastIAText==='object'&&_lastIAText.resumen){
-        // 5.0: mismo arreglo que en el informe por email — el tamaño de letra
-        // se fija ANTES de partir el texto, no despues.
-        var parr2=function(texto,size,colTexto,colFondo,vinneta){
-          var t=_pdfTxt(texto); if(!t) return;
-          doc.setFontSize(size);
-          var sangria=vinneta?5:0;
-          var lineas=doc.splitTextToSize(t,CW-6-sangria);
-          var lh=Math.max(3.4,size*0.46);
-          var alto=lineas.length*lh+4;
-          if(y+alto>276){doc.addPage();y=M+8;}
-          if(colFondo) rect(M,y,CW,alto,2,colFondo);
-          doc.setFontSize(size);
-          doc.setTextColor(colTexto[0],colTexto[1],colTexto[2]);
-          if(vinneta) doc.text('-',M+3,y+lh+0.5);
-          lineas.forEach(function(l,i){doc.text(l,M+3+sangria,y+lh+0.5+i*lh);});
-          y+=alto+2;
-        };
-        var rotulo2=function(texto,col){
-          if(y>266){doc.addPage();y=M+8;}
-          doc.setFontSize(7.5);
-          doc.setTextColor(col[0],col[1],col[2]);
-          doc.text(_pdfTxt(texto),M,y+3);
-          y+=7;
-        };
-
-        if(y>226){doc.addPage();y=M+8;}
-        section('ANALISIS CLINICO IA  ('+(_lastIAText.fecha||'última sesión')+')',GOLD);
-        rect(M,y,CW,9,2,BG2);
-        var nivelC=_lastIAText.nivLabel&&_lastIAText.nivLabel.indexOf('óptimo')>=0?GREEN:_lastIAText.nivLabel&&_lastIAText.nivLabel.indexOf('urgentes')>=0?RED:GOLD;
-        txt('NIVEL: '+(_lastIAText.nivLabel||'—'),M+3,y+6,8.5,nivelC);
-        txt('Motor: '+(_lastIAText.motor||'—'),W-M-3,y+6,7,GRAY,'right');
-        y+=13;
-
-        rotulo2('RESUMEN',GOLD);
-        parr2(_lastIAText.resumen||'',8,[205,205,225],[18,18,32]);
-
-        if(_lastIAText.ajustes_entreno&&_lastIAText.ajustes_entreno.length){
-          rotulo2('AJUSTES DE ENTRENAMIENTO',GOLD);
-          _lastIAText.ajustes_entreno.forEach(function(a){ parr2(a,7.5,[200,200,220],BG2,true); });
-          y+=2;
-        }
-        if(_lastIAText.ajustes_nutricion&&_lastIAText.ajustes_nutricion.length){
-          rotulo2('AJUSTES DE NUTRICION',GREEN);
-          _lastIAText.ajustes_nutricion.forEach(function(a){ parr2(a,7.5,[200,200,220],BG2,true); });
-          y+=2;
-        }
-        if(_lastIAText.recomendacion){
-          rotulo2('DIRECTIVA PROXIMA SEMANA',BLUE);
-          parr2(_lastIAText.recomendacion,8,[185,205,245],[18,18,40]);
-          y+=2;
-        }
-      }
-    }
-
-    // ── PIE DE PÁGINA (todas las páginas) ─────
-    var totalPages=doc.getNumberOfPages();
-    for(var p=1;p<=totalPages;p++){
-      doc.setPage(p);
-      rect(0,287,W,10,0,BG);
-      txt('SpeciMen® Gym App · Informe generado el '+new Date().toLocaleDateString('es-ES'),W/2,292,7,GRAY,'center');
-      txt('SpeciMen Gym App® desarrollado por Cristhian Andrés Serna Salazar © | 2026. Todos los derechos reservados. Prohibida su reproducción total o parcial sin autorización.',W/2,294,5,[50,50,80],'center');
-      txt('Pág. '+p+'/'+totalPages,W-M,292,7,GRAY,'right');
-    }
-
-    var _fn='SpeciMen_Informe_'+( u.nombre||'usuario').split(' ')[0]+'_'+new Date().toISOString().slice(0,10)+'.pdf';
-    var _modo=entregarPDF(doc,_fn);
-    toast('✓ PDF generado correctamente');
+    var ia=(_lastIAText&&typeof _lastIAText==='object'&&_lastIAText.resumen)?_lastIAText:null;
+    var paginas=construirInformePDF(doc,u,ia);
+    var nombre='SpeciMen_Informe_'+((u.nombre||'usuario').split(' ')[0])+'_'+new Date().toISOString().slice(0,10)+'.pdf';
+    entregarPDF(doc,nombre);
+    toast('✓ Informe generado · '+paginas+' páginas');
   }catch(err){
-    diagLog('PDF',err.message,err.stack||'');toast('Error generando PDF: '+err.message,'var(--red)');
+    diagLog('PDF',err.message,err.stack||'');
+    toast('Error generando PDF: '+err.message,'var(--red)');
   }
 }
 window.generarPDF=generarPDF;
