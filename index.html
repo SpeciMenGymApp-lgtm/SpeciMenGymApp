@@ -3674,7 +3674,7 @@ $('btn-login').addEventListener('click',function(){
 // Script antiguo; si son correctas, se crea la cuenta nueva con la misma
 // contraseña y se sube su historial. Cada usuario se migra solo, al entrar.
 // ═══════════════════════════════════════════════════════════════════════════
-var API_BASE = '';   // p. ej. 'https://specimen-api.<cuenta>.workers.dev'
+var API_BASE = 'https://specimen-api.specimengymapp.workers.dev';   // vacío = volver al Apps Script
 
 function nubeWorker(){ return !!API_BASE; }
 function _tokenApi(){ try{ return localStorage.getItem('specimen_token')||''; }catch(e){ return ''; } }
