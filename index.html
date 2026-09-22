@@ -316,7 +316,8 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .plan-ex-row2:active{background:var(--bg4);margin:0 -16px;padding:12px 16px;}
 .plan-ex-num{width:26px;height:26px;border-radius:50%;background:var(--bg4);color:var(--t3);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--border2);}
 .plan-ex-body{flex:1;min-width:0;}
-.plan-ex-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.plan-ex-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px;line-height:1.3;overflow:hidden;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere;}
 .plan-ex-detail2{font-size:11px;color:var(--t3);display:flex;align-items:center;gap:6px;flex-wrap:wrap;line-height:1.5;}
 .plan-sets-badge{font-size:11px;font-weight:700;color:var(--acc2);background:var(--accb);padding:2px 7px;border-radius:4px;white-space:nowrap;}
 .plan-ex-pr{font-size:11px;color:var(--green);margin-top:3px;font-weight:500;}
@@ -362,7 +363,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 /* Área mensajes — scrollable */
 #kongo-msgs{position:absolute;top:48px;left:0;right:0;
   bottom:calc(160px + var(--safe));overflow-y:auto;-webkit-overflow-scrolling:touch;
-  padding:12px 14px 8px;display:flex;flex-direction:column;gap:10px;}
+  padding:12px 14px 16px;display:flex;flex-direction:column;gap:10px;}
 /* Input bar — pegado al fondo */
 #kongo-input-bar{position:absolute;bottom:calc(52px + var(--safe));left:0;right:0;
   background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);
@@ -511,6 +512,64 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   display:flex;align-items:center;justify-content:center;font-size:11px;}
 .user-btn img{width:18px;height:18px;border-radius:50%;object-fit:cover;vertical-align:-4px;margin-right:5px;}
 .chat-avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;}
+</style>
+
+<style>
+/* ══════════════════════════════════════════════════════════════════════════
+   5.0 · DISEÑO ADAPTABLE: móvil, iPad y ordenador
+   La app está pensada para móvil. En pantallas anchas se estiraba a todo el
+   ancho: casillas de kilos de 300 px, textos en una sola línea kilométrica y
+   ventanas de 1.000 px. Ahora el contenido va en una columna centrada del
+   ancho de un móvil grande / iPad vertical, y todo lo demás se alinea con ella.
+   ══════════════════════════════════════════════════════════════════════════ */
+:root{--col:100%;}
+
+/* Protección general: ningún texto ni imagen puede ensanchar la pantalla. */
+.content{overflow-x:hidden;}
+.card,.hevy-card,.modal{overflow-wrap:anywhere;}
+.content img,.content video,.content iframe,.content canvas,.modal img,.modal canvas{max-width:100%;}
+.content input,.content select,.content textarea{max-width:100%;}
+
+@media (min-width:700px){
+  :root{--col:680px;}
+  /* Columna central: el contenido y las barras usan el mismo ancho. */
+  .content{padding-left:max(16px,calc((100% - var(--col)) / 2));padding-right:max(16px,calc((100% - var(--col)) / 2));}
+  .topbar{padding-left:max(16px,calc((100% - var(--col)) / 2));padding-right:max(16px,calc((100% - var(--col)) / 2));}
+  .bnav{padding-left:calc((100% - var(--col)) / 2);padding-right:calc((100% - var(--col)) / 2);}
+  .bn{font-size:10.5px;min-height:58px;}
+  .bn-ico{font-size:21px;}
+
+  /* Ventanas emergentes: tarjeta centrada en vez de hoja a todo el ancho. */
+  .modal-ov{align-items:center;padding:24px;}
+  .modal{max-width:560px;border-radius:20px;max-height:86vh;}
+
+  /* Chat de Kongo: misma columna que el resto. */
+  #kongo-header,#kongo-msgs,#kongo-input-bar,#kongo-nokey{
+    left:max(0px,calc((100% - var(--col)) / 2));right:max(0px,calc((100% - var(--col)) / 2));}
+  #kongo-input-bar{border-left:1px solid var(--border);border-right:1px solid var(--border);border-radius:12px 12px 0 0;}
+  .chat-bubble{max-width:74%;}
+
+  /* Términos, registro y aviso de la nube. */
+  #lg-head,#lg-body,#lg-foot{padding-left:max(18px,calc((100% - var(--col)) / 2));padding-right:max(18px,calc((100% - var(--col)) / 2));}
+  .onb-inner{max-width:var(--col);margin:0 auto;}
+  #banner-nube{left:50%!important;right:auto!important;width:min(560px,calc(100% - 24px));transform:translateX(-50%);}
+
+  /* Vídeos: reproductor centrado y proporcionado, no a pantalla completa. */
+  #m-youtube iframe{width:min(100%,900px)!important;margin:0 auto;}
+}
+
+/* Ordenador: algo más de aire, sin pasar del ancho de lectura cómodo. */
+@media (min-width:1100px){
+  :root{--col:760px;}
+  body{font-size:15.5px;}
+}
+
+/* Móviles pequeños (iPhone SE, Android compactos). */
+@media (max-width:360px){
+  .bn{font-size:8.5px;padding:7px 1px 6px;}
+  .bn-ico{font-size:17px;}
+  .plan-ex-row2{gap:8px;}
+}
 </style>
 
 <div id="legal-gate">
@@ -4538,7 +4597,7 @@ function renderPlanEj(){
       var ename=e.n.replace(/'/g,"\\'");
       var emus=(e.mus||'').replace(/'/g,"\\'");
       return '<div class="plan-ex-row2" style="position:relative;">'
-        +'<div style="display:flex;align-items:center;flex:1;" onclick="showExDetail(\''+eid+'\',\''+ename+'\')">'
+        +'<div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;" onclick="showExDetail(\''+eid+'\',\''+ename+'\')">'
           +'<div class="plan-ex-num">'+(exIdx+1)+'</div>'
           +'<div class="plan-ex-body">'
             +'<div class="plan-ex-title">'+e.n+'</div>'
@@ -6746,15 +6805,7 @@ function renderKongo(){
 function kongoRenderMsgs(){
   var div=$('kongo-msgs');
   if(!div||div.style.display==='none') return;
-  // Ajustar bottom de msgs según altura del input bar
-  // Ajustar bottom de msgs según altura real del input bar
-  var bar=$('kongo-input-bar');
-  if(bar){
-    requestAnimationFrame(function(){
-      var h=bar.offsetHeight;
-      if(h>0) div.style.bottom=h+'px';
-    });
-  }
+  requestAnimationFrame(kongoAjustarAlto);
 
   div.innerHTML=_kongo.msgs.map(function(m, idx){
     var isUser=m.role==='user';
@@ -6820,6 +6871,26 @@ function kongoRenderMsgs(){
 
   div.scrollTop=div.scrollHeight;
 }
+
+// 5.0 · El área de mensajes termina justo donde empieza la barra de escribir.
+// Antes se usaba solo la altura de la barra, sin contar que la barra está
+// ENCIMA del menú inferior: el final de cada respuesta quedaba tapado.
+// Ahora se mide la distancia real entre la parte de arriba de la barra y el
+// fondo de la pantalla del chat, y se recalcula al crecer el texto o al
+// abrirse el teclado.
+function kongoAjustarAlto(){
+  var div=$('kongo-msgs'), bar=$('kongo-input-bar'), sc=$('sc-kongo');
+  if(!div||!bar||!sc||!bar.offsetHeight) return;
+  var abajo=sc.getBoundingClientRect().bottom - bar.getBoundingClientRect().top;
+  if(abajo>0){
+    var pegado=div.scrollHeight-div.scrollTop-div.clientHeight<40;
+    div.style.bottom=Math.ceil(abajo)+'px';
+    if(pegado) div.scrollTop=div.scrollHeight;
+  }
+}
+window.kongoAjustarAlto=kongoAjustarAlto;
+window.addEventListener('resize',function(){ requestAnimationFrame(kongoAjustarAlto); });
+if(window.visualViewport) window.visualViewport.addEventListener('resize',function(){ requestAnimationFrame(kongoAjustarAlto); });
 
 // Genera sugerencias contextuales según el contenido del último mensaje
 // ── SWAP EJERCICIO EN EL PLAN ─────────────────────────────
@@ -8444,6 +8515,7 @@ function initKongoListeners(){
     inp.addEventListener('input',function(){
       this.style.height='auto';
       this.style.height=Math.min(this.scrollHeight,100)+'px';
+      kongoAjustarAlto();
     });
   }
 }
