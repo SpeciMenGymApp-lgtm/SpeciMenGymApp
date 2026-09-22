@@ -470,6 +470,47 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .lg-check input{margin-top:2px;width:17px;height:17px;flex-shrink:0;accent-color:var(--green);}
 .lg-check span{font-size:11.8px;line-height:1.55;color:var(--t2);}
 .lg-check.on span{color:var(--text);}
+/* 5.0 · Casillas de aceptación con chulo verde grande y visible */
+/* La regla global de <label> las ponía en MAYÚSCULAS y difíciles de leer. */
+.lg-check{text-transform:none;letter-spacing:normal;font-weight:400;font-size:inherit;}
+.lg-check input{-webkit-appearance:none;appearance:none;margin:0;width:24px;height:24px;flex-shrink:0;border-radius:7px;
+  border:2px solid var(--border2);background:var(--bg);cursor:pointer;transition:all .15s;
+  background-repeat:no-repeat;background-position:center;background-size:16px 16px;}
+.lg-check input:checked{background-color:var(--green);border-color:var(--green);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 12.5l5 5L20 6.5' fill='none' stroke='%23fff' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");}
+.lg-check input:disabled{opacity:.45;}
+.lg-check.on::after{content:'Aceptado';margin-left:auto;align-self:center;font-size:10px;font-weight:800;color:var(--green);
+  letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;padding-left:6px;}
+</style>
+<style>
+/* 5.0 · Secciones desplegables del perfil */
+.pf-sec{background:var(--bg2);border:1px solid var(--border);border-radius:14px;margin-bottom:12px;overflow:hidden;}
+.pf-sec>summary{list-style:none;display:flex;align-items:center;gap:11px;padding:14px 15px;cursor:pointer;user-select:none;-webkit-user-select:none;}
+.pf-sec>summary::-webkit-details-marker{display:none;}
+.pf-sec>summary .pf-ico{width:34px;height:34px;border-radius:10px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.pf-sec>summary .pf-tit{font-size:14px;font-weight:700;color:var(--text);}
+.pf-sec>summary .pf-sub{font-size:11px;color:var(--t3);margin-top:1px;}
+.pf-sec>summary::after{content:'';margin-left:auto;width:9px;height:9px;border-right:2px solid var(--t3);border-bottom:2px solid var(--t3);
+  transform:rotate(45deg);transition:transform .2s;flex-shrink:0;margin-right:4px;}
+.pf-sec[open]>summary::after{transform:rotate(-135deg);}
+.pf-sec[open]>summary{border-bottom:1px solid var(--border);}
+.pf-body{padding:14px 15px 15px;}
+.pf-sec.pf-main{border-color:var(--acc);}
+.pf-sec.pf-main>summary .pf-ico{background:var(--accb);}
+.pf-sub-sec{background:var(--bg3);border:1px solid var(--border2);border-radius:11px;margin-bottom:9px;overflow:hidden;}
+.pf-sub-sec>summary{list-style:none;padding:12px 13px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:9px;}
+.pf-sub-sec>summary::-webkit-details-marker{display:none;}
+.pf-sub-sec>summary::after{content:'';margin-left:auto;width:7px;height:7px;border-right:2px solid var(--t3);border-bottom:2px solid var(--t3);transform:rotate(45deg);transition:transform .2s;}
+.pf-sub-sec[open]>summary::after{transform:rotate(-135deg);}
+.pf-sub-sec .pf-body{padding:4px 13px 13px;}
+/* Foto de perfil */
+.pf-avatar{position:relative;width:64px;height:64px;border-radius:50%;flex-shrink:0;cursor:pointer;}
+.pf-avatar .pf-av-in{width:100%;height:100%;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:27px;font-weight:900;}
+.pf-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
+.pf-avatar .pf-cam{position:absolute;right:-2px;bottom:-2px;width:24px;height:24px;border-radius:50%;background:var(--acc);border:2px solid var(--bg2);
+  display:flex;align-items:center;justify-content:center;font-size:11px;}
+.user-btn img{width:18px;height:18px;border-radius:50%;object-fit:cover;vertical-align:-4px;margin-right:5px;}
+.chat-avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;}
 </style>
 
 <div id="legal-gate">
@@ -681,7 +722,15 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     <div style="height:10px;"></div>
     <div id="lg-fin" class="lg-box lg-info" style="text-align:center;">
       <b>Has llegado al final del documento.</b><br>
-      Marca abajo las casillas para continuar.
+      Marca las casillas para continuar.
+    </div>
+    <!-- 5.0: las casillas solo aparecen al final, después de leerlo todo. -->
+    <div id="lg-acepta" style="margin-top:12px;">
+      <label class="lg-check" id="lgc1"><input type="checkbox" id="lg-c1"><span>He leído y acepto los <b>Términos de uso</b> y la <b>Política de privacidad</b>, y confirmo que soy <b>mayor de 18 años</b>.</span></label>
+      <label class="lg-check" id="lgc2"><input type="checkbox" id="lg-c2"><span><b>Consiento expresamente</b> el tratamiento de mis <b>datos de salud</b> (peso, medidas, porcentaje de grasa, alergias) para calcular mis planes.</span></label>
+      <label class="lg-check" id="lgc3"><input type="checkbox" id="lg-c3"><span>Entiendo que esta app es <b>orientativa</b>, que <b>no sustituye a un médico ni a un nutricionista</b>, y que el filtrado de alérgenos <b>no garantiza</b> la ausencia de trazas.</span></label>
+      <button class="btn btn-acc btn-full" id="lg-aceptar" disabled style="opacity:.4;margin-top:4px;">Aceptar y continuar</button>
+      <button class="btn btn-ghost btn-full" id="lg-rechazar" style="margin-top:7px;font-size:12px;">No acepto</button>
     </div>
     <p style="font-size:10.5px;color:var(--t3);text-align:center;margin-top:14px;">
       Versión 1.0 · Agosto de 2026<br>
@@ -690,14 +739,9 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   </div>
 
   <div id="lg-foot">
-    <div id="lg-aviso" style="font-size:11px;color:var(--amber);text-align:center;margin-bottom:9px;">
-      Desplázate hasta el final para poder aceptar
+    <div id="lg-aviso" style="font-size:12px;color:var(--amber);text-align:center;">
+      ↓ Lee el documento completo: al final podrás aceptarlo
     </div>
-    <label class="lg-check" id="lgc1"><input type="checkbox" id="lg-c1"><span>He leído y acepto los <b>Términos de uso</b> y la <b>Política de privacidad</b>, y confirmo que soy <b>mayor de 18 años</b>.</span></label>
-    <label class="lg-check" id="lgc2"><input type="checkbox" id="lg-c2"><span><b>Consiento expresamente</b> el tratamiento de mis <b>datos de salud</b> (peso, medidas, porcentaje de grasa, alergias) para calcular mis planes.</span></label>
-    <label class="lg-check" id="lgc3"><input type="checkbox" id="lg-c3"><span>Entiendo que esta app es <b>orientativa</b>, que <b>no sustituye a un médico ni a un nutricionista</b>, y que el filtrado de alérgenos <b>no garantiza</b> la ausencia de trazas.</span></label>
-    <button class="btn btn-acc btn-full" id="lg-aceptar" disabled style="opacity:.4;margin-top:4px;">Aceptar y continuar</button>
-    <button class="btn btn-ghost btn-full" id="lg-rechazar" style="margin-top:7px;font-size:12px;">No acepto</button>
   </div>
 </div>
 
@@ -1020,15 +1064,11 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   <div class="section-sub">Datos, suplementos y configuración</div>
   <div class="card" id="perfil-card"></div>
 
-  <!-- CALCULADORA METABÓLICA -->
-  <div class="card" style="border-color:var(--amber);">
-    <div class="card-hdr"><div class="card-title" style="color:var(--amber);">🔬 Calculadora metabólica</div></div>
-    <div id="calc-metabolica"></div>
-  </div>
-
-  <!-- EDITAR OBJETIVO -->
-  <div class="card" style="border-color:var(--acc);">
-    <div class="card-hdr"><div class="card-title" style="color:var(--acc2);">⚙️ Modificar objetivo y plan</div></div>
+  <!-- 5.0 · Perfil reorganizado: lo físico visible arriba (tarjeta de
+       perfil), el resto en secciones que se despliegan al tocarlas. -->
+  <details class="pf-sec">
+    <summary><span class="pf-ico">🎯</span><span><div class="pf-tit">Objetivo y plan</div><div class="pf-sub">Objetivo, déficit y peso actual</div></span></summary>
+    <div class="pf-body">
     <div class="fg"><label>Objetivo</label>
       <select id="edit-obj">
         <option value="recomp">Recomposición corporal</option>
@@ -1045,111 +1085,130 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
         <option value="25">25% — Agresivo (máximo recomendado)</option>
       </select>
     </div>
-    <div class="fg"><label>⏰ Hora de entrenamiento</label>
-      <select id="edit-hora-entreno">
-        <option value="manana">🌅 Mañana (6:00 - 11:00)</option>
-        <option value="mediodia">☀️ Mediodía (11:00 - 14:00)</option>
-        <option value="tarde">🌇 Tarde (14:00 - 18:00)</option>
-        <option value="noche">🌙 Noche (18:00 - 22:00)</option>
-      </select>
-    </div>
-    <div class="fg"><label>💼 Tipo de trabajo</label>
-      <select id="edit-trabajo">
-        <option value="sedentario">🪑 Sedentario (oficina, sentado)</option>
-        <option value="moderado">🚶 Moderado (de pie, caminando)</option>
-        <option value="activo">🏗️ Activo (esfuerzo físico constante)</option>
-      </select>
-    </div>
-    <div class="fg"><label>País de residencia</label>
-      <select id="edit-pais">
-        <option value="es">🇪🇸 España</option>
-        <option value="co">🇨🇴 Colombia</option>
-      </select>
-    </div>
-    <div class="fg"><label>Tipo de alimentación</label>
-      <select id="edit-dieta">
-        <option value="equilibrada">Equilibrada</option>
-        <option value="lowcarb">Baja en carbohidratos</option>
-        <option value="keto">Cetogénica (keto)</option>
-      </select>
-    </div>
     <div class="fg"><label>Peso actual (kg)</label>
       <input type="text" id="edit-peso" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="Ej: 95.5">
     </div>
     <button class="btn btn-acc btn-full" id="btn-edit-save">Actualizar plan ✓</button>
-  </div>
+    </div>
+  </details>
+  <details class="pf-sec">
+    <summary><span class="pf-ico">🔬</span><span><div class="pf-tit">Calculadora metabólica</div><div class="pf-sub">Metabolismo basal, gasto y macros</div></span></summary>
+    <div class="pf-body">
+      <div id="calc-metabolica"></div>
+    </div>
+  </details>
+  <details class="pf-sec">
+    <summary><span class="pf-ico">💊</span><span><div class="pf-tit">Suplementación</div><div class="pf-sub">Qué tomar y cuándo</div></span></summary>
+    <div class="pf-body">
+      <div id="perfil-supls"></div>
+    </div>
+  </details>
+  <details class="pf-sec pf-main" id="pf-config">
+    <summary><span class="pf-ico">⚙️</span><span><div class="pf-tit">Configuración</div><div class="pf-sub">Preferencias, IA, nube, copias y privacidad</div></span></summary>
+    <div class="pf-body">
+      <details class="pf-sub-sec">
+        <summary>🍽️ Preferencias de rutina y alimentación</summary>
+        <div class="pf-body">
+        <div class="fg"><label>⏰ Hora de entrenamiento</label>
+          <select id="edit-hora-entreno">
+            <option value="manana">🌅 Mañana (6:00 - 11:00)</option>
+            <option value="mediodia">☀️ Mediodía (11:00 - 14:00)</option>
+            <option value="tarde">🌇 Tarde (14:00 - 18:00)</option>
+            <option value="noche">🌙 Noche (18:00 - 22:00)</option>
+          </select>
+        </div>
+        <div class="fg"><label>💼 Tipo de trabajo</label>
+          <select id="edit-trabajo">
+            <option value="sedentario">🪑 Sedentario (oficina, sentado)</option>
+            <option value="moderado">🚶 Moderado (de pie, caminando)</option>
+            <option value="activo">🏗️ Activo (esfuerzo físico constante)</option>
+          </select>
+        </div>
+        <div class="fg"><label>País de residencia</label>
+          <select id="edit-pais">
+            <option value="es">🇪🇸 España</option>
+            <option value="co">🇨🇴 Colombia</option>
+          </select>
+        </div>
+        <div class="fg"><label>Tipo de alimentación</label>
+          <select id="edit-dieta">
+            <option value="equilibrada">Equilibrada</option>
+            <option value="lowcarb">Baja en carbohidratos</option>
+            <option value="keto">Cetogénica (keto)</option>
+          </select>
+        </div>
+    <button class="btn btn-acc btn-full" onclick="$('btn-edit-save').click()">Guardar preferencias ✓</button>
+        </div>
+      </details>
+      <details class="pf-sub-sec">
+        <summary>🤖 Inteligencia artificial</summary>
+        <div class="pf-body">
+        <!-- IA: solo Google Gemini. Sin clave propia, la app usa la IA del servidor. -->
+        <input type="hidden" id="cfg-key">
+        <div style="font-size:12px;color:var(--t2);background:var(--bg3);border-radius:8px;padding:10px 12px;margin-bottom:10px;line-height:1.7;border:1px solid var(--border2);">
+          <b>🔑 Inteligencia artificial — Google Gemini</b><br>
+          No necesitas clave: la app usa la IA de SpeciMen.<br>
+          Opcional: si tienes tu propia clave (<b>AIza...</b> o <b>AQ....</b>, en <b>aistudio.google.com/apikey</b>), pégala aquí y no gastarás tu cupo mensual.
+        </div>
+        <div class="fg"><label>API Key Gemini</label><input type="password" id="cfg-gemini" placeholder="AIza... o AQ...."></div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;"><button class="btn btn-sm btn-ghost" id="btn-test-gemini" style="flex-shrink:0;">Probar conexión</button><span id="gemini-test-status" style="font-size:12px;"></span></div>
+    <button class="btn btn-green btn-full" onclick="$('btn-save-cfg').click()">Guardar</button>
+        </div>
+      </details>
+      <details class="pf-sub-sec">
+        <summary>☁️ Nube y envío por email</summary>
+        <div class="pf-body">
+        <div style="font-size:12px;color:var(--t2);background:var(--bg3);border-radius:8px;padding:10px 12px;margin-bottom:10px;line-height:1.7;border:1px solid var(--border2);">
+          <b>📧 Envío de análisis por email</b><br>
+          Pega aquí la URL de tu Web App de Google Apps Script (función <code>doPost</code> con <code>MailApp.sendEmail</code>) para poder enviarte el análisis de progreso por correo.
+        </div>
+        <div class="fg"><label>URL Backend Email (Google Apps Script)</label><input type="url" id="cfg-gas-url" placeholder="https://script.google.com/macros/s/.../exec"></div>
+        <button class="btn btn-green btn-full" id="btn-save-cfg" style="margin-bottom:8px;">Guardar configuración</button>
+        <button class="btn btn-full" onclick="syncNube()" style="margin-bottom:8px;font-size:13px;">☁️ Sincronizar ahora con la nube</button>
+        </div>
+      </details>
+      <details class="pf-sub-sec">
+        <summary>💾 Copias de seguridad</summary>
+        <div class="pf-body">
+        <div style="font-size:12px;color:var(--t2);margin-bottom:14px;line-height:1.6;">Exporta tus datos antes de actualizar la app o como respaldo. El JSON contiene todo y permite restaurar. El PDF es un informe legible para compartir.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+          <button class="btn btn-acc" onclick="exportarJSON()" style="font-size:13px;padding:11px 8px;">
+            📦 Exportar JSON<br><span style="font-size:10px;font-weight:400;opacity:.8;">Respaldo completo</span>
+          </button>
+          <button class="btn" onclick="exportarPDF()" style="font-size:13px;padding:11px 8px;border:1px solid var(--border2);">
+            📄 Exportar PDF<br><span style="font-size:10px;font-weight:400;opacity:.8;">Informe legible</span>
+          </button>
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:10px;">
+          <div style="font-size:12px;color:var(--t2);margin-bottom:8px;">Restaurar desde respaldo JSON:</div>
+          <input type="file" id="import-json-file" accept=".json" style="display:none;" onchange="importarJSON(this)">
+          <button class="btn btn-full" onclick="$('import-json-file').click()" style="font-size:13px;">
+            📥 Importar JSON
+          </button>
+          <div id="import-status" style="font-size:11px;margin-top:6px;display:none;"></div>
+        </div>
+        <div style="background:var(--bg3);border-radius:8px;padding:10px 12px;margin-top:10px;border-left:3px solid var(--acc);">
+          <div style="font-size:11px;font-weight:700;color:var(--acc2);margin-bottom:4px;">📱 Nota para iPhone (Safari)</div>
+          <div style="font-size:11px;color:var(--t2);line-height:1.6;">
+            Al exportar, Safari puede abrir el JSON en el navegador en vez de descargarlo.<br>
+            Si eso ocurre: toca el botón compartir <b>□↑</b> → <b>"Guardar en Archivos"</b> → elige <b>Descargas</b>.<br><br>
+            Al importar: toca <b>📥 Importar JSON</b> → en el selector de archivos ve a <b>Archivos → Descargas</b> y elige el archivo <b>SpeciMen_backup_FECHA.json</b>.
+          </div>
+        </div>
+        </div>
+      </details>
+      <details class="pf-sub-sec">
+        <summary>🔒 Privacidad y legal</summary>
+        <div class="pf-body">
+        <button class="btn btn-full" onclick="verConsentimientos()" style="margin-bottom:8px;font-size:13px;">🔒 Consentimientos y mis derechos</button>
+        <button class="btn btn-full" onclick="verDocumentoLegal()" style="margin-bottom:8px;font-size:13px;">📄 Términos y política de privacidad</button>
+        <button class="btn btn-full" onclick="verDiagnostico()" style="margin-bottom:8px;font-size:13px;">🩺 Diagnóstico y estado de la app</button>
+        </div>
+      </details>
+    </div>
+  </details>
 
-  <div class="card"><div class="card-title" style="margin-bottom:10px;">💊 Suplementación</div><div id="perfil-supls"></div></div>
-
-  <!-- ── EXPORTAR / IMPORTAR DATOS ── -->
-  <div class="card">
-    <div class="card-title" style="margin-bottom:4px;">💾 Mis datos</div>
-    <div style="font-size:12px;color:var(--t2);margin-bottom:14px;line-height:1.6;">Exporta tus datos antes de actualizar la app o como respaldo. El JSON contiene todo y permite restaurar. El PDF es un informe legible para compartir.</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
-      <button class="btn btn-acc" onclick="exportarJSON()" style="font-size:13px;padding:11px 8px;">
-        📦 Exportar JSON<br><span style="font-size:10px;font-weight:400;opacity:.8;">Respaldo completo</span>
-      </button>
-      <button class="btn" onclick="exportarPDF()" style="font-size:13px;padding:11px 8px;border:1px solid var(--border2);">
-        📄 Exportar PDF<br><span style="font-size:10px;font-weight:400;opacity:.8;">Informe legible</span>
-      </button>
-    </div>
-    <div style="border-top:1px solid var(--border);padding-top:10px;">
-      <div style="font-size:12px;color:var(--t2);margin-bottom:8px;">Restaurar desde respaldo JSON:</div>
-      <input type="file" id="import-json-file" accept=".json" style="display:none;" onchange="importarJSON(this)">
-      <button class="btn btn-full" onclick="$('import-json-file').click()" style="font-size:13px;">
-        📥 Importar JSON
-      </button>
-      <div id="import-status" style="font-size:11px;margin-top:6px;display:none;"></div>
-    </div>
-    <div style="background:var(--bg3);border-radius:8px;padding:10px 12px;margin-top:10px;border-left:3px solid var(--acc);">
-      <div style="font-size:11px;font-weight:700;color:var(--acc2);margin-bottom:4px;">📱 Nota para iPhone (Safari)</div>
-      <div style="font-size:11px;color:var(--t2);line-height:1.6;">
-        Al exportar, Safari puede abrir el JSON en el navegador en vez de descargarlo.<br>
-        Si eso ocurre: toca el botón compartir <b>□↑</b> → <b>"Guardar en Archivos"</b> → elige <b>Descargas</b>.<br><br>
-        Al importar: toca <b>📥 Importar JSON</b> → en el selector de archivos ve a <b>Archivos → Descargas</b> y elige el archivo <b>SpeciMen_backup_FECHA.json</b>.
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title" style="margin-bottom:10px;">⚙️ Configuración</div>
-    <!-- Opción recomendada: Anthropic Claude -->
-    <div style="font-size:12px;color:var(--acc2);background:var(--accb);border-radius:8px;padding:10px 12px;margin-bottom:10px;line-height:1.7;border:1px solid rgba(108,79,255,0.3);">
-      <b>⭐ Opción recomendada — Anthropic Claude:</b><br>
-      1. Ve a <b>console.anthropic.com</b><br>
-      2. Crea cuenta → <b>API Keys → Create Key</b><br>
-      3. Clave empieza por <b>sk-ant-...</b><br>
-      4. Pégala abajo · Incluye <b>$5 de crédito gratis</b> al registrarte
-    </div>
-    <div class="fg"><label>API Key Anthropic Claude ⭐</label><input type="password" id="cfg-key" placeholder="sk-ant-..."></div>
-    <div class="sep" style="margin:10px 0;"></div>
-    <!-- Opción alternativa: Gemini -->
-    <div style="font-size:12px;color:var(--t2);background:var(--bg3);border-radius:8px;padding:10px 12px;margin-bottom:10px;line-height:1.7;border:1px solid var(--border2);">
-      <b>🔑 Alternativa — Google Gemini:</b><br>
-      Acepta claves <b>AIza...</b> y también el nuevo formato <b>AQ....</b><br>
-      Obtener en: <b>aistudio.google.com/apikey</b>
-    </div>
-    <div class="fg"><label>API Key Gemini</label><input type="password" id="cfg-gemini" placeholder="AIza... o AQ...."></div>
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;"><button class="btn btn-sm btn-ghost" id="btn-test-gemini" style="flex-shrink:0;">Probar conexión</button><span id="gemini-test-status" style="font-size:12px;"></span></div>
-    <div class="sep" style="margin:10px 0;"></div>
-    <div style="font-size:12px;color:var(--t2);background:var(--bg3);border-radius:8px;padding:10px 12px;margin-bottom:10px;line-height:1.7;border:1px solid var(--border2);">
-      <b>📧 Envío de análisis por email</b><br>
-      Pega aquí la URL de tu Web App de Google Apps Script (función <code>doPost</code> con <code>MailApp.sendEmail</code>) para poder enviarte el análisis de progreso por correo.
-    </div>
-    <div class="fg"><label>URL Backend Email (Google Apps Script)</label><input type="url" id="cfg-gas-url" placeholder="https://script.google.com/macros/s/.../exec"></div>
-    <div class="sep" style="margin:10px 0;"></div>
-    <div style="font-size:12px;color:var(--green);background:var(--gb);border-radius:8px;padding:9px 12px;margin-bottom:12px;line-height:1.6;">
-      <b>✅ Sin API key:</b> el análisis automático funciona siempre y es completamente gratis. Pulsa "Analizar" en Progreso sin configurar nada.
-    </div>
-    <button class="btn btn-green btn-full" id="btn-save-cfg" style="margin-bottom:8px;">Guardar configuración</button>
-    <button class="btn btn-full" onclick="syncNube()" style="margin-bottom:8px;font-size:13px;">☁️ Sincronizar ahora con la nube</button>
-    <div class="sep" style="margin:10px 0;"></div>
-    <div style="font-size:11px;font-weight:700;color:var(--acc2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Privacidad y datos</div>
-    <button class="btn btn-full" onclick="verConsentimientos()" style="margin-bottom:8px;font-size:13px;">🔒 Consentimientos y mis derechos</button>
-    <button class="btn btn-full" onclick="verDocumentoLegal()" style="margin-bottom:8px;font-size:13px;">📄 Términos y política de privacidad</button>
-    <button class="btn btn-full" onclick="verDiagnostico()" style="margin-bottom:8px;font-size:13px;">🩺 Diagnóstico y estado de la app</button>
-    <button class="btn btn-d btn-full" id="btn-logout">Cerrar sesión</button>
-  </div>
+  <button class="btn btn-d btn-full" id="btn-logout" style="margin:4px 0 18px;">Cerrar sesión</button>
 </div>
 
 </div><!-- /content -->
@@ -1356,7 +1415,10 @@ var DEFAULT_GAS_URL='https://script.google.com/macros/s/AKfycbzL0n2PonwmFO1jd2qE
 if(!localStorage.getItem('specimen_gas_url')) localStorage.setItem('specimen_gas_url',DEFAULT_GAS_URL);
 var APP={users:[],cur:0,timerSecs:120,timerMax:120,timerRun:false,timerInt:null,timerEnd:null,exTemp:[]};
 var _lastIAText='';
-var ANTHROPIC_KEY=localStorage.getItem('specimen_apikey')||'';
+// La IA es solo Google Gemini (5.0). La clave de Claude de versiones
+// anteriores se descarta para que nadie siga pagando a otro proveedor.
+var ANTHROPIC_KEY='';
+try{ localStorage.removeItem('specimen_apikey'); }catch(e){}
 var GEMINI_KEY=localStorage.getItem('specimen_gemini')||'';
 // Las keys persisten en localStorage automáticamente
 // Se restauran en cada carga sin acción del usuario
@@ -1521,7 +1583,7 @@ function verDiagnostico(){
     + 'Online: ' + navigator.onLine + '\n'
     + 'jsPDF cargado: ' + (typeof window.jspdf!=='undefined'||typeof window.jsPDF!=='undefined') + '\n'
     + 'Backend GAS: ' + ((localStorage.getItem('specimen_gas_url')||'').slice(0,60)||'(sin configurar)') + '\n'
-    + 'API Claude: ' + (ANTHROPIC_KEY?'configurada':'no') + ' · API Gemini: ' + (GEMINI_KEY?'configurada':'no') + '\n'
+    + 'IA: Gemini ' + (GEMINI_KEY?'(clave propia)':(usarIAServidor()?'(servidor SpeciMen)':'(sin configurar)')) + '\n'
     + 'Usuarios locales: ' + (APP.users||[]).length + '\n';
   var filas = lista.length
     ? lista.slice().reverse().map(function(d){
@@ -1829,8 +1891,8 @@ function getPlanEjercicio(u){
 // GENERACIÓN DE PLAN CON IA + EVIDENCIA CIENTÍFICA
 async function generarPlanIA(){
   var u=U(); if(!u) return;
-  var key=ANTHROPIC_KEY||GEMINI_KEY||usarIAServidor();
-  if(!key){toast('Necesitas configurar una API key (Claude o Gemini) en Perfil → Configuración','var(--amber)');return;}
+  var key=GEMINI_KEY||usarIAServidor();
+  if(!key){toast('Configura tu clave de Gemini en Perfil → Configuración','var(--amber)');return;}
 
   var btn=$('btn-generar-plan-ia');
   if(btn){btn.disabled=true;btn.textContent='⏳ Analizando tu perfil...';}
@@ -1858,27 +1920,7 @@ async function generarPlanIA(){
 
   try{
     var resp, txt;
-    if(usarIAServidor()){
-      txt=await iaProxy({prompt:prompt,max_tokens:8000});
-    } else if(ANTHROPIC_KEY){
-      resp=await fetch('https://api.anthropic.com/v1/messages',{
-        method:'POST',
-        headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:8000,messages:[{role:'user',content:prompt}]})
-      });
-      var ad=await resp.json();
-      if(ad.error) throw new Error('Claude: '+(ad.error.message||ad.error.type));
-      txt=ad.content[0].text||'';
-    } else {
-      resp=await fetch('https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',{
-        method:'POST',
-        headers:{'Content-Type':'application/json','Authorization':'Bearer '+GEMINI_KEY},
-        body:JSON.stringify({model:'gemini-2.5-flash',messages:[{role:'user',content:prompt}],temperature:0.2,max_tokens:8000})
-      });
-      var gd=await resp.json();
-      if(gd.error) throw new Error('Gemini: '+(gd.error.message||JSON.stringify(gd.error)));
-      txt=gd.choices[0].message.content||'';
-    }
+    txt=await iaTexto({prompt:prompt,max_tokens:8000,temperature:0.2});
     // Parser robusto para JSON de array
     txt=txt.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
     var jStart=txt.indexOf('['), jEnd=txt.lastIndexOf(']');
@@ -3528,7 +3570,7 @@ function crearPerfil(rests){
   // ── Sincronizar con backend en la nube (si está configurado) ──
   var gasUrl=localStorage.getItem('specimen_gas_url')||'';
   if(nubeWorker()){
-    nubeRegistrar(u,$('ob-pw').value).catch(function(e){diagLog('NUBE-REGISTRO',e.message);});
+    nubeRegistrar(u,$('ob-pw').value,{bienvenida:true}).catch(function(e){diagLog('NUBE-REGISTRO',e.message);});
   } else if(gasUrl){
     fetch(gasUrl,{method:'POST',body:(function(){
       var fd=new FormData();
@@ -3679,7 +3721,7 @@ var API_BASE = 'https://specimen-api.specimengymapp.workers.dev';   // vacío = 
 function nubeWorker(){ return !!API_BASE; }
 function _tokenApi(){ try{ return localStorage.getItem('specimen_token')||''; }catch(e){ return ''; } }
 function _guardarTokenApi(t){ try{ if(t) localStorage.setItem('specimen_token',t); else localStorage.removeItem('specimen_token'); }catch(e){} }
-function usarIAServidor(){ return nubeWorker() && !!_tokenApi() && !ANTHROPIC_KEY && !GEMINI_KEY; }
+function usarIAServidor(){ return nubeWorker() && !!_tokenApi() && !GEMINI_KEY; }
 window.nubeWorker=nubeWorker; window.usarIAServidor=usarIAServidor;
 
 async function api(ruta, cuerpo){
@@ -3699,7 +3741,7 @@ window.api=api;
 function _perfilParaNube(u){
   var p={};
   Object.keys(u||{}).forEach(function(k){
-    if(['sessions','measures','pw','planNut','planEj','cloudUid','driveFolderId'].indexOf(k)<0) p[k]=u[k];
+    if(['sessions','measures','pw','planNut','planEj','cloudUid','driveFolderId','sesionesBorradas'].indexOf(k)<0) p[k]=u[k];
   });
   p.rests=normalizarRests(u.rests||[]);
   return p;
@@ -3724,9 +3766,12 @@ function _usuarioDesdeNube(d, h){
 }
 
 // Alta en el Worker (usado al crear el perfil).
-async function nubeRegistrar(u, password){
+async function nubeRegistrar(u, password, opciones){
   var r=await api('/api/registro',{email:u.email,password:password,nombre:u.nombre,perfil:_perfilParaNube(u),consentimiento:_consentimientoLocal()});
-  if(r.d.ok) toast('✓ Cuenta creada en la nube');
+  if(r.d.ok){
+    toast('✓ Cuenta creada en la nube');
+    if(opciones && opciones.bienvenida) pedirBienvenida(u.email);
+  }
   else diagLog('NUBE-REGISTRO', r.d.error||('estado '+r.estado));
   return r;
 }
@@ -3774,9 +3819,13 @@ async function nubeSincronizar(silencioso, soloPerfil){
   }
   try{
     var cuerpo={perfil:_perfilParaNube(u)};
-    if(!soloPerfil){ cuerpo.sessions=u.sessions||[]; cuerpo.measures=u.measures||[]; }
+    if(!soloPerfil){
+      limpiarDuplicadosUsuario(u);
+      cuerpo.sessions=u.sessions||[]; cuerpo.measures=u.measures||[];
+      if(u.sesionesBorradas && u.sesionesBorradas.length) cuerpo.borrados=u.sesionesBorradas.slice(0,500);
+    }
     var r=await api('/api/sync',cuerpo);
-    if(r.d.ok){ u.ultimaSync=new Date().toISOString(); saveAll(); if(!silencioso) toast('✓ Sincronizado con la nube'); }
+    if(r.d.ok){ u.ultimaSync=new Date().toISOString(); if(cuerpo.borrados) u.sesionesBorradas=(u.sesionesBorradas||[]).slice(cuerpo.borrados.length); saveAll(); if(!silencioso) toast('✓ Sincronizado con la nube'); }
     else if(r.estado===401){ ofrecerVinculoNube(true); }
     else if(!silencioso) toast('No se pudo sincronizar','var(--red)');
     return r.d;
@@ -3799,6 +3848,86 @@ async function iaProxy(op){
   throw new Error(r.d.error||'La IA no respondió');
 }
 window.iaProxy=iaProxy;
+
+// Email de bienvenida con el PDF de los términos aceptados. Lo envía el Apps
+// Script (Gmail de SpeciMen) tras confirmar con el servidor que la cuenta es
+// nueva. Si falla no pasa nada: la cuenta ya está creada.
+function pedirBienvenida(email){
+  var gas=localStorage.getItem('specimen_gas_url')||DEFAULT_GAS_URL;
+  if(!gas||!email) return;
+  var fd=new FormData();
+  fd.append('data',JSON.stringify({action:'bienvenida',email:email}));
+  fetch(gas,{method:'POST',body:fd}).then(function(r){ return r.json(); }).then(function(d){
+    if(d&&d.ok) toast('📧 Te hemos enviado un email de bienvenida');
+    else diagLog('BIENVENIDA',(d&&d.error)||'sin respuesta');
+  }).catch(function(e){ diagLog('BIENVENIDA',e.message); });
+}
+window.pedirBienvenida=pedirBienvenida;
+
+// ── GEMINI: único proveedor de IA ─────────────────────────────────────────
+// Todas las funciones de IA (plan, análisis y Kongo) pasan por aquí.
+// Por qué existe: cada una llamaba a Gemini a su manera y Kongo fallaba con
+// "respuesta vacía": Gemini devuelve un mensaje sin texto cuando recibe dos
+// turnos seguidos del mismo rol (bienvenida + "Entendido", o un error previo
+// guardado en el historial). Aquí se normaliza la conversación y se prueban
+// varios modelos, porque Google retira modelos (gemini-2.0-flash ya no existe).
+var MODELOS_GEMINI=['gemini-2.5-flash','gemini-3.6-flash','gemini-2.5-flash-lite'];
+
+function _normalizarMensajes(system, mensajes){
+  var out=[];
+  (mensajes||[]).forEach(function(m){
+    var rol=m.role==='assistant'||m.role==='model'?'assistant':'user';
+    var txt=String(m.content||'').trim();
+    if(!txt) return;
+    if(!out.length && rol==='assistant') return;           // debe empezar el usuario
+    var prev=out[out.length-1];
+    if(prev && prev.role===rol) prev.content+='\n\n'+txt; // fusionar turnos seguidos
+    else out.push({role:rol,content:txt});
+  });
+  if(system) out.unshift({role:'system',content:String(system)});
+  return out;
+}
+
+async function geminiChat(op){
+  var msgs=_normalizarMensajes(op.system, op.messages||[{role:'user',content:op.prompt||''}]);
+  var ultimo='sin respuesta';
+  for(var i=0;i<MODELOS_GEMINI.length;i++){
+    try{
+      var r=await fetch('https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+GEMINI_KEY},
+        body:JSON.stringify({model:MODELOS_GEMINI[i],messages:msgs,temperature:op.temperature==null?0.4:op.temperature,max_tokens:op.max_tokens||2000})
+      });
+      var d=await r.json().catch(function(){return {};});
+      if(Array.isArray(d)) d=d[0]||{};
+      if(d.error) d=d.error;
+      var c=d.choices&&d.choices[0];
+      var txt=c&&c.message&&c.message.content;
+      if(r.ok && txt) return txt;
+      ultimo=(d.message)||(c?('respuesta vacía ('+(c.finish_reason||'?')+')'):('estado '+r.status));
+      diagLog('GEMINI', MODELOS_GEMINI[i]+': '+ultimo);
+      if(r.status===400&&/API key|API_KEY/i.test(ultimo)) break;   // clave inválida
+      if(r.status===401||r.status===403) break;
+    }catch(e){ ultimo=e.message; }
+  }
+  throw new Error('Gemini: '+ultimo);
+}
+window.geminiChat=geminiChat;
+
+// Clave propia si la hay; si falla (cupo de Google, clave caducada) y la
+// cuenta está en la nube, se reintenta por el servidor. Sin clave, servidor.
+async function iaTexto(op){
+  if(GEMINI_KEY){
+    try{ return await geminiChat(op); }
+    catch(e){
+      if(nubeWorker() && _tokenApi()){ diagLog('IA','clave propia falló, uso el servidor: '+e.message); return await iaProxy(op); }
+      throw e;
+    }
+  }
+  if(usarIAServidor()) return await iaProxy(op);
+  throw new Error(nubeWorker()?'Inicia sesión en la nube para usar la IA':'Configura tu clave de Gemini en Perfil → Configuración');
+}
+window.iaTexto=iaTexto;
 
 // Usuarios que ya estaban dentro de la app: se les pide la contraseña UNA
 // vez para vincular su cuenta con el sistema nuevo y subir su historial.
@@ -3892,6 +4021,57 @@ window.entrarConNube=entrarConNube;
 
 // Fusiona dos listas sin duplicar: primero por id, y si no hay id, por la
 // combinacion fecha+tipo, que es lo que identifica una sesion en la practica.
+// ── LIMPIEZA DE SESIONES DUPLICADAS ───────────────────────────────────────
+// Origen: el Apps Script 1.x añadía una fila nueva en cada sincronización y
+// devolvía la fecha con un día menos (la formateaba en UTC). Al iniciar sesión
+// esas copias entraban en el móvil con otro id y otra fecha, y ya no casaban
+// con el original. Una copia es: mismo tipo, mismas series (ejercicio, kg,
+// reps) y fecha a un día como mucho. Se conserva la del móvil (id numérico),
+// que tiene la fecha buena. Dos sesiones el mismo día con ejercicios
+// distintos NO son copias y se conservan las dos.
+function _huellaSesion(x){
+  return String(x.tipo||'')+'#'+JSON.stringify((x.exs||[]).map(function(e){
+    return [e.id||e.n||'',(e.series||[]).map(function(z){ return [String(z.kg==null?'':z.kg),String(z.reps==null?'':z.reps),!!z.done]; })];
+  }));
+}
+function _diasEntre(a,b){
+  var x=Date.parse(String(a).slice(0,10)+'T12:00:00Z'), y=Date.parse(String(b).slice(0,10)+'T12:00:00Z');
+  return (isNaN(x)||isNaN(y)) ? 99 : Math.abs(x-y)/864e5;
+}
+function deduplicarSesiones(lista){
+  var orden=(lista||[]).filter(Boolean).map(function(x,i){ return {x:x,i:i}; });
+  // Primero las del móvil (id numérico), luego las que tienen más datos.
+  orden.sort(function(a,b){
+    var la=/^d+$/.test(String(a.x.id))?1:0, lb=/^d+$/.test(String(b.x.id))?1:0;
+    if(la!==lb) return lb-la;
+    var ka=Object.keys(a.x).length, kb=Object.keys(b.x).length;
+    return ka!==kb ? kb-ka : a.i-b.i;
+  });
+  var porHuella={}, quedan=[], borradas=[];
+  orden.forEach(function(o){
+    var h=_huellaSesion(o.x), previas=porHuella[h]||(porHuella[h]=[]);
+    var copia=previas.some(function(p){ return _diasEntre(p.fecha,o.x.fecha)<=1; });
+    if(copia){ if(o.x.id!=null) borradas.push(String(o.x.id)); }
+    else { previas.push(o.x); quedan.push(o.x); }
+  });
+  quedan.sort(function(a,b){ return String(a.fecha||'').localeCompare(String(b.fecha||'')); });
+  return {quedan:quedan, borradas:borradas};
+}
+window.deduplicarSesiones=deduplicarSesiones;
+
+// Limpia al usuario actual y apunta lo quitado para borrarlo también en la nube.
+function limpiarDuplicadosUsuario(u){
+  if(!u || !u.sessions || !u.sessions.length) return 0;
+  var r=deduplicarSesiones(u.sessions);
+  if(!r.borradas.length) return 0;
+  u.sessions=r.quedan;
+  u.sesionesBorradas=(u.sesionesBorradas||[]).concat(r.borradas);
+  saveAll();
+  diagLog('DUPLICADOS', r.borradas.length+' sesiones repetidas eliminadas');
+  return r.borradas.length;
+}
+window.limpiarDuplicadosUsuario=limpiarDuplicadosUsuario;
+
 function fusionarPorId(local, nube){
   var out = (local||[]).slice();
   var vistos = {};
@@ -4004,6 +4184,15 @@ function dedupUsers(){
 function initApp(){
   setTimeout(function(){ try{ ofrecerVinculoNube(); }catch(e){} }, 1500);
   dedupUsers();
+  // Sesiones repetidas por el Apps Script antiguo: se quitan al abrir y,
+  // si hay cuenta en la nube, se borran también allí.
+  try{
+    var nDup=limpiarDuplicadosUsuario(U());
+    if(nDup){
+      setTimeout(function(){ toast('✓ '+nDup+' sesiones repetidas eliminadas del historial'); }, 1200);
+      if(nubeWorker() && _tokenApi()) setTimeout(function(){ nubeSincronizar(true); }, 2500);
+    }
+  }catch(e){ diagLog('DUPLICADOS', e.message); }
   updateUserSwitcher();
   checkSesionDraft();
   // Guardar borrador cada 5 segundos (+ inmediatamente en cada input/check)
@@ -4064,20 +4253,14 @@ function initApp(){
 
   $('btn-ia').addEventListener('click',runIA);
   $('btn-save-cfg').addEventListener('click',function(){
-    ANTHROPIC_KEY=($('cfg-key').value||'').trim();
-    if(ANTHROPIC_KEY) localStorage.setItem('specimen_apikey',ANTHROPIC_KEY);
     GEMINI_KEY=($('cfg-gemini').value||'').trim();
-    if(GEMINI_KEY) localStorage.setItem('specimen_gemini',GEMINI_KEY);
+    // Campo vacío = quitar la clave propia y volver a la IA del servidor.
+    if(GEMINI_KEY) localStorage.setItem('specimen_gemini',GEMINI_KEY); else localStorage.removeItem('specimen_gemini');
     var gasUrl=($('cfg-gas-url').value||'').trim();
     if(gasUrl) localStorage.setItem('specimen_gas_url',gasUrl);
     toast('Configuración guardada y protegida ✓');
   });
   // Auto-guardar al salir del campo (onblur)
-  var cfgKey=$('cfg-key');
-  if(cfgKey) cfgKey.addEventListener('blur',function(){
-    var v=this.value.trim();
-    if(v&&v!==ANTHROPIC_KEY){ANTHROPIC_KEY=v;localStorage.setItem('specimen_apikey',v);}
-  });
   var cfgGem=$('cfg-gemini');
   if(cfgGem) cfgGem.addEventListener('blur',function(){
     var v=this.value.trim();
@@ -4164,10 +4347,13 @@ function initApp(){
   initKongoListeners();
 }
 
+function _escHtml(t){ return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function updateUserSwitcher(){
   var u0=APP.users[0], u1=APP.users[1];
-  if(u0){$('btn-u1').textContent=u0.nombre.split(' ')[0];$('btn-u1').style.display='';}else{$('btn-u1').style.display='none';}
-  if(u1){$('btn-u2').textContent=u1.nombre.split(' ')[0];$('btn-u2').style.display='';}else{$('btn-u2').style.display='none';}
+  // 5.0: miniatura de la foto de perfil junto al nombre.
+  var etiqueta=function(x){ var n=_escHtml(String(x.nombre||'').split(' ')[0]); return x.fotoPerfil?'<img src="'+x.fotoPerfil+'" alt="">'+n:n; };
+  if(u0){$('btn-u1').innerHTML=etiqueta(u0);$('btn-u1').style.display='';}else{$('btn-u1').style.display='none';}
+  if(u1){$('btn-u2').innerHTML=etiqueta(u1);$('btn-u2').style.display='';}else{$('btn-u2').style.display='none';}
   var isF=U().genero==='M';
   $('btn-u1').className='user-btn'+(APP.cur===0?(isF&&APP.cur===0?' active-f':' active-m'):'');
   $('btn-u2').className='user-btn'+(APP.cur===1?(isF&&APP.cur===1?' active-f':' active-m'):'');
@@ -5105,7 +5291,7 @@ async function runIA(){
   var meds=u.measures||[]; var lastMed=meds[meds.length-1]||{}; var prevMed=meds[meds.length-2]||{};
 
   // ── Análisis automático sin API key ──
-  if(!GEMINI_KEY && !ANTHROPIC_KEY && !usarIAServidor()){
+  if(!GEMINI_KEY && !usarIAServidor()){
     var mac2=u.macros||calcMacros(u);
     var numSes=sesUlt7.length;
     var rpeArr=sesUlt7.map(function(s){return parseFloat(s.rpe)||7;});
@@ -5315,9 +5501,7 @@ async function runIA(){
     return;
   }
 
-  // ── Con API Key: Claude primero (más fiable), luego Gemini ──
-  var useGemini=!!GEMINI_KEY && !ANTHROPIC_KEY; // Gemini solo si no hay Claude
-  var activeKey=ANTHROPIC_KEY||GEMINI_KEY;
+  // ── Con IA (Gemini: clave propia o servidor) ──
   var mac2=u.macros||calcMacros(u);
   var sesData=sesUlt7.map(function(s){return (s.tipo||'?')+' RPE '+(s.rpe||'?');}).join(', ')||'Sin sesiones registradas';
   var prompt='Eres un fisiologista clínico y entrenador certificado. Analiza este progreso semanal y responde EXACTAMENTE en el formato indicado, sin texto adicional.\n\n'
@@ -5341,39 +5525,7 @@ async function runIA(){
     +'IMPORTANTE: responde SOLO con las 7 líneas del formato. Sin introducciones ni texto extra.';
   try{
     var resp, txt;
-    if(usarIAServidor()){
-      txt=await iaProxy({prompt:prompt,max_tokens:2000});
-    } else if(ANTHROPIC_KEY){
-      resp=await fetch('https://api.anthropic.com/v1/messages',{
-        method:'POST',
-        headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:2000,messages:[{role:'user',content:prompt}]})
-      });
-      var ad=await resp.json();
-      if(ad.error) throw new Error('Claude: '+(ad.error.message||ad.error.type));
-      txt=ad.content[0].text||'';
-    } else if(GEMINI_KEY){
-      var gUrl='https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
-      // Intentar con múltiples modelos en orden de preferencia
-      var geminiModels=['gemini-2.5-flash','gemini-2.5-flash-lite','gemini-3.5-flash','gemini-2.0-flash'];
-      var gd=null, lastErr='';
-      for(var mi=0;mi<geminiModels.length;mi++){
-        try{
-          resp=await fetch(gUrl,{
-            method:'POST',
-            headers:{'Content-Type':'application/json','Authorization':'Bearer '+GEMINI_KEY},
-            body:JSON.stringify({model:geminiModels[mi],messages:[{role:'user',content:prompt}],temperature:0.4,max_tokens:2000})
-          });
-          gd=await resp.json();
-          if(gd.choices&&gd.choices[0]&&gd.choices[0].message.content){
-            txt=gd.choices[0].message.content;
-            break;
-          }
-          lastErr=(gd.error&&gd.error.message)||JSON.stringify(gd).slice(0,120);
-        }catch(fe){lastErr=fe.message;}
-      }
-      if(!txt) throw new Error('Gemini: '+lastErr);
-    }
+    txt=await iaTexto({prompt:prompt,max_tokens:2000});
     // ── Parser de texto plano — sin riesgo de JSON corruption ────
     // Parser robusto: captura contenido hasta el siguiente encabezado o fin de texto
     // ── PARSER DE LA RESPUESTA IA — reescrito en 5.0 ──────────────────────
@@ -5437,7 +5589,7 @@ async function runIA(){
     aj._rawTxt=txt;
     var niv={'bueno':'b','regular':'r','necesita_mejorar':'m'}[aj.nivel.trim().toLowerCase()]||'r';
     var nivLabel={'bueno':'✅ Progreso óptimo','regular':'⚡ Progreso aceptable','necesita_mejorar':'⚠️ Ajustes urgentes'}[aj.nivel.trim().toLowerCase()]||'⚡ Progreso aceptable';
-    var motor=ANTHROPIC_KEY?'Claude Sonnet 4 (Anthropic)':GEMINI_KEY?'Gemini (Google)':'IA';
+    var motor='Gemini (Google)';
     $r.innerHTML='<div class="ia-card">'
       +'<div class="ia-nivel '+niv+'">'+nivLabel+'</div>'
       +'<div style="font-size:13px;color:var(--text);line-height:1.7;margin-bottom:12px;font-style:italic;border-left:3px solid var(--acc);padding-left:10px;">'+aj.resumen+'</div>'
@@ -5529,6 +5681,81 @@ function renderCalcMetabolica(u, mac){
   $('calc-metabolica').innerHTML=html;
 }
 
+// ── FOTO DE PERFIL — 5.0 ──────────────────────────────────────────────────
+// Se recorta al centro y se reduce a 256×256 en JPEG (~20-30 KB) antes de
+// guardarla: así cabe en el perfil, viaja a la nube con él y se recupera al
+// entrar desde otro móvil. La foto original nunca sale del dispositivo.
+function avatarHTML(u, tam){
+  u=u||{}; tam=tam||64;
+  var esH=u.genero==='H';
+  var ini=String(u.nombre||'?').trim().charAt(0).toUpperCase()||'?';
+  return u.fotoPerfil
+    ? '<img src="'+u.fotoPerfil+'" alt="Foto de perfil">'
+    : '<span style="font-size:'+Math.round(tam*0.42)+'px;color:'+(esH?'var(--acc2)':'var(--pink)')+';">'+ini+'</span>';
+}
+window.avatarHTML=avatarHTML;
+
+function elegirFotoPerfil(){
+  var inp=document.getElementById('foto-perfil-file');
+  if(!inp){
+    inp=document.createElement('input');
+    inp.type='file'; inp.accept='image/*'; inp.id='foto-perfil-file'; inp.style.display='none';
+    inp.addEventListener('change',function(){ if(this.files&&this.files[0]) guardarFotoPerfil(this.files[0]); this.value=''; });
+    document.body.appendChild(inp);
+  }
+  inp.click();
+}
+window.elegirFotoPerfil=elegirFotoPerfil;
+
+function _reducirFoto(archivo, lado){
+  return new Promise(function(ok, mal){
+    var lector=new FileReader();
+    lector.onerror=function(){ mal(new Error('No se pudo leer la imagen')); };
+    lector.onload=function(){
+      var img=new Image();
+      img.onerror=function(){ mal(new Error('Formato de imagen no compatible')); };
+      img.onload=function(){
+        var c=document.createElement('canvas'); c.width=lado; c.height=lado;
+        var m=Math.min(img.width,img.height);
+        c.getContext('2d').drawImage(img,(img.width-m)/2,(img.height-m)/2,m,m,0,0,lado,lado);
+        ok(c.toDataURL('image/jpeg',0.82));
+      };
+      img.src=lector.result;
+    };
+    lector.readAsDataURL(archivo);
+  });
+}
+
+async function guardarFotoPerfil(archivo){
+  var u=U(); if(!u) return;
+  if(!/^image\//.test(archivo.type||'')){ toast('Elige una imagen','var(--amber)'); return; }
+  try{
+    u.fotoPerfil=await _reducirFoto(archivo,256);
+    saveAll();
+    pintarFotoPerfil();
+    toast('✓ Foto de perfil actualizada');
+    if(nubeWorker()) nubeSincronizar(true,true);
+  }catch(e){ diagLog('FOTO-PERFIL',e.message); toast(e.message,'var(--red)'); }
+}
+window.guardarFotoPerfil=guardarFotoPerfil;
+
+function quitarFotoPerfil(){
+  var u=U(); if(!u||!u.fotoPerfil) return;
+  if(!confirm('¿Quitar tu foto de perfil?')) return;
+  delete u.fotoPerfil; saveAll(); pintarFotoPerfil();
+  if(nubeWorker()) nubeSincronizar(true,true);
+  toast('Foto de perfil eliminada');
+}
+window.quitarFotoPerfil=quitarFotoPerfil;
+
+// Refresca la foto en todos los sitios donde aparece sin re-renderizar todo.
+function pintarFotoPerfil(){
+  try{ updateUserSwitcher(); }catch(e){}
+  try{ if(document.getElementById('perfil-card')) renderPerfil(); }catch(e){}
+  try{ if(typeof kongoRenderMsgs==='function' && document.getElementById('kongo-msgs')) kongoRenderMsgs(); }catch(e){}
+}
+window.pintarFotoPerfil=pintarFotoPerfil;
+
 function renderPerfil(){
   var u=U(); var mac=u.macros||calcMacros(u); var esH=u.genero==='H';
 
@@ -5553,19 +5780,24 @@ function renderPerfil(){
   var paiLabel={es:'🇪🇸 España',co:'🇨🇴 Colombia'}[u.pais||'es']||u.pais||'—';
   var dietaLabel={equilibrada:'Equilibrada',lowcarb:'Baja en carbos',keto:'Cetogénica'}[u.dieta||'equilibrada'];
   var keyStatus='';
-  if(ANTHROPIC_KEY) keyStatus+='<span style="color:var(--green);font-size:11px;">✓ Claude</span> ';
-  if(GEMINI_KEY) keyStatus+='<span style="color:var(--green);font-size:11px;">✓ Gemini</span>';
-  if(!ANTHROPIC_KEY&&!GEMINI_KEY) keyStatus='<span style="color:var(--t3);font-size:11px;">Sin IA configurada</span>';
+  if(GEMINI_KEY) keyStatus='<span style="color:var(--green);font-size:11px;">✓ Gemini (clave propia)</span>';
+  else if(usarIAServidor()) keyStatus='<span style="color:var(--green);font-size:11px;">✓ IA SpeciMen</span>';
+  else keyStatus='<span style="color:var(--t3);font-size:11px;">Sin IA configurada</span>';
 
   $('perfil-card').innerHTML=''
     // ── Avatar + nombre + email
     +'<div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">'
-      +'<div style="width:60px;height:60px;border-radius:50%;background:'+(esH?'var(--accb)':'var(--pb)')+';display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;color:'+(esH?'var(--acc2)':'var(--pink)')+';">'+(u.nombre||'?')[0].toUpperCase()+'</div>'
+      +'<div class="pf-avatar" onclick="elegirFotoPerfil()" title="Cambiar foto de perfil">'
+        +'<div class="pf-av-in" style="background:'+(esH?'var(--accb)':'var(--pb)')+';">'+avatarHTML(u,64)+'</div>'
+        +'<div class="pf-cam">📷</div>'
+      +'</div>'
       +'<div style="flex:1;">'
         +'<div style="font-size:18px;font-weight:800;">'+u.nombre+'</div>'
         +'<div style="font-size:12px;color:var(--acc2);margin-top:2px;">'+u.email+'</div>'
         +'<div style="font-size:11px;color:var(--t3);margin-top:2px;">'+(esH?'♂ Hombre':'♀ Mujer')+' · '+paiLabel+'</div>'
         +'<div style="margin-top:4px;">'+keyStatus+'</div>'
+        +'<div style="margin-top:5px;font-size:11px;"><a onclick="elegirFotoPerfil()" style="color:var(--acc2);cursor:pointer;">'+(u.fotoPerfil?'Cambiar foto':'Añadir foto de perfil')+'</a>'
+          +'<a id="pf-quitar-foto" onclick="quitarFotoPerfil()" style="color:var(--t3);cursor:pointer;margin-left:10px;'+(u.fotoPerfil?'':'display:none;')+'">Quitar</a></div>'
       +'</div>'
     +'</div>'
     // ── Ficha completa con botón editar
@@ -6466,7 +6698,7 @@ var KONGO_QUICK=[
 ];
 
 function renderKongo(){
-  var hasKey=!!(ANTHROPIC_KEY||GEMINI_KEY||usarIAServidor());
+  var hasKey=!!(GEMINI_KEY||usarIAServidor());
   // Mostrar/ocultar secciones con los IDs correctos
   var nokey=$('kongo-nokey');
   var msgs=$('kongo-msgs');
@@ -6475,7 +6707,7 @@ function renderKongo(){
   if(nokey) nokey.style.display=hasKey?'none':'flex';
   if(msgs)  msgs.style.display=hasKey?'flex':'none';
   if(bar)   bar.style.display=hasKey?'flex':'none';
-  if(st)    st.textContent=hasKey?(ANTHROPIC_KEY?'Claude conectado':GEMINI_KEY?'Gemini conectado':'IA SpeciMen conectada'):'';
+  if(st)    st.textContent=hasKey?(GEMINI_KEY?'Gemini conectado':'IA SpeciMen conectada'):'';
   if(!hasKey) return;
 
   // Chips de preguntas rápidas (scroll horizontal)
@@ -6554,7 +6786,7 @@ function kongoRenderMsgs(){
     }
 
     return '<div class="chat-msg '+(isUser?'user':'kongo')+'">'
-      +'<div class="chat-avatar '+(isUser?'':'kongo-av')+'">'+( isUser?'👤':'🦍')+'</div>'
+      +'<div class="chat-avatar '+(isUser?'':'kongo-av')+'">'+( isUser?((U()&&U().fotoPerfil)?'<img src="'+U().fotoPerfil+'" alt="">':'👤'):'🦍')+'</div>'
       +'<div style="min-width:0;flex:1;">'
         +'<div class="chat-bubble">'+html+suggestions+'</div>'
         +'<div class="chat-time">'+timeStr+'</div>'
@@ -8178,53 +8410,21 @@ async function kongoSend(){
     +'Si preguntan sobre calorías, di exactamente '+mac.kcal+' kcal.';
 
   // Build messages for API (last 10 messages for context)
-  var apiMsgs=_kongo.msgs.slice(-11,-1).map(function(m){
+  // Los avisos de error no son conversación: si se reenvían, Gemini se lía.
+  var apiMsgs=_kongo.msgs.slice(-11,-1).filter(function(m){ return !m.error; }).map(function(m){
     return {role:m.role,content:m.content};
   });
   apiMsgs.push({role:'user',content:msg});
 
   try{
     var respText='';
-    if(usarIAServidor()){
-      respText=await iaProxy({system:systemPrompt,messages:apiMsgs,max_tokens:2000});
-    } else if(ANTHROPIC_KEY){
-      var r=await fetch('https://api.anthropic.com/v1/messages',{
-        method:'POST',
-        headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-        body:JSON.stringify({
-          model:'claude-sonnet-4-6',
-          max_tokens:2000,
-          system:systemPrompt,
-          messages:apiMsgs
-        })
-      });
-      var d=await r.json();
-      if(d.error) throw new Error('Claude: '+d.error.message);
-      respText=d.content[0].text;
-    } else if(GEMINI_KEY){
-      // Gemini: system prompt as first user message + model response
-      var geminiMsgs=[{role:'user',content:systemPrompt+'\n\nConfirma que entendiste el perfil.'},
-                      {role:'assistant',content:'Entendido. Soy Kongo y conozco el perfil del atleta. ¿En qué puedo ayudarte?'}]
-                      .concat(apiMsgs);
-      var gr=await fetch('https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',{
-        method:'POST',
-        headers:{'Content-Type':'application/json','Authorization':'Bearer '+GEMINI_KEY},
-        body:JSON.stringify({
-          model:'gemini-2.5-flash',
-          messages:geminiMsgs.map(function(m){return {role:m.role,content:m.content};}),
-          max_tokens:2000,
-          temperature:0.7
-        })
-      });
-      var gd=await gr.json();
-      if(gd.error) throw new Error('Gemini: '+(gd.error.message||JSON.stringify(gd.error)));
-      if(!gd.choices||!gd.choices[0]) throw new Error('Gemini: respuesta vacía. Verifica tu API key en Perfil → Configuración.');
-      respText=gd.choices[0].message.content;
-    }
+    respText=await iaTexto({system:systemPrompt,messages:apiMsgs,max_tokens:2000,temperature:0.7});
+    if(!respText) throw new Error('respuesta vacía');
 
     _kongo.msgs.push({role:'assistant',content:respText,ts:new Date()});
   } catch(e){
-    _kongo.msgs.push({role:'assistant',content:'Vaya, parece que hay un problema con la conexión. Verifica tu API key en Perfil → Configuración. Error: '+e.message,ts:new Date()});
+    diagLog('KONGO', e.message);
+    _kongo.msgs.push({role:'assistant',error:true,content:'No he podido responder ahora mismo. Inténtalo de nuevo en un momento. ('+e.message+')',ts:new Date()});
   }
 
   _kongo.typing=false;
@@ -8448,7 +8648,9 @@ function deleteHistSession(sIdx){
   var s=u.sessions[sIdx]; if(!s) return;
   if(!confirm('¿Eliminar la sesión "'+s.tipo+'" del '+fmtDate(s.fecha)+'?\n\nEsta acción no se puede deshacer.')) return;
   u.sessions.splice(sIdx,1);
+  if(s.id!=null) u.sesionesBorradas=(u.sesionesBorradas||[]).concat(String(s.id));
   saveAll();
+  if(nubeWorker()) nubeSincronizar(true);
   closeM('m-edit-hist');
   renderHist();
   toast('Sesión eliminada');
@@ -8546,16 +8748,24 @@ function mostrarPuertaLegal(alTerminar){
     var ok=todas && leido;
     btn.disabled=!ok;
     btn.style.opacity=ok?'1':'.4';
-    if(!leido) aviso.textContent='Desplázate hasta el final para poder aceptar';
-    else if(!todas) aviso.textContent='Debes marcar las tres casillas para continuar';
+    // 5.0: las casillas están al final del documento; la barra inferior solo
+    // orienta y desaparece cuando ya está todo marcado.
+    var pie=document.getElementById('lg-foot');
+    if(!leido) aviso.textContent='↓ Lee el documento completo: al final podrás aceptarlo';
+    else if(!todas) aviso.textContent='Marca las tres casillas para continuar';
     else aviso.textContent='';
     aviso.style.color=ok?'var(--green)':'var(--amber)';
+    if(pie) pie.style.display=ok?'none':'';
   }
 
   // Detectar lectura completa
   function comprobarScroll(){
     if(leido) return;
-    if(body.scrollTop + body.clientHeight >= body.scrollHeight - 60){
+    // Leído = el aviso "Has llegado al final" ya se ve en pantalla.
+    var fin=document.getElementById('lg-fin');
+    var alFinal=fin ? fin.getBoundingClientRect().top <= body.getBoundingClientRect().bottom - 20
+                    : body.scrollTop + body.clientHeight >= body.scrollHeight - 60;
+    if(alFinal){
       leido=true;
       revisar();
     }
@@ -8740,25 +8950,12 @@ async function testGeminiConnection(){
   btn.disabled=true;
   statusEl.textContent='';
   try{
-    var gUrl='https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
-    var gBody={
-      model:'gemini-2.5-flash',
-      messages:[{role:'user',content:'Responde únicamente con la palabra: ok'}],
-      max_tokens:10
-    };
-    var resp=await fetch(gUrl,{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
-      body:JSON.stringify(gBody)
-    });
-    var data=await resp.json();
-    if(data.error){
-      statusEl.style.color='var(--red)';
-      statusEl.textContent='✕ Error: '+(data.error.message||JSON.stringify(data.error));
-    } else {
-      statusEl.style.color='var(--green)';
-      statusEl.textContent='✓ Gemini conectado';
-    }
+    // Misma ruta que usa la app de verdad: si aquí responde, Kongo también.
+    var antes=GEMINI_KEY; GEMINI_KEY=key;
+    try{ var t=await geminiChat({prompt:'Responde únicamente con la palabra: ok',max_tokens:200}); }
+    finally{ GEMINI_KEY=antes; }
+    statusEl.style.color='var(--green)';
+    statusEl.textContent='✓ Gemini conectado ('+String(t).trim().slice(0,20)+')';
   }catch(e){
     statusEl.style.color='var(--red)';
     statusEl.textContent='✕ Error: '+e.message;
