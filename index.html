@@ -444,6 +444,263 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   });
 </script>
 <!-- ══════════ ONBOARDING ══════════ -->
+<!-- ══════════ PUERTA LEGAL — Términos, Privacidad y Aviso de Salud ══════════ -->
+<style>
+#legal-gate{position:fixed;inset:0;background:var(--bg);z-index:9500;display:none;flex-direction:column;}
+#legal-gate.on{display:flex;}
+#lg-head{flex-shrink:0;padding:calc(var(--safe) + 14px) 18px 12px;border-bottom:1px solid var(--border);background:var(--bg2);}
+#lg-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 18px 20px;}
+#lg-foot{flex-shrink:0;padding:12px 16px calc(var(--safe) + 12px);border-top:1px solid var(--border);background:var(--bg2);}
+#lg-body h2{font-size:14px;color:var(--acc2);margin:20px 0 7px;letter-spacing:.02em;}
+#lg-body h3{font-size:12.5px;color:var(--text);margin:14px 0 5px;}
+#lg-body p,#lg-body li{font-size:12.5px;line-height:1.72;color:var(--t2);margin-bottom:8px;}
+#lg-body ul{padding-left:17px;margin-bottom:10px;}
+#lg-body li{margin-bottom:5px;}
+#lg-body b{color:var(--text);}
+#lg-body .lg-box{border-radius:10px;padding:12px 14px;margin:12px 0;font-size:12.5px;line-height:1.7;}
+#lg-body .lg-danger{background:rgba(239,68,68,.09);border-left:3px solid var(--red);}
+#lg-body .lg-warn{background:var(--ab);border-left:3px solid var(--amber);}
+#lg-body .lg-info{background:var(--accb);border-left:3px solid var(--acc);}
+#lg-body table{width:100%;border-collapse:collapse;margin:10px 0;font-size:11.5px;}
+#lg-body th{text-align:left;color:var(--acc2);font-weight:700;padding:6px 8px;border-bottom:1px solid var(--border2);}
+#lg-body td{padding:6px 8px;border-bottom:1px solid var(--border);color:var(--t2);vertical-align:top;line-height:1.55;}
+.lg-check{display:flex;align-items:flex-start;gap:10px;padding:9px 11px;background:var(--bg3);border:1.5px solid var(--border2);
+  border-radius:9px;margin-bottom:7px;cursor:pointer;transition:all .15s;}
+.lg-check.on{border-color:var(--green);background:var(--gb);}
+.lg-check input{margin-top:2px;width:17px;height:17px;flex-shrink:0;accent-color:var(--green);}
+.lg-check span{font-size:11.8px;line-height:1.55;color:var(--t2);}
+.lg-check.on span{color:var(--text);}
+</style>
+
+<div id="legal-gate">
+  <div id="lg-head">
+    <div style="font-size:17px;font-weight:800;color:var(--acc2);letter-spacing:.04em;">SpeciMen® Gym App</div>
+    <div style="font-size:12px;color:var(--t3);margin-top:2px;">Términos de uso, privacidad y aviso de salud</div>
+  </div>
+
+  <div id="lg-body">
+
+    <div class="lg-box lg-danger">
+      <b style="color:var(--red);">LEE ESTO ANTES DE EMPEZAR</b><br>
+      SpeciMen® Gym App es una <b>herramienta de apoyo y orientación</b>. <b>No es un producto sanitario, no
+      emite diagnósticos y no sustituye a un médico, endocrino, dietista-nutricionista, fisioterapeuta ni
+      entrenador personal titulado.</b> Para funcionar necesita tratar datos sobre tu salud, así que léelo
+      con calma antes de aceptar.
+    </div>
+
+    <h2>1. Quién es el responsable</h2>
+    <p><b>Responsable del tratamiento:</b> Cristhian Andrés Serna Salazar.<br>
+    <b>Contacto para privacidad y ejercicio de derechos:</b> a través de la dirección de correo desde la que
+    recibes los informes de la aplicación.<br>
+    <b>Aplicación:</b> SpeciMen® Gym App, versión 5.0.<br>
+    <b>Ámbito:</b> España y Colombia.</p>
+
+    <h2>2. Qué datos tratamos</h2>
+    <p>La app trata las siguientes categorías de datos, todas facilitadas por ti:</p>
+    <table>
+      <tr><th>Categoría</th><th>Datos concretos</th></tr>
+      <tr><td>Identificativos</td><td>Nombre y apellidos, dirección de correo electrónico</td></tr>
+      <tr><td>Acceso</td><td>Contraseña (almacenada cifrada mediante resumen SHA-256; nunca en texto legible)</td></tr>
+      <tr><td><b style="color:var(--red);">Salud (categoría especial)</b></td>
+          <td>Fecha de nacimiento, sexo biológico, altura, peso, porcentaje de grasa corporal, perímetros
+          corporales (cintura, cuello, cadera, pecho, brazo, muslo, pantorrilla), <b>alergias e
+          intolerancias alimentarias</b>, nivel de esfuerzo percibido, fatiga y notas personales</td></tr>
+      <tr><td><b style="color:var(--red);">Imágenes (categoría especial)</b></td>
+          <td>Fotografías de progreso corporal, <b>estrictamente voluntarias</b></td></tr>
+      <tr><td>Actividad</td><td>Sesiones de entrenamiento, ejercicios, series, cargas, duración, hidratación,
+          objetivos, tipo de trabajo y horario de entrenamiento</td></tr>
+      <tr><td>Técnicos</td><td>Preferencias guardadas en tu dispositivo (país, tipo de dieta, configuración)</td></tr>
+    </table>
+    <p>Los datos sobre salud y las fotografías son <b>categorías especiales</b> conforme al artículo 9 del
+    RGPD y <b>datos sensibles</b> conforme al artículo 5 de la Ley 1581 de 2012 de Colombia. Su tratamiento
+    exige tu <b>consentimiento explícito</b>, que es lo que se te pide más abajo.</p>
+    <div class="lg-box lg-info">
+      <b>Facilitar datos sensibles es voluntario.</b> No estás obligado a declarar alergias ni a subir
+      fotografías, y puedes usar la app sin hacerlo. Ahora bien, si no declaras tus alergias, el plan
+      nutricional <b>no podrá filtrarlas</b>.
+    </div>
+
+    <h2>3. Para qué los usamos y con qué base legal</h2>
+    <table>
+      <tr><th>Finalidad</th><th>Base legal</th></tr>
+      <tr><td>Crear y mantener tu cuenta</td><td>Ejecución del servicio que solicitas (art. 6.1.b RGPD)</td></tr>
+      <tr><td>Calcular tus necesidades calóricas, macronutrientes y composición corporal</td>
+          <td>Consentimiento explícito (art. 9.2.a RGPD)</td></tr>
+      <tr><td>Generar planes de entrenamiento y menús, y excluir tus alérgenos</td>
+          <td>Consentimiento explícito (art. 9.2.a RGPD)</td></tr>
+      <tr><td>Guardar tu historial y sincronizarlo entre dispositivos</td>
+          <td>Consentimiento explícito (art. 9.2.a RGPD)</td></tr>
+      <tr><td>Almacenar fotografías de progreso</td><td>Consentimiento explícito y separado</td></tr>
+      <tr><td>Enviarte informes por correo cuando tú lo pides</td><td>Consentimiento</td></tr>
+      <tr><td>Generar análisis mediante inteligencia artificial</td>
+          <td>Consentimiento explícito y separado (solo si configuras una clave de IA)</td></tr>
+    </table>
+    <p>No usamos tus datos para publicidad, no elaboramos perfiles comerciales, no los vendemos ni los
+    cedemos a terceros con fines comerciales.</p>
+
+    <h2>4. Dónde se guardan</h2>
+    <ul>
+      <li><b>En tu dispositivo:</b> mediante el almacenamiento local del navegador. Estos datos permanecen
+      en tu teléfono u ordenador y <b>no están cifrados</b> por la aplicación: quien tenga acceso
+      desbloqueado a tu dispositivo puede llegar a ellos. Protege tu equipo con código o biometría.</li>
+      <li><b>En la nube (opcional):</b> si el servicio de sincronización está activo, tu perfil, sesiones y
+      medidas se guardan en una hoja de cálculo de <b>Google Sheets</b>, y tus fotografías en una carpeta
+      privada de <b>Google Drive</b> creada para ti, ambas bajo la cuenta de Google del responsable. La
+      transmisión se realiza mediante conexión cifrada HTTPS.</li>
+      <li><b>Enlaces de fotografías:</b> las fotos que subas se comparten con permiso «cualquier persona con
+      el enlace». El enlace no se publica ni se indexa, pero <b>quien lo obtenga podrá ver la imagen</b>.</li>
+    </ul>
+
+    <h2>5. Con quién se comparten</h2>
+    <p>La aplicación se conecta con los siguientes terceros:</p>
+    <table>
+      <tr><th>Servicio</th><th>Qué recibe</th><th>Cuándo</th></tr>
+      <tr><td><b>Google LLC</b> (Sheets, Drive, Gmail, Apps Script)</td>
+          <td>Todos los datos sincronizados, incluidas fotografías</td><td>Si la sincronización está activa</td></tr>
+      <tr><td><b>Anthropic PBC</b> (Claude)</td>
+          <td>Tu perfil, medidas, objetivos, alergias y registros de entrenamiento, dentro del texto de consulta</td>
+          <td>Solo si configuras una clave de Claude y usas el análisis o el chat</td></tr>
+      <tr><td><b>Google</b> (Gemini)</td><td>Los mismos datos que Claude</td>
+          <td>Solo si configuras una clave de Gemini</td></tr>
+      <tr><td><b>YouTube</b> (Google)</td><td>Tu dirección IP y cookies de Google al reproducir un vídeo</td>
+          <td>Al abrir un vídeo de técnica</td></tr>
+      <tr><td><b>USDA FoodData Central</b> y <b>wger.de</b></td>
+          <td>El término que buscas. No se envían datos personales</td><td>Al buscar alimentos o ejercicios</td></tr>
+      <tr><td><b>Cloudflare</b> (cdnjs)</td><td>Tu IP al descargar la biblioteca que genera los PDF</td>
+          <td>Al exportar un informe</td></tr>
+    </table>
+    <div class="lg-box lg-warn">
+      <b>Transferencias internacionales.</b> Google y Anthropic tienen su sede en Estados Unidos, fuera del
+      Espacio Económico Europeo. Al activar la sincronización o el análisis con IA, <b>consientes
+      expresamente</b> esa transferencia (art. 49.1.a RGPD). Puedes usar la aplicación sin ninguna de las
+      dos: los cálculos, los planes y los informes funcionan por completo en tu dispositivo.
+    </div>
+
+    <h2>6. Cuánto tiempo los conservamos</h2>
+    <ul>
+      <li><b>En tu dispositivo:</b> hasta que borres los datos desde la propia app o desinstales o limpies
+      el navegador.</li>
+      <li><b>En la nube:</b> mientras mantengas la cuenta activa. Si solicitas la supresión, se eliminan
+      la fila de perfil, el historial y la carpeta de fotografías en un plazo máximo de <b>30 días</b>.</li>
+      <li><b>Correos enviados:</b> permanecen en tu bandeja y en la del remitente hasta que se borren
+      manualmente.</li>
+    </ul>
+
+    <h2>7. Tus derechos</h2>
+    <p>Puedes ejercer en cualquier momento y de forma gratuita los derechos de <b>acceso, rectificación,
+    supresión, limitación, portabilidad y oposición</b>, así como <b>retirar tu consentimiento</b> sin que
+    ello afecte a la licitud del tratamiento anterior.</p>
+    <ul>
+      <li><b>Acceso y portabilidad:</b> inmediatos, desde <b>Perfil → Mis datos → Exportar JSON</b>, que
+      descarga todo en formato legible por máquina.</li>
+      <li><b>Rectificación:</b> desde <b>Perfil → Modificar objetivo y plan</b> y desde la ficha personal.</li>
+      <li><b>Supresión:</b> desde <b>Perfil → Eliminar mi cuenta y mis datos</b>.</li>
+      <li><b>Retirada del consentimiento:</b> desde <b>Perfil → Consentimientos</b>.</li>
+    </ul>
+    <p>Si consideras que tus datos no se tratan correctamente, puedes reclamar ante la autoridad de control:
+    <b>Agencia Española de Protección de Datos</b> (www.aepd.es) en España, o la
+    <b>Superintendencia de Industria y Comercio</b> (www.sic.gov.co) en Colombia.</p>
+
+    <h2>8. Seguridad — y sus límites</h2>
+    <p>Aplicamos medidas razonables: transmisión cifrada mediante HTTPS, contraseñas guardadas
+    exclusivamente como resumen criptográfico SHA-256 y carpetas de fotografías separadas por usuario.</p>
+    <div class="lg-box lg-warn">
+      Aun así, <b>ningún sistema es completamente seguro</b>. Esta es una aplicación desarrollada de forma
+      individual, no auditada por terceros, y sin cifrado de los datos guardados en tu dispositivo. Si
+      manejas información que consideras especialmente delicada, valora no subir fotografías y usar la app
+      solo en modo local, sin sincronización.
+    </div>
+
+    <h2>9. Edad mínima</h2>
+    <p>Debes ser <b>mayor de 18 años</b> para usar SpeciMen® Gym App. La aplicación calcula déficits
+    calóricos y planes de entrenamiento que no son adecuados para menores en desarrollo sin supervisión
+    profesional. Si detectamos una cuenta de una persona menor de edad, se eliminará.</p>
+
+    <h2>10. Aviso de salud</h2>
+    <div class="lg-box lg-danger">
+      <b style="color:var(--red);">SpeciMen® Gym App NO sustituye a un profesional sanitario.</b>
+    </div>
+    <h3>Qué es y qué no es</h3>
+    <ul>
+      <li>Es una <b>guía orientativa</b> basada en fórmulas de referencia poblacional: Mifflin-St Jeor para
+      el gasto energético y el método Navy para el porcentaje de grasa. Ambas son <b>estimaciones
+      estadísticas</b> con márgenes de error de entre el 3 % y el 5 %, y pueden desviarse mucho más en tu
+      caso concreto.</li>
+      <li><b>No es un producto sanitario</b> ni ha sido evaluado por ninguna agencia del medicamento.</li>
+      <li><b>No emite diagnósticos</b> ni detecta enfermedades, déficits nutricionales ni lesiones.</li>
+      <li><b>No sustituye</b> a tu médico de cabecera, endocrino, dietista-nutricionista, fisioterapeuta ni
+      entrenador personal titulado.</li>
+    </ul>
+    <h3>Consulta antes de empezar si...</h3>
+    <ul>
+      <li>Estás <b>embarazada</b>, en posparto o en lactancia.</li>
+      <li>Tienes o has tenido un <b>trastorno de la conducta alimentaria</b>.</li>
+      <li>Padeces <b>diabetes</b>, patología cardiovascular, renal, hepática o tiroidea.</li>
+      <li>Tomas <b>medicación</b> que pueda interaccionar con cambios en la dieta o el ejercicio.</li>
+      <li>Tienes una <b>lesión</b> activa o dolor sin diagnosticar.</li>
+      <li>Eres mayor de 65 años o llevas mucho tiempo sin actividad física.</li>
+    </ul>
+    <h3>Alergias e intolerancias</h3>
+    <div class="lg-box lg-danger">
+      El filtrado de alérgenos es una <b>ayuda, no una garantía</b>. La app excluye del plan los alimentos
+      que declares, pero <b>no puede conocer los ingredientes reales, las trazas ni la contaminación
+      cruzada</b> de lo que compras o de lo que te sirven. <b>Revisa siempre el etiquetado</b> y sigue las
+      indicaciones de tu alergólogo. Si tienes una alergia grave, lleva contigo tu medicación de rescate.
+    </div>
+    <h3>Contenido generado por inteligencia artificial</h3>
+    <p>Los análisis y las respuestas del asistente <b>Kongo</b> los genera un modelo de lenguaje. Pueden
+    contener <b>errores, imprecisiones o recomendaciones inadecuadas</b> para tu situación. Trátalos como
+    una sugerencia que debes contrastar, nunca como una indicación clínica.</p>
+    <h3>Durante el entrenamiento</h3>
+    <p><b>Detén el ejercicio de inmediato</b> si notas dolor en el pecho, mareo, visión borrosa, falta de
+    aire desproporcionada, náuseas o dolor articular agudo. En caso de urgencia llama al <b>112</b> en
+    España o al <b>123</b> en Colombia.</p>
+
+    <h2>11. Condiciones de uso</h2>
+    <p><b>Licencia.</b> Se te concede un derecho de uso personal, gratuito, no exclusivo e intransferible.
+    SpeciMen Gym App® y su código son propiedad de Cristhian Andrés Serna Salazar. Queda prohibida su
+    reproducción, distribución, descompilación o comercialización, total o parcial, sin autorización
+    escrita.</p>
+    <p><b>Uso correcto.</b> Te comprometes a facilitar datos veraces, a no compartir tu cuenta, a no usar
+    la app con fines ilícitos y a no intentar acceder a datos de otras personas.</p>
+    <p><b>Claves de IA.</b> Si configuras una clave de Claude o Gemini, es tuya, se guarda en tu dispositivo
+    y <b>tú asumes el coste</b> de su consumo. El responsable no accede a ella ni responde de los cargos.</p>
+    <p><b>Disponibilidad.</b> El servicio se presta «tal cual», sin garantía de disponibilidad continua ni
+    de ausencia de errores. Puede interrumpirse o discontinuarse. <b>Exporta tu copia de seguridad en JSON
+    con regularidad</b>: es tu garantía frente a la pérdida de datos.</p>
+    <p><b>Responsabilidad.</b> En la máxima medida permitida por la ley, el responsable no responde de los
+    daños derivados del uso de la aplicación, incluidos lesiones, problemas de salud o pérdida de datos,
+    cuando deriven de un uso contrario a estas condiciones o de no haber consultado a un profesional.
+    Nada de lo aquí dispuesto excluye la responsabilidad por dolo o negligencia grave, ni los derechos que
+    la normativa de consumo te reconoce con carácter imperativo.</p>
+    <p><b>Modificaciones.</b> Estas condiciones pueden actualizarse. Si el cambio es sustancial, se te
+    pedirá aceptar la nueva versión antes de seguir usando la app.</p>
+    <p><b>Ley aplicable.</b> Legislación española y, para usuarios residentes en Colombia, la normativa
+    colombiana que resulte imperativa, en particular la Ley 1581 de 2012 y el Decreto 1377 de 2013.</p>
+
+    <div style="height:10px;"></div>
+    <div id="lg-fin" class="lg-box lg-info" style="text-align:center;">
+      <b>Has llegado al final del documento.</b><br>
+      Marca abajo las casillas para continuar.
+    </div>
+    <p style="font-size:10.5px;color:var(--t3);text-align:center;margin-top:14px;">
+      Versión 1.0 · Agosto de 2026<br>
+      SpeciMen Gym App® · Cristhian Andrés Serna Salazar © 2026
+    </p>
+  </div>
+
+  <div id="lg-foot">
+    <div id="lg-aviso" style="font-size:11px;color:var(--amber);text-align:center;margin-bottom:9px;">
+      Desplázate hasta el final para poder aceptar
+    </div>
+    <label class="lg-check" id="lgc1"><input type="checkbox" id="lg-c1"><span>He leído y acepto los <b>Términos de uso</b> y la <b>Política de privacidad</b>, y confirmo que soy <b>mayor de 18 años</b>.</span></label>
+    <label class="lg-check" id="lgc2"><input type="checkbox" id="lg-c2"><span><b>Consiento expresamente</b> el tratamiento de mis <b>datos de salud</b> (peso, medidas, porcentaje de grasa, alergias) para calcular mis planes.</span></label>
+    <label class="lg-check" id="lgc3"><input type="checkbox" id="lg-c3"><span>Entiendo que esta app es <b>orientativa</b>, que <b>no sustituye a un médico ni a un nutricionista</b>, y que el filtrado de alérgenos <b>no garantiza</b> la ausencia de trazas.</span></label>
+    <button class="btn btn-acc btn-full" id="lg-aceptar" disabled style="opacity:.4;margin-top:4px;">Aceptar y continuar</button>
+    <button class="btn btn-ghost btn-full" id="lg-rechazar" style="margin-top:7px;font-size:12px;">No acepto</button>
+  </div>
+</div>
+
 <div class="onb" id="onb">
 <div class="onb-inner">
 
@@ -461,7 +718,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     </div>
     <div class="fg"><label>Nombre completo</label><input type="text" id="ob-nombre" placeholder="Tu nombre y apellido"></div>
     <div class="fg"><label>Email</label><input type="email" id="ob-email" placeholder="correo@ejemplo.com" inputmode="email"></div>
-    <div class="fg"><label>Contraseña</label><div class="pw-wrap"><input type="password" id="ob-pw" placeholder="Mínimo 6 caracteres"><button class="pw-eye" type="button" onclick="togglePw('ob-pw',this)" tabindex="-1"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
+    <div class="fg"><label>Contraseña</label><div class="pw-wrap"><input type="password" id="ob-pw" placeholder="Mínimo 8 caracteres"><button class="pw-eye" type="button" onclick="togglePw('ob-pw',this)" tabindex="-1"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
     <button class="btn btn-acc btn-full" id="s1-next" style="margin-top:auto;">Continuar →</button>
     <div style="text-align:center;margin-top:14px;font-size:13px;color:var(--t2);">¿Ya tienes cuenta? <button class="btn btn-ghost btn-sm" id="go-login" style="font-size:12px;">Iniciar sesión</button></div>
   </div>
@@ -886,6 +1143,10 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     </div>
     <button class="btn btn-green btn-full" id="btn-save-cfg" style="margin-bottom:8px;">Guardar configuración</button>
     <button class="btn btn-full" onclick="syncNube()" style="margin-bottom:8px;font-size:13px;">☁️ Sincronizar ahora con la nube</button>
+    <div class="sep" style="margin:10px 0;"></div>
+    <div style="font-size:11px;font-weight:700;color:var(--acc2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Privacidad y datos</div>
+    <button class="btn btn-full" onclick="verConsentimientos()" style="margin-bottom:8px;font-size:13px;">🔒 Consentimientos y mis derechos</button>
+    <button class="btn btn-full" onclick="verDocumentoLegal()" style="margin-bottom:8px;font-size:13px;">📄 Términos y política de privacidad</button>
     <button class="btn btn-full" onclick="verDiagnostico()" style="margin-bottom:8px;font-size:13px;">🩺 Diagnóstico y estado de la app</button>
     <button class="btn btn-d btn-full" id="btn-logout">Cerrar sesión</button>
   </div>
@@ -1363,6 +1624,20 @@ function calcMacros(u){
     kcal=tdee;
   }
 
+  // ── Suelo de seguridad ──
+  // 5.0: por debajo de ~1200 kcal (mujer) o ~1500 kcal (hombre) no se debe
+  // bajar sin supervisión médica: no se cubren micronutrientes y se pierde
+  // masa muscular. Antes, una mujer de 50 kg con déficit del 25 % y trabajo
+  // sedentario recibía 1178 kcal. Si el suelo recorta el déficit, se refleja
+  // en deficitReal para que el usuario vea el déficit que de verdad aplica.
+  var kcalMin=esH?1500:1200;
+  var kcalRecortada=false;
+  if(kcal<kcalMin){
+    kcal=kcalMin;
+    kcalRecortada=true;
+    if(obj==='perdida'||obj==='recomp') deficitReal=Math.max(0,Math.round((1-kcal/tdee)*100));
+  }
+
   // ── Proteína basada en masa magra (endocrinología clínica) ──
   // Pérdida de grasa: 2.2-2.4 g/kg masa magra; recomp: 2.0-2.2; volumen: 1.8-2.0
   var protMultiplier=(obj==='perdida')?2.3:(obj==='recomp')?2.1:(obj==='volumen')?1.9:1.8;
@@ -1416,7 +1691,8 @@ function calcMacros(u){
     perdidaSemanalKg, perdidaMensualKg, semanasObj, dieta,
     pctProt:Math.round(prot*4/kcal*100),
     pctCarbs:Math.round(carbs*4/kcal*100),
-    pctGrasa:Math.round(grasa*9/kcal*100)
+    pctGrasa:Math.round(grasa*9/kcal*100),
+    kcalRecortada:kcalRecortada, kcalMin:kcalMin
   };
 }
 
@@ -1553,7 +1829,7 @@ function getPlanEjercicio(u){
 // GENERACIÓN DE PLAN CON IA + EVIDENCIA CIENTÍFICA
 async function generarPlanIA(){
   var u=U(); if(!u) return;
-  var key=ANTHROPIC_KEY||GEMINI_KEY;
+  var key=ANTHROPIC_KEY||GEMINI_KEY||usarIAServidor();
   if(!key){toast('Necesitas configurar una API key (Claude o Gemini) en Perfil → Configuración','var(--amber)');return;}
 
   var btn=$('btn-generar-plan-ia');
@@ -1582,7 +1858,9 @@ async function generarPlanIA(){
 
   try{
     var resp, txt;
-    if(ANTHROPIC_KEY){
+    if(usarIAServidor()){
+      txt=await iaProxy({prompt:prompt,max_tokens:8000});
+    } else if(ANTHROPIC_KEY){
       resp=await fetch('https://api.anthropic.com/v1/messages',{
         method:'POST',
         headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
@@ -2353,44 +2631,123 @@ function _pickAli(rol, rests, pais, seed){
   return pool[Math.abs(seed || 0) % pool.length].n;
 }
 
-// Validador: recorre el plan ya generado buscando alérgenos declarados.
-// Es una red de seguridad, no la defensa principal — si salta, hay un
-// alimento mal etiquetado en el catálogo.
+// ── DETECCIÓN Y SANEADO DE ALÉRGENOS — 5.0 ────────────────────────────────
+// El compositor elige alimentos filtrados, pero las plantillas de los 7 días
+// tienen además alimentos escritos a mano dentro del texto ("180g salmón",
+// "jamón serrano (30g)", "queso fresco"...) que nunca pasaban por el filtro.
+// Las pruebas automáticas lo destaparon: con 17 alergias distintas aparecía
+// el alimento prohibido en algún plan.
+//
+// Solución: una sola lista de pistas, compartida por el VALIDADOR (que avisa)
+// y el SANEADOR (que sustituye). Todo lo que el validador detectaría, el
+// saneador lo cambia antes de que el plan llegue al usuario.
+var ALERGENO_PISTAS = {
+  gluten:     ['trigo','cuscús','cuscus','espelta','centeno','seitán','seitan','pasta','tostada','pan','cebada','bulgur','harina'],
+  lacteos:    ['yogur','queso','kumis','whey','caseína','caseina','skyr','ghee','leche','requesón','requeson','nata','mantequilla','kéfir','kefir','cuajada'],
+  lactosa:    ['yogur','queso','kumis','whey','caseína','caseina','skyr','leche','requesón','requeson','nata','mantequilla','kéfir','kefir'],
+  huevo:      ['huevo','clara','claras','tortilla','yema'],
+  huevo_clara:['clara','claras','tortilla'],
+  pescado:    ['salmón','salmon','atún','atun','merluza','tilapia','mojarra','bacalao','sardina','caballa','trucha','lubina','corvina','boquerón','boqueron','bagre','pescado','anchoa'],
+  crustaceos: ['gamba','langostino','camarón','camaron','cangrejo','marisco'],
+  moluscos:   ['mejillón','mejillon','almeja','calamar','pulpo','sepia','marisco'],
+  cacahuetes: ['cacahuete','maní','mani'],
+  frutos_secos:['nuez','nueces','almendra','anacardo','pistacho','avellana','frutos secos'],
+  almendra:   ['almendra'], anacardo:['anacardo'], nuez:['nuez','nueces'],
+  soja:       ['soja','tofu','tempeh','edamame'],
+  sesamo:     ['sésamo','sesamo','tahini'],
+  apio:       ['apio'], mostaza:['mostaza'], altramuces:['altramuz','altramuces'],
+  arroz:      ['arroz'], maiz:['maíz','maiz','arepa','crispetas','mazorca'],
+  avena:      ['avena'], champinon:['champiñón','champiñon','champiñones','seta','setas'],
+  garbanzo:   ['garbanzo'], lenteja:['lenteja'], judia:['fríjol','frijol','fríjoles','frijoles','alubia','judía blanca'],
+  levadura_pan:['pan','tostada'],
+  fructosa:   ['plátano','platano','banano','mango','uva','dátil','datil','manzana','pera','fresa','arándano','arandano','kiwi','naranja','guayaba','maracuyá','maracuya','higo','papaya','piña','fruta','miel','zumo','jugo'],
+  solanaceas: ['patata','papa','pimiento','berenjena','tomate','hogao'],
+  cerdo:      ['cerdo','jamón','jamon','chicharrón','chicharron','bacon','tocino','panceta','chorizo','lomo de cerdo'],
+  ternera:    ['ternera','carne de res','res']
+};
+// Frases que contienen una pista pero NO son el alérgeno.
+var ALERGENO_EXCEPCIONES = {
+  lacteos:  ['yogur de coco','yogur de soja','yogur vegetal','yogur de almendra','leche de coco','bebida de'],
+  lactosa:  ['sin lactosa','yogur de coco','yogur de soja','yogur vegetal','yogur de almendra','leche de coco','bebida de'],
+  gluten:   ['pan sin gluten','sin gluten','pasta de lenteja','harina de plátano','harina de platano'],
+  levadura_pan: ['sin levadura'],
+  fructosa: ['sin fruta']
+};
+
+// ¿Contiene el texto alguna pista del alérgeno k? Devuelve la pista o null.
+// Se exige límite de palabra para no confundir "pera" con "espera".
+function _pistaAlergeno(texto, k){
+  var pistas=ALERGENO_PISTAS[k]; if(!pistas) return null;
+  var t=' '+String(texto||'').toLowerCase()+' ';
+  (ALERGENO_EXCEPCIONES[k]||[]).forEach(function(x){ t=t.split(x).join(' '); });
+  for(var i=0;i<pistas.length;i++){
+    var p=pistas[i].replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    var re=new RegExp('(^|[^a-záéíóúñü])'+p+'(s|es)?([^a-záéíóúñü]|$)');
+    if(re.test(t)) return pistas[i];
+  }
+  return null;
+}
+
 function validarPlanAlergenos(plan, rests){
   if (!plan || !rests || !rests.length) return [];
   var avisos = [];
-  var texto = JSON.stringify(plan).toLowerCase();
-  var PISTAS = {
-    gluten:['trigo','cuscús','cuscus','espelta','centeno','seitán','seitan','pasta integral','tostada integral'],
-    lacteos:['yogur natural','queso','kumis','whey','caseína','caseina','skyr','ghee','leche'],
-    huevo:['huevo','clara','tortilla'], huevo_clara:['clara de huevo'],
-    pescado:['salmón','salmon','atún','atun','merluza','tilapia','mojarra','bacalao','sardina','caballa','trucha','lubina','corvina','boquerón','boqueron','bagre'],
-    crustaceos:['gamba','langostino','camarón','camaron'],
-    moluscos:['mejillón','mejillon','almeja','calamar','pulpo'],
-    cacahuetes:['cacahuete','maní','mani '],
-    frutos_secos:['nuez','nueces','almendra','anacardo','pistacho','avellana'],
-    almendra:['almendra'], anacardo:['anacardo'], nuez:['nuez','nueces'],
-    soja:['soja','tofu','tempeh','edamame'],
-    sesamo:['sésamo','sesamo','tahini'],
-    apio:['apio'], mostaza:['mostaza'], altramuces:['altramuz','altramuces'],
-    arroz:['arroz','tortita de arroz'], maiz:['maíz','maiz','arepa'],
-    avena:['avena'], champinon:['champiñón','champiñon','seta'],
-    garbanzo:['garbanzo'], lenteja:['lenteja'], judia:['fríjol','frijol','alubia','judía blanca'],
-    levadura_pan:['pan '], fructosa:['plátano','platano','banano','mango','uva','dátil','datil','manzana','pera','fresa','arándano','arandano','kiwi','naranja','guayaba','maracuyá','maracuya','higo'],
-    solanaceas:['patata','papa criolla','pimiento','berenjena','tomate'],
-    cerdo:['cerdo','jamón serrano','jamon serrano','chicharrón','chicharron','bacon','tocino'], ternera:['ternera','carne de res']
-  };
+  var texto = JSON.stringify(plan);
   rests.forEach(function(k){
-    var pistas = PISTAS[k]; if (!pistas) return;
-    for (var i = 0; i < pistas.length; i++) {
-      if (texto.indexOf(pistas[i]) >= 0) { avisos.push({alergeno:k, encontrado:pistas[i]}); break; }
-    }
+    var p=_pistaAlergeno(texto,k);
+    if(p) avisos.push({alergeno:k, encontrado:p});
   });
   return avisos;
 }
 window.validarPlanAlergenos = validarPlanAlergenos;
 
+// Con qué familia de alimentos se sustituye lo que choca con cada alérgeno.
+var ALERGENO_SUSTITUTO = {
+  gluten:'cereal_principal', lacteos:'lacteo', lactosa:'lacteo', huevo:'prot_ave', huevo_clara:'prot_ave',
+  pescado:'prot_ave', crustaceos:'prot_ave', moluscos:'prot_ave', cacahuetes:'grasa_seco',
+  frutos_secos:'grasa_seco', almendra:'grasa_seco', anacardo:'grasa_seco', nuez:'grasa_seco',
+  soja:'prot_ave', sesamo:'grasa_seco', apio:'verdura', altramuces:'legumbre', arroz:'cereal_principal',
+  maiz:'tuberculo', avena:'cereal_desayuno', champinon:'verdura', garbanzo:'legumbre', lenteja:'legumbre',
+  judia:'legumbre', levadura_pan:'pan_tostada', fructosa:'verdura', solanaceas:'verdura',
+  cerdo:'prot_ave', ternera:'prot_ave', mostaza:null
+};
+
+// Sustituye, línea a línea, todo alimento que choque con una alergia.
+function sanearPlanAlergenos(plan, rests, pais, semilla){
+  if(!plan || !rests || !rests.length) return plan;
+  var n=0;
+  (plan||[]).forEach(function(dia){
+    (dia.comidas||[]).forEach(function(c){
+      c.items=(c.items||[]).map(function(item){
+        var actual=String(item);
+        for(var vuelta=0; vuelta<4; vuelta++){
+          var choca=null;
+          for(var i=0;i<rests.length;i++){ if(_pistaAlergeno(actual,rests[i])){ choca=rests[i]; break; } }
+          if(!choca) return actual;
+          n++;
+          var cant=(actual.match(/^\s*(\d+[\d.,]*\s*(g|gr|ml|kg|uds?|unidades)?\b\s*|½\s*|¼\s*)/i)||[''])[0];
+          var rol=ALERGENO_SUSTITUTO[choca];
+          if(!rol){ actual='Aliño de aceite de oliva y limón (adaptado a tus alergias)'; continue; }
+          var sust=_pickAli(rol, rests, pais||'es', (semilla||0)+n);
+          actual=(cant?cant.trim()+' ':'')+sust+' (adaptado a tus alergias)';
+        }
+        return actual;
+      });
+    });
+  });
+  return plan;
+}
+window.sanearPlanAlergenos=sanearPlanAlergenos;
+
+// Punto de entrada público: genera y, a continuación, sanea. Así ninguna
+// ruta del código puede entregar un plan sin pasar por el filtro final.
 function getPlanNutricion(u, mac, rests){
+  var r=normalizarRests(rests||[]);
+  var plan=_getPlanNutricionBase(u, mac, r);
+  return sanearPlanAlergenos(plan, r, (u&&u.pais)||'es', _semillaMenu(u));
+}
+window.getPlanNutricion=getPlanNutricion;
+
+function _getPlanNutricionBase(u, mac, rests){
   var esH=u.genero==='H';
   var k=mac.kcal;
   var obj=u.obj||'recomp';
@@ -2680,7 +3037,7 @@ function showExDetail(id, nombre){
     // mandan los pasos de tecnica, que siguen funcionando sin conexion.
     // 5.0: el poster usa el catalogo verificado y muestra canal y duracion
     // reales bajo la miniatura, en vez de la atribucion fija a Jeff Nippard.
-    var _vids=(typeof getVideosEj==='function')?getVideosEj(id):[];
+    var _vids=(typeof getVideosEj==='function')?getVideosEj(id,nombre):[];
     if(_vids.length){
       var _v0=_vids[0];
       var _esc=function(s){return String(s||'').replace(/'/g,'').replace(/"/g,'');};
@@ -2857,263 +3214,180 @@ function openYouTube(url, titulo, canal){
 }
 window.openYouTube=openYouTube;
 // ═══════════════════════════════════════════════════════════════════════════
-// VIDEOTECA 5.0 — verificada el 21/08/2026
-// ---------------------------------------------------------------------------
-// Cada entrada se comprobo contra el endpoint oembed de YouTube (existencia,
-// titulo y canal reales) y contra la pagina del video (duracion). Los
-// comentarios "Jeff Nippard" del mapa anterior eran falsos en 29 de 31 casos:
-// la mayoria son de ScottHermanFitness, Howcast, LIVESTRONG o CrossFit.
-//
-// Se corrigieron:
-//   · 6 videos ELIMINADOS de YouTube (pullover, remo-barra, caminata,
-//     eliptica, face pull y abduccion se abrian en blanco)
-//   · 7 videos que mostraban OTRO ejercicio (press inclinado apuntaba a un
-//     video de opinion de 13 min; el peso muerto rumano al convencional;
-//     la plancha lateral a la frontal; el curl concentrado al de barra;
-//     la sentadilla sumo a la normal; el peso muerto con kettlebell al de
-//     barra; la movilidad a una rutina de 19 minutos)
-//
-// Formato: cada ejercicio admite VARIOS videos. v=id, t=titulo, s=segundos,
-// c=canal. El primero es el recomendado; el resto son alternativas que el
-// usuario puede elegir (mas corta, otro angulo, con mancuerna en vez de barra).
+// VIDEOTECA 5.0 — verificada el 22/09/2026
+// Un vídeo por MOVIMIENTO, no por código de ejercicio. Todos comprobados en
+// YouTube: existen, se pueden incrustar, duran entre 12 y 60 segundos y su
+// título nombra ese movimiento concreto. Revisados además a mano: se
+// descartaron los de 'errores', opinión, comparativas y variantes distintas.
+// v=id · t=título · s=segundos · c=canal. El primero es el recomendado.
 // ═══════════════════════════════════════════════════════════════════════════
-var VIDEOS_EJ={
-  // ── PECHO ──────────────────────────────────────────────────────────────
-  'press-banca':[
-    {v:'hWbUlkb5Ms4',t:'Press banca con técnica perfecta (5 pasos)',s:50,c:'Jeff Nippard'}
-  ],
-  'press-banca-fb':[
-    {v:'hWbUlkb5Ms4',t:'Press banca con técnica perfecta (5 pasos)',s:50,c:'Jeff Nippard'}
-  ],
-  'press-incl':[
-    {v:'cq-4gME3IFY',t:'Corrige tu press inclinado en 60 segundos',s:56,c:'ScottHermanFitness'},
-    {v:'DbFgADa2PL8',t:'Cómo hacer: press inclinado con barra',s:235,c:'ScottHermanFitness'}
-  ],
-  'aperturas-cable':[
-    {v:'Iwe6AmxVf7o',t:'Cómo hacer: aperturas en polea alta',s:132,c:'ScottHermanFitness'}
-  ],
-  'pullover':[
-    {v:'tpLnfSQJ0gg',t:'Cómo hacer: pull-over con mancuerna',s:118,c:'ScottHermanFitness'},
-    {v:'ZhPOEQJRzBU',t:'Pull-over: enfocarlo a pecho o a dorsal',s:369,c:'ScottHermanFitness'}
-  ],
-  'fondos':[
-    {v:'2z8JmcrW-As',t:'El fondo perfecto — hazlo bien',s:278,c:'Calisthenic Movement'}
-  ],
+var VIDEOS_MOV={"abduccion":[{"v":"HJLzMM_naPg","t":"Como realizar abducción en maquina correctamente","s":19,"c":"Abraham Ysas"},{"v":"QSPI-I5vjmw","t":"ABDUCCIÓN DE CADERA EN MÁQUINA","s":56,"c":"Laura Rozo | Médica esp. en nutrición humana"}],"abduccion_banda":[{"v":"GoeqVgJdWak","t":"Abducción de Cadera Sentado con Banda","s":40,"c":"Coach Luis Solís"},{"v":"qgwrbh4T1m0","t":"103. Abducción de cadera con banda elastica y piernas abiertas","s":17,"c":"Proet Ejercicio Terapéutico "}],"aduccion":[{"v":"ghrWOwqn5eM","t":"Usa correctamente maquina de abducciones y aducciones","s":18,"c":"Karen Zárate"},{"v":"zYYR_W9BTEQ","t":"Aducción de cadera [Máquina sentado]","s":14,"c":"Centro Wellness On"}],"air_bike":[{"v":"1K2GIpSd8ws","t":"How to Assault Air Bike in 15 seconds","s":15,"c":"The Gym In The North"},{"v":"NQUvO0ohAoE","t":"Assault Bike - Technique video Socials: @Paulpait","s":12,"c":"Perrin Paul"}],"aperturas_cable":[{"v":"BuCWCL6OEoU","t":"CÓMO HACER CRUCES DE POLEA SEGÚN TU OBJETIVO","s":51,"c":"Fit Generation"},{"v":"QEW6RO0O-ak","t":"Cómo hacer cable crossover/cruces en polea","s":17,"c":"AmCoder Fit"}],"aperturas_mancuernas":[{"v":"-4U8vckpVAU","t":"Como hacer las Aperturas de pectoral con mancuerna bien hechas?","s":23,"c":"Daniel Hernandez Rubio"},{"v":"089rPTZ3mEI","t":"Apertura con mancuernas en suelo","s":22,"c":"Clafitness"}],"battle_ropes":[{"v":"F_xkxgwiO0s","t":"CÓMO usar la Battle ROPE en el gym !","s":15,"c":"Andres Henriquez Reyes"},{"v":"XLYh2lLCv-I","t":"APRENDE A USAR LA BATTLE ROPE O CUERDA DE BATALLA !","s":59,"c":"Andres Henriquez Reyes"}],"bici_estatica":[{"v":"h2WtDZrLHmk","t":"Pasos para ajustar la bicicleta","s":54,"c":"Bestcycling"},{"v":"M9ODrHwSBXk","t":"Con ESTE CONSEJO, disfrutarás mejor del SPINNING","s":24,"c":"Corporación Municipal de Deportes de Peñalolén"}],"box_jump":[{"v":"L9l2YZ_TIZc","t":"Cómo saltar al cajon - Box jump de Crossfit","s":58,"c":"Training Norte · Academia TN"},{"v":"aSNHbD9pqWA","t":"Un tip con el que ganarás velocidad en tus saltos de cajón.","s":18,"c":"Alvaro Andrades"}],"buenos_dias":[{"v":"ap-omoO-ZAg","t":"Como hacer un buenos dias o good morning","s":48,"c":"El Mundo GYM"},{"v":"RGZd_udGVeE","t":"¿CÓMO HACER el BUENOS DÍAS?","s":32,"c":"Olaya Baker"}],"burpees":[{"v":"ojiK-zPu09I","t":"(Cámara lenta) Cómo hacer un burpee correctamente - Besttraining","s":52,"c":"Bestcycling"},{"v":"awbFx6HqWns","t":"Como hacer burpees correctamente","s":32,"c":"Runnea.com"}],"caminata_inclinada":[{"v":"fczGADaKC-k","t":"Caminar Cinta Inclinado","s":28,"c":"RepsDown"},{"v":"tBZVYkK8SDw","t":"Incline Walking On The Treadmill","s":15,"c":"Health & Fitness"}],"comba":[{"v":"AyZTUWP4ofI","t":"Tutorial para Aprender a Saltar la Cuerda como un BOXEADOR!","s":52,"c":"Asgardrope®"},{"v":"JKTdN8OfXzU","t":"Tutorial para aprender a saltar la cuerda como un BOXEADOR PROFESIONAL!","s":16,"c":"Asgardrope®"}],"crunch":[{"v":"HLAPlJhxqEE","t":"Cómo hacer CRUNCH ABDOMINAL CORRECTAMENTE","s":59,"c":"El Nivel Fit"},{"v":"BzYrN4o5X5o","t":"Guía completa para hacer crunch abdominal correctamente","s":28,"c":"ClaudiaFitness"}],"crunch_polea":[{"v":"p-kdPTKDgNs","t":"Cómo hacer CRUNCH en POLEA correctamente (Abdominales)","s":26,"c":"Fit Generation"},{"v":"xYIVO1nCm3E","t":"Crunch en polea alta","s":34,"c":"Priscilla_bc"}],"curl_arana":[{"v":"1MbBr8xkQac","t":"Curl Araña","s":53,"c":"Alberto Hiciano IFBB PRO"},{"v":"B_SDP425oEc","t":"Pasos para hacer el Spider Curl para biceps!","s":41,"c":"Tomy Medina"}],"curl_barra":[{"v":"MqYBweUzDT4","t":"Así se hace el curl de Bíceps con Barra","s":39,"c":"Gym Topz"},{"v":"QejmaMkb7eo","t":"Curl de bíceps con barra","s":34,"c":"Alberto Hiciano IFBB PRO"}],"curl_concentrado":[{"v":"-fWXrhX3hGI","t":"Como hacer curl concentrado con mancuerna","s":31,"c":"CosmicCoach"},{"v":"nqZMDLo8yHo","t":"CLAVES CURL CONCENTRADO","s":59,"c":"IRON Masters"}],"curl_ez":[{"v":"gGSLcJp6h18","t":"Como desarollar tus biceps con BARRA z","s":34,"c":"Maru lekhal"},{"v":"yaAyYKZ5iO0","t":"[Curl de bíceps] con Barra Z correctamente","s":19,"c":"fitnessdigital"}],"curl_femoral":[{"v":"9xbBr5Ytl8c","t":"Cómo Hacer Curl Femoral Tumbado en Máquina · Técnica Correcta","s":42,"c":"Vitar Club"},{"v":"wxtfjSYC9yY","t":"CURL FEMORAL ¿CUÁL HACER?","s":32,"c":"Fit Generation"}],"curl_femoral_sentado":[{"v":"CBCPBnMzsMI","t":"Curl Femoral Sentado en Máquina · Técnica Correcta","s":46,"c":"Vitar Club"},{"v":"XG2XVE_VcTM","t":"Estás DESAPROVECHANDO tu CURL FEMORAL SENTADO","s":20,"c":"Nowtrain"}],"curl_inclinado":[{"v":"jktjmrPmOrs","t":"Curl Biceps En Banco Inclinado Con Mancuernas","s":51,"c":"Coach Honorio Landa"},{"v":"2bzTfdB3j4M","t":"Curl en banco inclinado, hazlo bien así","s":30,"c":"Alberto Mareque"}],"curl_mancuernas":[{"v":"LQcQNJiVY24","t":"Cómo hacer Curl de Bíceps correctamente","s":13,"c":"Samuel Delgado"},{"v":"Q9FDIWJmEAM","t":"Cómo hacer CURL BÍCEPS Mancuerna de pie // Ejercicios Bíceps Brazos","s":12,"c":"Guille GTS Fitness"}],"curl_martillo":[{"v":"XhM67ihE3ks","t":"Curl martillo: hazlo así","s":42,"c":"Alberto Tuya"},{"v":"PzmSQcFSNPI","t":"El truco del curl MARTILLO","s":37,"c":"BlueGym Animation"}],"curl_nordico":[{"v":"B3miixeFsec","t":"Curl Nórdico 3 Formas de Adaptarlo para trabajar tus Isquios, Fortalecerlos + Prevenir Lesiones","s":57,"c":"Ninolift"},{"v":"QZdcn8POwbw","t":"Curl Nórdico desde cero! (Técnica Correcta)","s":15,"c":"Miguel Leon Trainer"}],"curl_polea":[{"v":"vDnOrc_bZKM","t":"ASÍ SE DEBE HACER EL CURL DE BÍCEPS EN POLEA","s":30,"c":"Haro Fitness"},{"v":"BNxez0L-9LQ","t":"CURL DE BICEPS EN POLEA BAJA","s":25,"c":"CARLOS Online Coach"}],"curl_predicador":[{"v":"uO5OUPTT5fE","t":"Como posicionarte curl predicador","s":15,"c":"CosmicCoach"},{"v":"BSiwAVGzRBI","t":"CURL SCOTT NO SUBAS DEL TODO POR FAVOR","s":57,"c":"IRON Masters"}],"dead_bug":[{"v":"i8-JzNik6VQ","t":"Dead Bug","s":52,"c":"Baptist Health"},{"v":"d3PjEIuyis8","t":"Dead Bug, Exercise Is Medicine, University of Arkansas","s":26,"c":"UARK College of Education and Health Professions"}],"dominadas":[{"v":"6E3tt4ajzSs","t":"CÓMO HACER UNA PULL-UP O DOMINADA (TÉCNICA PERFECTA)","s":48,"c":"coachcalistenia"},{"v":"aUqc3c1p6Os","t":"DOMINADAS: Cómo colocar nuestro cuerpo correctamente","s":37,"c":"Jéssica Martín Moreno"}],"elev_frontal":[{"v":"PTRTYb1ZZv0","t":"Cómo Hacer Elevaciones Frontales con Mancuernas Correctamente","s":21,"c":"Your House Fitness"},{"v":"jk7YrK79ciA","t":"Elevaciones Frontales con mancuernas","s":41,"c":"Alberto Hiciano IFBB PRO"}],"elev_lateral":[{"v":"lvUvnvXgh-Y","t":"TÉCNICA CORRECTA en ELEVACIONES LATERALES","s":29,"c":"Fit Generation"},{"v":"zEANAIh1l9g","t":"Aprende la tecnica correcta de elevaciones laterales con mancuernas","s":28,"c":"Karen Zárate"}],"elev_lateral_polea":[{"v":"SaoW-iSUxfk","t":"Cómo hacer Elevaciones Laterales en Polea","s":40,"c":"BlueGym Animation"},{"v":"2g-26KtNp1A","t":"Elevaciones laterales en polea baja","s":44,"c":"Priscilla_bc"}],"elev_piernas":[{"v":"KxWX2jGMe8I","t":"COMO HACER ELEVACION DE PIERNAS DE FORMA CORRECTA","s":28,"c":"soyjosefitness"},{"v":"hTm5SjiW4gY","t":"Elevaciones de piernas tumbado","s":49,"c":"Priscilla_bc"}],"elev_piernas_colgado":[{"v":"_jLskVdzS4o","t":"Hanging leg raise tutorial","s":44,"c":"Rod J Cooper "},{"v":"2n4UqRIJyk4","t":"How to Properly Perform Hanging Leg Raises With Good Form For Shredded Abs (Exercise Demonstration)","s":15,"c":"Gerardi Performance"}],"eliptica":[{"v":"MSA1ZZ0AWrs","t":"ELIPTICA · ¿Cómo usarla CORRECTAMENTE?","s":60,"c":"May Abad"},{"v":"-vPOM0ULsg0","t":"Cómo Usar la Bicicleta Elíptica en el Gimnasio · PROCLUB","s":36,"c":"Pro Club Panama"}],"encogimientos":[{"v":"QgokS_HikVo","t":"Encogimiento de hombros","s":52,"c":"Alberto Hiciano IFBB PRO"},{"v":"n-LJZYfNWxA","t":"Encogimientos para trapecio BIEN hechos","s":40,"c":"Ocean Fitness"}],"ext_cuadriceps":[{"v":"FtXooCm3wdQ","t":"La manera correcta de realizar las extensiones de cuadriceps (DÍA DE PIERNAS)","s":20,"c":"Chuyst"},{"v":"7zbn-i_fxGU","t":"EXTENSIONES DE CUÁDRICEPS: AJUSTA BIEN LA MÁQUINA","s":51,"c":"Trainologym"}],"ext_triceps_cabeza":[{"v":"LvYIcAEy1Ws","t":"EXTENSIÓN DE TRÍCEPS POR ENCIMA DE LA CABEZA CON MANCUERNA","s":15,"c":"NFIT"},{"v":"xiXJxlGKryY","t":"Get the most out of your overhead tricep extensions with this tip!","s":13,"c":"LisaFiitt Workouts"}],"ext_triceps_polea":[{"v":"a4Yxi1vyc2A","t":"TRICEPS CON POLEA CORRECTA EJECUCION","s":12,"c":"Educación Física MC"},{"v":"FELcywKlkqE","t":"Extensión de tríceps en polea alta - Hazlo bien","s":60,"c":"Galvistrainer"}],"face_pull":[{"v":"4otcO1StZHQ","t":"Cómo hacer un Facepull PERFECTO! Vídeo completo en la descripción","s":28,"c":"BlueGym Animation"},{"v":"CkIoZeOKfPw","t":"Haz el face pull de Esta manera","s":26,"c":"Maru lekhal"}],"flexiones":[{"v":"S44aVCTshH8","t":"Como hacer flexiones correctamente","s":42,"c":"Flaco Fuertaco"},{"v":"NCVSqd3cAgg","t":"COMO HACER TU PRIMERA FLEXIÓN","s":24,"c":"Lucius"}],"fondos":[{"v":"cvyZAIa7heU","t":"TÉCNICA CORRECTA de FONDOS en PARALELAS","s":58,"c":"Jéssica Martín Moreno"},{"v":"1fR3Ss8OFug","t":"Cómo hacer Fondos Correctamente","s":24,"c":"Arceo Fitness"}],"fondos_banco":[{"v":"hVwojhhQhj4","t":"Como hacer Fondos en Banco","s":23,"c":"Pipe Arenas"},{"v":"oVs-HluNKP0","t":"Está es la técnica correcta en los fondos en banco","s":15,"c":"Mas Barras"}],"frog_pump":[{"v":"S4zgfIb3k8M","t":"Pumpen tus GLÚTEOS con Frog pump","s":43,"c":"Maria Lopez Polo"},{"v":"RLKHj4RTSu0","t":"An easy tip for weighted frog pumps and glute bridges!","s":24,"c":"Bret Contreras Glute Guy"}],"gemelo":[{"v":"pfM1DK7SRH0","t":"Elevación de gemelos / GEMELOS","s":17,"c":"FIBER GYM"},{"v":"1BL4681pIz4","t":"697. Elevación de gemelos de pie con mancuernas","s":14,"c":"Proet Ejercicio Terapéutico "}],"gemelo_sentado":[{"v":"3ra-uyR1Aus","t":"GEMELO SENTADO correctamente","s":20,"c":"Martinhm"},{"v":"_LWs5rtRk_k","t":"Gemelos sentado","s":19,"c":"Licenciada Rocío Pedre"}],"hip_thrust":[{"v":"bE76E1sa5rA","t":"Técnica perfecta para Hip Thrust","s":33,"c":"Fit Generation"},{"v":"OSOP3JAApGk","t":"HIP THRUST TÉCNICA CORRECTA","s":22,"c":"Lee Ortiz"}],"hip_thrust_unilateral":[{"v":"RaKaj5gtk1A","t":"Realiza correctamente el hip thrust unilateral","s":17,"c":"Karen Zárate"},{"v":"alV5rbdX1ug","t":"HIP THRUST A UNA PIERNA · ¿Te ayuda a lograr unos glúteos más grandes?","s":60,"c":"Oscar Banderas | Nattybody"}],"hiperextensiones":[{"v":"neoUfYkJVwM","t":"Como hacer hiperextensiones correctamente para fortalecer lumbares sin lastimarte la espalda baja","s":43,"c":"Entrena inteligente"}],"hollow":[{"v":"YRmzConjl8c","t":"Cómo hacer el HOLLOW de forma correcta","s":28,"c":"Nachogst"},{"v":"lj_nWQiY3lE","t":"Cómo realizar hollow Hold","s":27,"c":"Camilo Avila Trainer"}],"jalon":[{"v":"TcYwpzaRS1I","t":"Cómo hacer Jalón de Pecho PERFECTO! Tenéis el vídeo completo en mi canal","s":49,"c":"BlueGym Animation"},{"v":"3e-76jcA91w","t":"Cómo hacer Jalón de Pecho PERFECTO! Vídeo completo en la descripción","s":45,"c":"BlueGym Animation"}],"kettlebell_swing":[{"v":"2gXtvqLa_T8","t":"Correctly Perform Kettlebell Swings!","s":60,"c":"Squat University"},{"v":"jwILQCx61ts","t":"Fix Your Kettlebell Swing","s":57,"c":"FitnessFAQs"}],"pajaros":[{"v":"Vhxgy-pj35I","t":"Cómo Hacer PÁJAROS Correctamente para el DELTOIDES POSTERIOR","s":16,"c":"Guille 3D"},{"v":"dnUpZK26C4A","t":"Pájaros Con Mancuernas - HAZLO BIEN !","s":43,"c":"Manuel Escalera"}],"pallof":[{"v":"WCKzrxJPEqo","t":"Press Pallof en Polea Técnica","s":60,"c":"Dra. Isabel Junio"},{"v":"ZUEtG54s1_s","t":"PRESS PALLOF","s":54,"c":"Priscilla_bc"}],"paseo_granjero":[{"v":"B_zT15qcucE","t":"CAMINATA DE GRANJERO. El dios de los trapecios","s":46,"c":"PREFIT-X"},{"v":"Q5NaIXAfjY4","t":"El paseo o Caminata del Granjero \"Farmers walk” El ejercicio mas importante que no estas haciendo!!!","s":32,"c":"Rob Diesel"}],"patada_gluteo":[{"v":"_RovolXS2m8","t":"Patada de glúteo en polea :técnica correcta","s":20,"c":"NATALI CAMERO "},{"v":"B9Fqo0KqeWc","t":"Patada glúteo polea baja","s":59,"c":"Priscilla_bc"}],"patada_triceps":[{"v":"35U1T7p8MME","t":"Patada Triceps de la manera correcta","s":19,"c":"Sergio Orduz"},{"v":"K2smm4Oohpw","t":"Ejecuta correctamente esta patada de Tríceps con mancuerna","s":17,"c":"Deportika Online"}],"peck_deck":[{"v":"GTZ0aQ7GMZo","t":"APERTURAS en máquina para PECTORAL [Contractora de PECHO]","s":26,"c":"Javi NewBody"},{"v":"vpfZk2kdlTM","t":"APERTURAS EN MÁQUINA PECK DECK / MARIPOSA.","s":15,"c":"Flor Fit"}],"peso_muerto":[{"v":"rzpikhhtwwA","t":"PESO MUERTO CONVENCIONAL · BARBELL DEADLIFT [EXPLICACIÓN TÉCNICA] **TIPS Y TRUCOS","s":60,"c":"Luis Serra"},{"v":"7BdVi5qJ7E4","t":"Cómo hacer peso muerto en 5 pasos","s":57,"c":"Jeremy Ethier en Español"}],"peso_muerto_sumo":[{"v":"10igkYVL4c0","t":"Cómo hacer un Sumo Deadlift","s":47,"c":"Squat University Español"},{"v":"YE7rtn57tP4","t":"Cómo hacer un PESO MUERTO SUMO","s":34,"c":"La Ciencia del Chándal"}],"plancha":[{"v":"4j8op027Ibk","t":"TÉCNICA para una PLANCHA perfecta y efectiva para tu ZONA ABDOMINAL","s":59,"c":"GABY WELLNESS"},{"v":"lsjf_EgsfXc","t":"ASI SE HACE LA PLANCHA ABDOMINAL","s":42,"c":"Angel Franquines"}],"plancha_lateral":[{"v":"45t3tTcRcKE","t":"PLANCHA LATERAL ISOMÉTRICA para ABDOMINALES · CÓMO SE HACE","s":34,"c":"APTA Vital Sport"},{"v":"qPtIWsI0Fws","t":"Ejercicio de plancha lateral","s":54,"c":"Fisiovalle Fisioterapia y Osteopatía"}],"plancha_toques":[{"v":"jstseIj_vDM","t":"Plancha alta con toque de hombros","s":53,"c":"GO Green Order"},{"v":"VVElHrIm5r4","t":"Toques de Hombro en Plancha (Plank Shoulder Taps)","s":22,"c":"ISoft Colombia"}],"pm_kettlebell":[{"v":"eqp8MP92idk","t":"Mejora tus de peso muerto con kettlebells","s":51,"c":"Mari Sanso Workouts"},{"v":"2Puq3mI6oLI","t":"KB deadlift - peso muerto con pesa rusa","s":15,"c":"Dra. Ana Karen Vázquez"}],"pm_rumano":[{"v":"BSLuRD7fZwc","t":"Cómo hacer peso muerto rumano (RDL) sin dolor de espalda","s":60,"c":"Squat University Español"},{"v":"8qNrTuZ0rXM","t":"PESO MUERTO RUMANO RDL · HAZLO CORRECTAMENTE","s":44,"c":"ATHLEAN-X Español"}],"pm_rumano_unilateral":[{"v":"V0SfMaC_t6c","t":"Peso muerto rumano unilateral","s":42,"c":"Priscilla_bc"},{"v":"YXjc7TURwfE","t":"PESO MUERTO RUMANO UNILATERAL CON MANCUERNA","s":35,"c":"CARLOS Online Coach"}],"prensa":[{"v":"mnmjGgfJ6Q0","t":"Como Hacer Ejercicios de Prensa de Pierna de Forma Efectiva","s":60,"c":"SHORTS ENTRENAMIENTO"},{"v":"wt_xO5AbCp8","t":"HAZ LA PRENSA DE PIERNAS BIEN, CRACK","s":27,"c":"Trainologym"}],"press_arnold":[{"v":"llERM60yGZc","t":"Cómo hacer un ARNOLD PRESS de la forma correcta","s":35,"c":"Ruben Stouth"},{"v":"wpsaMyaEJk4","t":"Press Arnold con mancuerna.","s":26,"c":"GymTravelerOrg"}],"press_banca":[{"v":"_avc-tV_v0A","t":"Técnica PRESS BANCA","s":40,"c":"Martinhm"},{"v":"wLayV1XggbM","t":"Cómo realizar el Press de Banca correctamente - GO fit","s":28,"c":"GOfit"}],"press_cerrado":[{"v":"v8z-nqlNfaE","t":"Cómo hacer un Press de Banca (agarre cerrado)","s":31,"c":"La Ciencia del Chándal"},{"v":"odbDcJ35444","t":"Press de Banca con AGARRE CERRADO ¿Lo haces bien? ·","s":30,"c":"Fit Generation"}],"press_declinado":[{"v":"KlLUp-LMq9o","t":"Cómo Hacer Press de Banca Declinado · Técnica y Consejos para un Pecho Más Fuerte","s":27,"c":"Eduardo Fitness"},{"v":"a2ObGBMss4M","t":"Cómo Hacer Press Declinado con Mancuernas · Ejercicio para Pecho”","s":20,"c":"Your House Fitness"}],"press_frances":[{"v":"L3bEz-vcdGU","t":"Cómo hacer PRESS FRANCÉS","s":32,"c":"BlueGym Animation"},{"v":"5Lafu9_9O_U","t":"COMO HACER CORRECTAMENTE EL PRESS FRANCÉS / ROMPECRANEOS.","s":14,"c":"Chriso Aesthetic"}],"press_hombro_mancuerna":[{"v":"sWJoAATDlGM","t":"PRESS de HOMBRO con MANCUERNAS (sentado)","s":38,"c":"Laura Rozo | Médica esp. en nutrición humana"},{"v":"IuR427toLXE","t":"Press de hombros con mancuernas, hazlo bien así","s":35,"c":"Alberto Mareque"}],"press_inclinado":[{"v":"HboHdKXrYG8","t":"CÓMO hacer un Press de Banca Inclinado con Barra PERFECTO","s":45,"c":"La Ciencia del Chándal"},{"v":"SqT0lZDPm-Y","t":"CÓMO EJECUTAR EL PRESS EN BANCA INCLINADA","s":28,"c":"CosmicCoach"}],"press_mancuernas":[{"v":"DfzDjXCO2Nw","t":"¿Cómo hacer PRESS DE PECHO con mancuernas?","s":24,"c":"FDR Fitness"},{"v":"JcNt92ufIzM","t":"Press plano con mancuerna.","s":31,"c":"GymTravelerOrg"}],"press_maquina":[{"v":"Nbh72taMf4w","t":"Hammer Strength Chest Press Demonstration","s":59,"c":"Life Fitness Australia"},{"v":"7HIn3hh9hQo","t":"Hammer Strength Flat Press","s":42,"c":"Parabellum Coaching"}],"press_militar":[{"v":"BTwSz8baoyc","t":"PRESS MILITAR ¡TÉCNICA CORRECTA!","s":59,"c":"FRANK SERAPIÓN"},{"v":"yaOyBuco_mY","t":"CLAVES para hacer correctamente el PRESS MILITAR","s":58,"c":"Powerexplosive"}],"puente_gluteo":[{"v":"vRHav61cjVU","t":"¿Cómo hacer PUENTE DE GLÚTEO?","s":38,"c":"FDR Fitness"},{"v":"UACIKae85Sk","t":"COMO HACER PUENTE DE GLÚTEOS","s":13,"c":"Paola | Entrenamiento de glúteo "}],"pullover_mancuerna":[{"v":"X0qV-Gs69MM","t":"Pullover con mancuerna: técnica perfecta para el pecho","s":54,"c":"karlos Doncel"},{"v":"Y2WPDYf4Zzw","t":"Cómo Hacer el Pullover con Mancuerna Correctamente","s":29,"c":"Your House Fitness"}],"pullover_polea":[{"v":"E7CiaycXvXU","t":"PULLOVER en POLEA ALTA [HAZLO ASÍ]","s":59,"c":"Javi NewBody"},{"v":"kXLRGQLISG4","t":"Pull over polea alta","s":57,"c":"Priscilla_bc"}],"remo_barra":[{"v":"VSdKfoQxj5o","t":"Como hacer el remo con barra","s":34,"c":"Maru lekhal"},{"v":"xyh5wKA5jBs","t":"Como hacer Remo con barra","s":16,"c":"Gym Topz"}],"remo_meadows":[{"v":"yTqX3JHtwUY","t":"Remo meadows","s":30,"c":"Instituto de Entrenamiento Personal"},{"v":"U2iIrowyRZc","t":"Remo Meadows/ Meadows Row","s":25,"c":"Mii Body - Dani Santolaya"}],"remo_menton":[{"v":"SZ9yjw3Fvic","t":"REMO al MENTÓN con BARRA","s":43,"c":"Laura Rozo | Médica esp. en nutrición humana"}],"remo_pendlay":[{"v":"BAf9AUf1IUQ","t":"Técnica remo pendlay con barra","s":47,"c":"Alexis Chamut"},{"v":"ICAibpi-2Vk","t":"Cómo hacer REMO PENDLAY paso a paso · Soy Powerlifter","s":22,"c":"Soy Powerlifter"}],"remo_polea":[{"v":"D_UXjlrZIBw","t":"Como hacer el Remo en polea baja","s":24,"c":"Maru lekhal"},{"v":"own3uEE4wP8","t":"Remo con polea, hazlo bien","s":25,"c":"Deportika Online"}],"remo_t":[{"v":"betz4CEWgxs","t":"TÉCNICA DE REMO EN T","s":29,"c":"Trillo"},{"v":"MzAh0xw_TKI","t":"REMO EN T · En menos de 1 minuto","s":43,"c":"Martinhm"}],"remo_unilateral":[{"v":"-RngKKzbEnI","t":"Cómo hacer el remo con mancuerna para una ESPALDA FUERTE","s":46,"c":"Julien LEPRETRE"},{"v":"N_KrUuUsg9k","t":"No sabes cómo hacer el remo unilateral con mancuerna ? Hazlo así","s":15,"c":"Asaad"}],"remoergometro":[{"v":"XSxsNjyes5c","t":"Te compartimos algunos tips para mejorar tu técnica de remo","s":12,"c":"Fitness Shop Guatemala"}],"rueda_abdominal":[{"v":"3D0gH8OYrAI","t":"Tutorial de la Rueda abdominal ¿Como usar el AB Roller?","s":54,"c":"Chuy Almada"},{"v":"cRy6GbL2QKY","t":"TUTORIAL de como EMPEZAR A USAR la RUEDA para ABDOMINALES","s":31,"c":"Johan Zambrano"}],"russian_twist":[{"v":"_d5cpAre7_w","t":"HOW TO PROPERLY DO RUSSIAN TWISTS","s":26,"c":"Colossus Fitness"},{"v":"iFQV6q4xRXM","t":"How to Actually Train the Obliques on Russian Twists / Pocket Pickers","s":12,"c":"TylerPath"}],"sentadilla":[{"v":"HW4NEytEiO0","t":"Cómo hacer sentadilla con barra correctamente","s":60,"c":"Galvistrainer"},{"v":"ZeOk4QLP0XQ","t":"Cómo hacer la sentadilla perfecta en 5 pasos thesaiyankiwi","s":60,"c":"The Saiyan Kiwi"}],"sentadilla_bulgara":[{"v":"-3d_wieNNHA","t":"Cómo realizar la Sentadilla Búlgara desde 0","s":59,"c":"Helys Fit"},{"v":"vNoLabSf5Mk","t":"La posición correcta en la sentadilla búlgara","s":13,"c":"Gym Topz"}],"sentadilla_frontal":[{"v":"SJ97z1-YVGs","t":"Técnica para Sentadilla Frontal","s":60,"c":"Dra. Isabel Junio"},{"v":"XhnCxbeMH_o","t":"Técnica de la sentadilla frontal o front squat","s":49,"c":"Juan Burpees"}],"sentadilla_goblet":[{"v":"lRYBbchqxtI","t":"HOW TO DO A GOBLET SQUAT","s":22,"c":"SquatCouple"},{"v":"ohgaarm26-c","t":"Sentadilla Goblet","s":60,"c":"mariadelastrainers"}],"sentadilla_hack":[{"v":"_K5qW_sENbg","t":"How to do HACK SQUAT MACHINE properlyComo hacer en correctamente","s":23,"c":"G Personal Trader"},{"v":"itmlCUc0P3k","t":"CÓMO HACER UNA SENTADILLA HACK - GO fit","s":39,"c":"GOfit"}],"sentadilla_sumo":[{"v":"6N38tqZ-6F4","t":"CONSEJOS PARA UNA SENTADILLA SUMO","s":60,"c":"Priscilla_bc"},{"v":"zOBlkYvFUQs","t":"Sentadilla sumo","s":38,"c":"Gala Trainer"}],"stairmaster":[{"v":"CEaPU7bVfjk","t":"How To Use the Stairmaster Correctly · Cómo Usar la Escaladora Correctamente","s":18,"c":"Santiago Tobon "},{"v":"6mYp_BNYD5Y","t":"The ONLY CORRECT way to use the stair master","s":12,"c":"TylerPath"}],"step_up":[{"v":"9XWxpd_kVko","t":"Técnica para Step-Ups o Subidas al Banco","s":55,"c":"Dra. Isabel Junio"},{"v":"yHyrYdgE36M","t":"COMO HACER STEP UP EN CAJON PARA GLÚTEOS","s":28,"c":"damaris Ximena07"}],"superman":[{"v":"MSO0yVf3Cvw","t":"EL EJERCICIO DEL SUPERMAN PARA TU ESPALDA","s":49,"c":"Marcos Sacristán | Fisioterapia a tu alcance"},{"v":"-oQLyLJb7tE","t":"Ejercicio Superman para dolor de espalda baja. Fortalece tu core, postura, estabilidad.","s":33,"c":"Quiropractico Monterrey"}],"trineo":[{"v":"JaYkEunOGU4","t":"CONSEJOS para el SLED PUSH.","s":60,"c":"Víctor Esparza | Entrenamiento híbrido"},{"v":"snlWx6b1qG4","t":"¿Te gustaría saber más de Sled push o empuje de trineo?","s":27,"c":"Eulises Hernández"}],"vacio_abdominal":[{"v":"vyva7cz7Nug","t":"Cómo hacer el “VACUUM” (vacío abdominal)⁉ -","s":50,"c":"Yeray Posing"},{"v":"epgNJZkdXSM","t":"Aprende como hacer hipopresivos, el vacío abdominal mejorará tu postura y aliviará tu dolor lumbar","s":50,"c":"yoelballega"}],"zancadas":[{"v":"Xcfs_3DMKlc","t":"(Cámara lenta) Cómo hacer una zancada correctamente - Besttraining","s":45,"c":"Bestcycling"},{"v":"m0ap8Io_kQs","t":"Cómo hacer ZANCADAS CORRECTAMENTE (para Glúteos)","s":33,"c":"Gluteoenforma"}],"zancadas_inversas":[{"v":"kz-UpxOKc0c","t":"ZANCADA INVERSA: ENFOQUE GLÚTEOS ! Desde cero!","s":34,"c":"Paula Suárez"},{"v":"m8lDdyiGtXc","t":"Zancadas alternas atrás","s":23,"c":"Coach Pablo Fraga"}]};
+// Se mantiene vacío por compatibilidad: ya nada decide el vídeo por código.
+var YOUTUBE_LINKS={};
 
-  // ── ESPALDA ────────────────────────────────────────────────────────────
-  'dominadas':[
-    {v:'eGo4IYlbE5g',t:'La dominada perfecta — hazla bien',s:272,c:'Calisthenic Movement'}
-  ],
-  'jalon-m':[
-    {v:'CAwf7n6Luuc',t:'Cómo hacer: jalón al pecho · 3 reglas de oro',s:341,c:'ScottHermanFitness'}
-  ],
-  'remo-barra':[
-    {v:'9efgcAjQe7E',t:'Cómo hacer: remo con barra inclinado',s:185,c:'ScottHermanFitness'},
-    {v:'qXrTDQG1oUQ',t:'Remo con barra: técnica para una espalda mayor',s:53,c:'Moorefitcoach'}
-  ],
-  'remo-cable':[
-    {v:'xQNrFHEMhI4',t:'Remo sentado en polea · guía de ejercicio',s:92,c:'Bodybuilding.com'}
-  ],
-  'remo-cable-m':[
-    {v:'xQNrFHEMhI4',t:'Remo sentado en polea · guía de ejercicio',s:92,c:'Bodybuilding.com'}
-  ],
-  'remo-uni':[
-    {v:'pYcpY20QaE8',t:'Cómo hacer: remo con mancuerna a una mano',s:140,c:'ScottHermanFitness'}
-  ],
-  'remo-uni-m':[
-    {v:'pYcpY20QaE8',t:'Cómo hacer: remo con mancuerna a una mano',s:140,c:'ScottHermanFitness'}
-  ],
-  'encogimientos':[
-    {v:'pqYr_lb04O4',t:'Cómo hacer: encogimientos con barra agarre ancho',s:86,c:'ScottHermanFitness'}
-  ],
+// ═══════════════════════════════════════════════════════════════════════════
+// VÍDEOS POR MOVIMIENTO — 5.0
+// ---------------------------------------------------------------------------
+// Antes el vídeo se buscaba por el CÓDIGO del ejercicio, y ese código
+// agrupaba movimientos distintos: los burpees, la bici estática y las battle
+// ropes compartían el código 'caminata' y mostraban un vídeo de caminar en
+// cinta; las flexiones mostraban press de banca; los encogimientos, remo con
+// barra. Ahora el vídeo se elige reconociendo el movimiento en el NOMBRE.
+//
+// Reglas:
+//  · El orden importa: van primero los patrones más específicos
+//    ("peso muerto rumano" antes que "peso muerto").
+//  · Si un ejercicio no encaja en ningún movimiento con vídeo verificado,
+//    NO se muestra vídeo. Es preferible a enseñar uno equivocado.
+//  · Todos los vídeos duran como máximo 60 segundos.
+// ═══════════════════════════════════════════════════════════════════════════
+var MOV_PATRONES = [
+  ['press_inclinado',      /press.*inclinad|inclinado.*press/],
+  ['press_declinado',      /press.*declinad/],
+  ['flexiones',            /flexion|push-?up/],
+  ['press_cerrado',        /agarre cerrado/],
+  ['press_maquina',        /hammer/],
+  ['press_hombro_mancuerna', /press (con )?mancuernas sentado|press militar sentado|press hombros mancuernas/],
+  ['press_arnold',         /arnold/],
+  ['press_militar',        /press militar|press hombros|press de hombros/],
+  ['press_mancuernas',     /press (con )?mancuernas|press (pecho|banca) mancuernas/],
+  ['press_banca',          /press (de )?banca|press pecho/],
+  ['aperturas_mancuernas', /aperturas con mancuernas/],
+  ['aperturas_cable',      /apertura|cruce de poleas/],
+  ['pajaros',              /pajaro|posterior|reverse peck/],
+  ['peck_deck',            /peck|contractor/],
+  ['fondos_banco',         /fondos en banco|dips en banco/],
+  ['fondos',               /fondos|dips/],
+  ['pullover_polea',       /pull-?over.*(polea|cable)/],
+  ['pullover_mancuerna',   /pull-?over/],
+  ['dominadas',            /dominada|pull-?up/],
+  ['jalon',                /jalon/],
+  ['remo_t',               /remo en t\b/],
+  ['remo_meadows',         /meadows/],
+  ['remo_pendlay',         /pendlay/],
+  ['remoergometro',        /remoerg|remo en maquina \(cardio\)/],
+  ['remo_menton',          /menton|upright/],
+  ['remo_barra',           /remo con barra/],
+  ['remo_unilateral',      /remo unilateral|kroc/],
+  ['remo_polea',           /remo (en )?(cable|polea|maquina)|remo cable/],
+  ['face_pull',            /face pull/],
+  ['encogimientos',        /encogimiento/],
+  ['superman',             /superman/],
+  ['hiperextensiones',     /hiperextension/],
+  ['buenos_dias',          /buenos dias|good morning/],
+  ['sentadilla_bulgara',   /bulgar/],
+  ['sentadilla_frontal',   /sentadilla frontal/],
+  ['sentadilla_goblet',    /goblet/],
+  ['peso_muerto_sumo',     /peso muerto sumo/],
+  ['sentadilla_sumo',      /sumo/],
+  ['sentadilla_hack',      /hack/],
+  ['box_jump',             /box jump|salto al cajon/],
+  ['sentadilla',           /sentadilla/],
+  ['prensa',               /prensa/],
+  ['zancadas_inversas',    /zancadas inversas/],
+  ['zancadas',             /zancada/],
+  ['step_up',              /step-?up/],
+  ['ext_cuadriceps',       /extension (de )?cuadriceps|extension cuadriceps/],
+  ['curl_nordico',         /nordico/],
+  ['curl_femoral_sentado', /curl femoral sentado/],
+  ['curl_femoral',         /curl femoral/],
+  ['pm_rumano_unilateral', /peso muerto (rumano )?a una pierna/],
+  ['pm_rumano',            /rumano/],
+  ['pm_kettlebell',        /peso muerto kettlebell/],
+  ['peso_muerto',          /peso muerto/],
+  ['gemelo_sentado',       /gemelo.*sentado/],
+  ['gemelo',               /gemelo/],
+  ['hip_thrust_unilateral', /hip thrust (unilateral|a una pierna)/],
+  ['hip_thrust',           /hip thrust/],
+  ['puente_gluteo',        /puente de gluteo/],
+  ['frog_pump',            /frog pump/],
+  ['abduccion_banda',      /abduccion.*banda/],
+  ['abduccion',            /abduccion|abductor/],
+  ['patada_gluteo',        /patada de gluteo/],
+  ['aduccion',             /aductor|aduccion/],
+  ['kettlebell_swing',     /kettlebell swing/],
+  ['elev_frontal',         /elevaciones frontales/],
+  ['elev_lateral_polea',   /laterales en polea/],
+  ['elev_lateral',         /elevaciones laterales|elevacion lateral/],
+  ['curl_martillo',        /martillo/],
+  ['curl_concentrado',     /concentrado/],
+  ['curl_predicador',      /predicador|scott/],
+  ['curl_arana',           /arana|spider/],
+  ['curl_inclinado',       /curl inclinado|banco inclinado/],
+  ['curl_polea',           /curl en polea|triceps polea/],
+  ['curl_ez',              /barra z|\bez\b/],
+  ['curl_barra',           /curl (con )?barra|curl biceps con barra/],
+  ['curl_mancuernas',      /curl/],
+  ['patada_triceps',       /patada de triceps/],
+  ['press_frances',        /press frances|skull/],
+  ['ext_triceps_cabeza',   /sobre (la )?cabeza/],
+  ['ext_triceps_polea',    /extension.*(triceps|cuerda|polea)|extension con cuerda/],
+  ['plancha_lateral',      /plancha lateral|core lateral/],
+  ['plancha_toques',       /toque de hombros/],
+  ['plancha',              /plancha/],
+  ['rueda_abdominal',      /rueda abdominal|ab wheel/],
+  ['elev_piernas_colgado', /colgado/],
+  ['elev_piernas',         /elevacion (de )?piernas/],
+  ['crunch_polea',         /crunch en polea/],
+  ['crunch',               /crunch/],
+  ['russian_twist',        /russian/],
+  ['pallof',               /pallof|antirotacion/],
+  ['dead_bug',             /dead bug/],
+  ['hollow',               /hollow/],
+  ['vacio_abdominal',      /vacio abdominal|bracing/],
+  ['burpees',              /burpee/],
+  ['comba',                /comba/],
+  ['battle_ropes',         /battle rope/],
+  ['air_bike',             /air bike|assault/],
+  ['stairmaster',          /escalera|stairmaster|escaladora/],
+  ['trineo',               /trineo|sled/],
+  ['paseo_granjero',       /granjero/],
+  ['bici_estatica',        /bicicleta estatica|intervalos bicicleta/],
+  ['eliptica',             /eliptica/],
+  ['caminata_inclinada',   /caminata inclinada|cinta inclinada|caminata en cinta/]
+];
 
-  // ── PIERNA ─────────────────────────────────────────────────────────────
-  'sentadilla':[
-    {v:'Uv_DKDl7EjA',t:'Checklist oficial de la sentadilla',s:565,c:'Squat University'},
-    {v:'MxsFDhcyFyE',t:'Sentadilla goblet — tutorial',s:191,c:'Buff Dudes'}
-  ],
-  'squat-barra-m':[
-    {v:'Uv_DKDl7EjA',t:'Checklist oficial de la sentadilla',s:565,c:'Squat University'}
-  ],
-  'squat-frontal':[
-    {v:'N4WGYDGu6bI',t:'Cómo hacer una sentadilla frontal con barra',s:44,c:'Elite Performance'},
-    {v:'tlfahNdNPPI',t:'Cómo hacer: sentadilla frontal (barra)',s:255,c:'ScottHermanFitness'}
-  ],
-  'squat-bulgara':[
-    {v:'uODWo4YqbT8',t:'Sentadilla búlgara en 3 pasos simples',s:55,c:'Davis Diley'},
-    {v:'2C-uNgKwPLE',t:'Cómo hacer: sentadilla búlgara',s:175,c:'ScottHermanFitness'}
-  ],
-  'squat-sumo':[
-    {v:'7BqURseCGSU',t:'Cómo hacer sentadilla sumo con mancuerna',s:32,c:'Elite Performance'}
-  ],
-  'goblet':[
-    {v:'MxsFDhcyFyE',t:'Sentadilla goblet — tutorial',s:191,c:'Buff Dudes'}
-  ],
-  'prensa':[
-    {v:'IZxyjW7MPJQ',t:'Cómo hacer: prensa de piernas sentado',s:155,c:'ScottHermanFitness'}
-  ],
-  'prensa-m':[
-    {v:'IZxyjW7MPJQ',t:'Cómo hacer: prensa de piernas sentado',s:155,c:'ScottHermanFitness'}
-  ],
-  'peso-muerto':[
-    {v:'op9kVnSso6Q',t:'El peso muerto — movimiento fundamental',s:57,c:'CrossFit'},
-    {v:'hCDzSR6bW10',t:'Checklist oficial del peso muerto (evita errores)',s:916,c:'ATHLEAN-X'}
-  ],
-  'peso-muerto-rum':[
-    {v:'d-hn_0sEpRQ',t:'Peso muerto rumano sin dolor de espalda',s:60,c:'Squat University'},
-    {v:'JCXUYuzwNrM',t:'Cómo hacer: peso muerto rumano (barra)',s:335,c:'ScottHermanFitness'},
-    {v:'FQKfr1YDhEk',t:'Peso muerto rumano con mancuernas',s:118,c:'ScottHermanFitness'}
-  ],
-  'peso-muerto-rum-m':[
-    {v:'FQKfr1YDhEk',t:'Peso muerto rumano con mancuernas',s:118,c:'ScottHermanFitness'},
-    {v:'d-hn_0sEpRQ',t:'Peso muerto rumano sin dolor de espalda',s:60,c:'Squat University'}
-  ],
-  'peso-muerto-kb':[
-    {v:'PrELOSH4E5s',t:'Peso muerto con kettlebell para principiantes',s:133,c:'The Durable Body'}
-  ],
-  'zancadas':[
-    {v:'QOVaHwm-Q6U',t:'Zancadas para principiantes',s:108,c:'BowFlex'}
-  ],
-  'zancadas-m':[
-    {v:'QOVaHwm-Q6U',t:'Zancadas para principiantes',s:108,c:'BowFlex'}
-  ],
-  'ext-cuad':[
-    {v:'YyvSfVjQeL0',t:'Cómo hacer: extensión de cuádriceps',s:160,c:'ScottHermanFitness'}
-  ],
-  'ext-cuad-m':[
-    {v:'YyvSfVjQeL0',t:'Cómo hacer: extensión de cuádriceps',s:160,c:'ScottHermanFitness'}
-  ],
-  'curl-fem':[
-    {v:'1Tq3QdYUuHs',t:'Cómo hacer: curl femoral tumbado',s:98,c:'ScottHermanFitness'}
-  ],
-  'curl-fem-m':[
-    {v:'1Tq3QdYUuHs',t:'Cómo hacer: curl femoral tumbado',s:98,c:'ScottHermanFitness'}
-  ],
-  'gemelo-pie':[
-    {v:'gwLzBJYoWlI',t:'Cómo hacer elevaciones de gemelos',s:139,c:'LIVESTRONG'}
-  ],
-  'gemelo-m':[
-    {v:'gwLzBJYoWlI',t:'Cómo hacer elevaciones de gemelos',s:139,c:'LIVESTRONG'}
-  ],
+function _plegarNombre(s){
+  return String(s||'').toLowerCase()
+    .replace(/[áàä]/g,'a').replace(/[éèë]/g,'e').replace(/[íìï]/g,'i')
+    .replace(/[óòö]/g,'o').replace(/[úùü]/g,'u').replace(/ñ/g,'n')
+    .replace(/^[a-z][0-9]?\s*·\s*/,'');   // quita prefijos de superserie "A1 · "
+}
+function movimientoDe(nombre){
+  var n=_plegarNombre(nombre);
+  if(!n) return null;
+  for(var i=0;i<MOV_PATRONES.length;i++){
+    if(MOV_PATRONES[i][1].test(n)) return MOV_PATRONES[i][0];
+  }
+  return null;
+}
+window.movimientoDe=movimientoDe;
 
-  // ── GLÚTEO ─────────────────────────────────────────────────────────────
-  'hip-thrust':[
-    {v:'xDmFkJxPzeM',t:'Hip thrust con técnica perfecta',s:432,c:'Jeff Nippard'}
-  ],
-  'hip-thrust-m':[
-    {v:'xDmFkJxPzeM',t:'Hip thrust con técnica perfecta',s:432,c:'Jeff Nippard'}
-  ],
-  'hip-thrust-fb-m':[
-    {v:'xDmFkJxPzeM',t:'Hip thrust con técnica perfecta',s:432,c:'Jeff Nippard'}
-  ],
-  'abduccion':[
-    {v:'2b97cvyH9sE',t:'Cómo hacer: abducción de cadera en máquina',s:119,c:'ScottHermanFitness'}
-  ],
-  'aduccion':[
-    {v:'GmRSV_n2E_0',t:'Cómo hacer: aducción de cadera en máquina',s:139,c:'ScottHermanFitness'}
-  ],
-
-  // ── HOMBRO ─────────────────────────────────────────────────────────────
-  'press-militar':[
-    {v:'2yjwXTZQDDI',t:'Cómo hacer: press militar de pie con barra',s:168,c:'ScottHermanFitness'}
-  ],
-  'press-hom-m':[
-    {v:'2yjwXTZQDDI',t:'Cómo hacer: press militar de pie con barra',s:168,c:'ScottHermanFitness'}
-  ],
-  'elev-lat':[
-    {v:'3VcKaXpzqRo',t:'Cómo hacer: elevaciones laterales con mancuerna',s:115,c:'ScottHermanFitness'},
-    {v:'Kqdd2kry4ck',t:'Elevación lateral — tutorial de 2 minutos',s:91,c:'ScottHermanFitness'}
-  ],
-  // OJO: esta clave apunta a FACE PULL, no a elevaciones laterales.
-  // El video anterior (V7dLqBSkCEY) estaba eliminado de YouTube.
-  'elev-lat-m':[
-    {v:'rep-qVOkqgk',t:'Cómo hacer: face pull',s:162,c:'ScottHermanFitness'}
-  ],
-  'pajaros':[
-    {v:'Yzah0rjvFQ8',t:'El mejor ejercicio para deltoides posterior',s:82,c:'ScottHermanFitness'}
-  ],
-
-  // ── BRAZO ──────────────────────────────────────────────────────────────
-  'curl-barra':[
-    {v:'kwG2ipFRgfo',t:'Cómo hacer un curl con barra',s:119,c:'Howcast'}
-  ],
-  'curl-m':[
-    {v:'kwG2ipFRgfo',t:'Cómo hacer un curl con barra',s:119,c:'Howcast'},
-    {v:'ICAXJVmOJik',t:'Corregido en 60 segundos: curl con mancuerna',s:55,c:'ScottHermanFitness'}
-  ],
-  'curl-conc':[
-    {v:'Jvj2wV0vOYU',t:'Cómo hacer: curl concentrado con mancuerna',s:100,c:'ScottHermanFitness'}
-  ],
-  'curl-martillo':[
-    {v:'zC3nLlEvin4',t:'Cómo hacer: curl martillo con mancuerna',s:122,c:'ScottHermanFitness'}
-  ],
-  'ext-polea':[
-    {v:'vB5OHsJ3EME',t:'Cómo hacer: extensión de tríceps en polea con cuerda',s:93,c:'ScottHermanFitness'}
-  ],
-  'ext-tri-m':[
-    {v:'vB5OHsJ3EME',t:'Cómo hacer: extensión de tríceps en polea con cuerda',s:93,c:'ScottHermanFitness'}
-  ],
-  'press-frances':[
-    {v:'znH-l4vZPDs',t:'El mejor ejercicio para tríceps grandes',s:100,c:'ScottHermanFitness'}
-  ],
-
-  // ── CORE ───────────────────────────────────────────────────────────────
-  'plancha':[
-    {v:'pSHjTRCQxIw',t:'Cómo hacer: plancha frontal',s:77,c:'ScottHermanFitness'}
-  ],
-  'plancha-m':[
-    {v:'pSHjTRCQxIw',t:'Cómo hacer: plancha frontal',s:77,c:'ScottHermanFitness'}
-  ],
-  'plancha-lat':[
-    {v:'NXr4Fw8q60o',t:'Cómo hacer una plancha lateral',s:114,c:'Howcast'}
-  ],
-  'crunch-m':[
-    {v:'00fTaKoQhG4',t:'Rutina de abdominales que no falla',s:60,c:'ScottHermanFitness'},
-    {v:'5ER5Of4MOPI',t:'Cómo hacer crunches — para principiantes',s:214,c:'Mind Body Soul'}
-  ],
-  'elev-piernas':[
-    {v:'hdng3Nm1x_E',t:'Cómo hacer: elevación de piernas colgado',s:138,c:'ScottHermanFitness'}
-  ],
-
-  // ── CARDIO Y MOVILIDAD ─────────────────────────────────────────────────
-  'caminata':[
-    {v:'MJ1Jdu1QTUk',t:'Por qué caminar en cinta inclinada quema más grasa',s:79,c:'Eric Roberts'}
-  ],
-  'caminar':[
-    {v:'MJ1Jdu1QTUk',t:'Por qué caminar en cinta inclinada quema más grasa',s:79,c:'Eric Roberts'}
-  ],
-  'caminata-m':[
-    {v:'MJ1Jdu1QTUk',t:'Por qué caminar en cinta inclinada quema más grasa',s:79,c:'Eric Roberts'}
-  ],
-  'eliptica':[
-    {v:'sHMemwz_HPU',t:'Cómo usar la elíptica',s:92,c:'Planet Fitness'},
-    {v:'YWfswVvOaiI',t:'Elíptica 101: técnica y consejos',s:121,c:'Sunny Health & Fitness'}
-  ],
-  'cardio-sab':[
-    {v:'sHMemwz_HPU',t:'Cómo usar la elíptica',s:92,c:'Planet Fitness'}
-  ],
-  'movilidad':[
-    {v:'LKSC_KujZ4g',t:'Calentamiento dinámico de 5 minutos',s:340,c:'Kaleigh Cohen Strength'},
-    {v:'5jOkxW1iBWk',t:'Calentamiento dinámico rápido en casa',s:302,c:'The Gainz Center'}
-  ]
-};
-
-// Compatibilidad: el resto del codigo sigue leyendo YOUTUBE_LINKS[id] como
-// una URL suelta. Se deriva del catalogo para no duplicar datos.
-var YOUTUBE_LINKS=(function(){
-  var m={};
-  Object.keys(VIDEOS_EJ).forEach(function(k){
-    if(VIDEOS_EJ[k] && VIDEOS_EJ[k].length) m[k]='https://www.youtube.com/watch?v='+VIDEOS_EJ[k][0].v;
-  });
-  return m;
-})();
-
-function getVideosEj(id){ return VIDEOS_EJ[id] || []; }
+// id se mantiene en la firma por compatibilidad, pero ya no decide nada:
+// el mismo id lo comparten ejercicios distintos.
+function getVideosEj(id, nombre){
+  var mov=movimientoDe(nombre);
+  return (mov && VIDEOS_MOV[mov]) ? VIDEOS_MOV[mov] : [];
+}
 window.getVideosEj=getVideosEj;
+
+function urlVideoDe(nombre){
+  var v=getVideosEj(null,nombre)[0];
+  return v ? 'https://www.youtube.com/watch?v='+v.v : '';
+}
+window.urlVideoDe=urlVideoDe;
+
+function abrirVideoEj(nombre){
+  var v=getVideosEj(null,nombre)[0];
+  if(!v) return;
+  openYouTube('https://www.youtube.com/watch?v='+v.v, v.t, v.c);
+}
+window.abrirVideoEj=abrirVideoEj;
+
 function fmtDurVideo(s){
   s=parseInt(s)||0;
   var m=Math.floor(s/60), r=s%60;
-  return m ? (m+':'+(r<10?'0':'')+r) : (r+'s');
+  return m ? (m+':'+(r<10?'0':'')+r) : (r+' s');
 }
 window.fmtDurVideo=fmtDurVideo;
 
@@ -3131,7 +3405,7 @@ function showGuia(nombre,id){
       // con su duracion y canal reales, para que el usuario elija (el corto
       // para repasar sobre la marcha, el largo para aprender la tecnica).
       +(function(){
-        var vids=getVideosEj(id);
+        var vids=getVideosEj(id,nombre);
         if(!vids.length) return '';
         return '<div style="margin-top:11px;display:flex;flex-direction:column;gap:6px;">'
           + vids.map(function(vd){
@@ -3185,6 +3459,7 @@ $('go-register').addEventListener('click',function(){obShow('s1');});
 $('s1-next').addEventListener('click',function(){
   if(!ONB.genero){toast('Elige tu género','var(--red)');return;}
   if(!$('ob-nombre').value.trim()||!$('ob-email').value.trim()||!$('ob-pw').value){toast('Completa todos los campos','var(--red)');return;}
+  if($('ob-pw').value.length<8){toast('La contraseña debe tener al menos 8 caracteres','var(--red)');return;}
   obShow('s2');
 });
 $('s2-back').addEventListener('click',function(){obShow('s1');});
@@ -3252,7 +3527,9 @@ function crearPerfil(rests){
 
   // ── Sincronizar con backend en la nube (si está configurado) ──
   var gasUrl=localStorage.getItem('specimen_gas_url')||'';
-  if(gasUrl){
+  if(nubeWorker()){
+    nubeRegistrar(u,$('ob-pw').value).catch(function(e){diagLog('NUBE-REGISTRO',e.message);});
+  } else if(gasUrl){
     fetch(gasUrl,{method:'POST',body:(function(){
       var fd=new FormData();
       fd.append('data',JSON.stringify({
@@ -3300,6 +3577,7 @@ $('s4-finish').addEventListener('click',function(){
 $('btn-login').addEventListener('click',function(){
   var email=$('lg-email').value.trim(), pw=$('lg-pw').value;
   var h=hashStr(pw);
+  if(nubeWorker()){ entrarConNube(email,pw,h); return; }
   var u=APP.users.find(function(x){return x.email===email&&x.pw===h;});
   if(u){
     APP.cur=APP.users.indexOf(u);
@@ -3380,6 +3658,233 @@ $('btn-login').addEventListener('click',function(){
   });
 });
 
+// ═══════════════════════════════════════════════════════════════════════════
+// CONEXIÓN CON EL WORKER DE CLOUDFLARE — 5.0
+// ---------------------------------------------------------------------------
+// Interruptor: mientras API_BASE esté vacío, la app sigue usando el Apps
+// Script como siempre. El día del despliegue se rellena con la dirección del
+// Worker y todo pasa a la API nueva, sin tocar nada más.
+//
+// La sesión viaja como token en la cabecera Authorization, no como cookie:
+// la app está en github.io y la API en workers.dev, y Safari en iPhone
+// bloquea las cookies entre dominios distintos.
+//
+// MIGRACIÓN SIN EXPORTAR NADA A MANO: si alguien inicia sesión y su cuenta
+// aún no existe en Cloudflare, se validan sus credenciales contra el Apps
+// Script antiguo; si son correctas, se crea la cuenta nueva con la misma
+// contraseña y se sube su historial. Cada usuario se migra solo, al entrar.
+// ═══════════════════════════════════════════════════════════════════════════
+var API_BASE = '';   // p. ej. 'https://specimen-api.<cuenta>.workers.dev'
+
+function nubeWorker(){ return !!API_BASE; }
+function _tokenApi(){ try{ return localStorage.getItem('specimen_token')||''; }catch(e){ return ''; } }
+function _guardarTokenApi(t){ try{ if(t) localStorage.setItem('specimen_token',t); else localStorage.removeItem('specimen_token'); }catch(e){} }
+function usarIAServidor(){ return nubeWorker() && !!_tokenApi() && !ANTHROPIC_KEY && !GEMINI_KEY; }
+window.nubeWorker=nubeWorker; window.usarIAServidor=usarIAServidor;
+
+async function api(ruta, cuerpo){
+  var tk=_tokenApi();
+  var cab={'Content-Type':'application/json'};
+  if(tk) cab.Authorization='Bearer '+tk;
+  var r=await fetch(API_BASE+ruta,{method:cuerpo?'POST':'GET',headers:cab,body:cuerpo?JSON.stringify(cuerpo):undefined});
+  var d={}; try{ d=await r.json(); }catch(e){}
+  if(d && d.token) _guardarTokenApi(d.token);
+  if(r.status===401 && ruta!=='/api/login' && ruta!=='/api/registro') _guardarTokenApi('');
+  return {estado:r.status, d:d||{}};
+}
+window.api=api;
+
+// Lo que se guarda del perfil. Los planes se regeneran en el dispositivo,
+// así que no viajan (salvo el que generó la IA, que no se puede recalcular).
+function _perfilParaNube(u){
+  var p={};
+  Object.keys(u||{}).forEach(function(k){
+    if(['sessions','measures','pw','planNut','planEj','cloudUid','driveFolderId'].indexOf(k)<0) p[k]=u[k];
+  });
+  p.rests=normalizarRests(u.rests||[]);
+  return p;
+}
+function _consentimientoLocal(){
+  var r={}; try{ r=JSON.parse(localStorage.getItem(LEGAL_KEY)||'{}'); }catch(e){}
+  return {terminos:!!r.terminos, salud:!!r.salud, aviso:!!r.aviso, version:r.version||LEGAL_VERSION};
+}
+
+// Construye el usuario local a partir de lo que devuelve /api/datos.
+function _usuarioDesdeNube(d, h){
+  var u=Object.assign({}, d.perfil||{});
+  u.email=d.email; u.nombre=d.nombre||u.nombre||''; u.pw=h; u.plan=d.plan||'free';
+  u.sessions=d.sessions||[]; u.measures=d.measures||[];
+  u.hydration=u.hydration||{}; u.compraMarcados=u.compraMarcados||{};
+  u.rests=normalizarRests(u.rests||[]);
+  u.macros=calcMacros(u);
+  u.planEj=getPlanEjercicio(u);
+  u.planNut=getPlanNutricion(u,u.macros,u.rests);
+  u.iaUso=d.ia||null;
+  return u;
+}
+
+// Alta en el Worker (usado al crear el perfil).
+async function nubeRegistrar(u, password){
+  var r=await api('/api/registro',{email:u.email,password:password,nombre:u.nombre,perfil:_perfilParaNube(u),consentimiento:_consentimientoLocal()});
+  if(r.d.ok) toast('✓ Cuenta creada en la nube');
+  else diagLog('NUBE-REGISTRO', r.d.error||('estado '+r.estado));
+  return r;
+}
+
+// Entrada con migración automática desde el Apps Script.
+async function nubeEntrar(email, password){
+  var r=await api('/api/login',{email:email,password:password});
+  if(r.estado===401){
+    // ¿Cuenta antigua? Se validan las credenciales en el backend anterior.
+    var gas=localStorage.getItem('specimen_gas_url')||'';
+    if(gas){
+      try{
+        var fd=new FormData();
+        fd.append('data',JSON.stringify({action:'getAll',email:email,password:password}));
+        var g=await (await fetch(gas,{method:'POST',body:fd})).json();
+        if(g && g.ok){
+          var perfil={nombre:g.nombre,genero:g.genero,fnac:g.fechaNacimiento,peso:g.peso,alt:g.altura,obj:g.objetivo,
+            horaEntreno:g.horaEntreno,trabajo:g.trabajo,grasa:g.grasa,cin:g.cin,cue:g.cue,cad:g.cad,rests:g.rests||[],
+            pais:g.pais,dieta:g.dieta,act:g.act,exp:g.exp,deficit:g.deficit};
+          var alta=await api('/api/registro',{email:email,password:password,nombre:g.nombre,perfil:perfil,consentimiento:_consentimientoLocal()});
+          if(alta.d.ok){
+            var ses=(g.sessions||[]).map(function(s){return {id:s.clienteId||s.id,fecha:s.fecha,tipo:s.tipo,dur:s.duracion,rpe:s.rpe,fat:s.fatiga,notas:s.notas,peso:s.pesoCorporal,sem:s.semana,meso:s.meso,exs:s.ejercicios||[]};});
+            var med=(g.measures||[]).map(function(m){return {id:m.clienteId||m.id,fecha:m.fecha,peso:m.peso,grasa:m.grasaPct,cin:m.cintura,cue:m.cuello,cad:m.cadera,pec:m.pecho,bra:m.brazo,mus:m.muslo,pan:m.pantorrilla,fotoUrl:m.fotoUrl,notas:m.notas};});
+            await api('/api/sync',{sessions:ses,measures:med});
+            toast('✓ Cuenta trasladada al sistema nuevo');
+            r=await api('/api/login',{email:email,password:password});
+          }
+        }
+      }catch(e){ diagLog('NUBE-MIGRAR', e.message); }
+    }
+  }
+  if(!r.d.ok) return {ok:false, error:r.d.error||'Email o contraseña incorrectos', estado:r.estado};
+  var datos=await api('/api/datos');
+  return datos.d.ok ? {ok:true, datos:datos.d} : {ok:false, error:'No se pudieron leer tus datos'};
+}
+window.nubeEntrar=nubeEntrar;
+
+// Sube perfil, sesiones y medidas. La API deduplica por id, así que
+// reenviar todo es seguro.
+async function nubeSincronizar(silencioso, soloPerfil){
+  var u=U();
+  if(!u || !_tokenApi()){
+    if(!silencioso) toast('Inicia sesión para sincronizar con la nube','var(--amber)');
+    return null;
+  }
+  try{
+    var cuerpo={perfil:_perfilParaNube(u)};
+    if(!soloPerfil){ cuerpo.sessions=u.sessions||[]; cuerpo.measures=u.measures||[]; }
+    var r=await api('/api/sync',cuerpo);
+    if(r.d.ok){ u.ultimaSync=new Date().toISOString(); saveAll(); if(!silencioso) toast('✓ Sincronizado con la nube'); }
+    else if(r.estado===401){ ofrecerVinculoNube(true); }
+    else if(!silencioso) toast('No se pudo sincronizar','var(--red)');
+    return r.d;
+  }catch(e){
+    diagLog('NUBE-SYNC', e.message);
+    if(!silencioso) toast('Sin conexión — se sincronizará más tarde','var(--amber)');
+    return null;
+  }
+}
+window.nubeSincronizar=nubeSincronizar;
+
+// IA a través del servidor: la clave es del servidor y el cupo, del plan.
+async function iaProxy(op){
+  var r=await api('/api/ia',{prompt:op.prompt,system:op.system,messages:op.messages,max_tokens:op.max_tokens||2000});
+  if(r.d.ok){
+    var u=U(); if(u){ u.iaUso={usadas:r.d.usadas,limite:r.d.limite}; saveAll(); }
+    return r.d.texto||'';
+  }
+  if(r.d.error==='cupo_agotado') throw new Error((r.d.mensaje||'Has agotado tus análisis de este mes')+' Se renuevan el día 1.');
+  throw new Error(r.d.error||'La IA no respondió');
+}
+window.iaProxy=iaProxy;
+
+// Usuarios que ya estaban dentro de la app: se les pide la contraseña UNA
+// vez para vincular su cuenta con el sistema nuevo y subir su historial.
+function ofrecerVinculoNube(caducada){
+  if(!nubeWorker() || _tokenApi() || document.getElementById('banner-nube')) return;
+  var u=U(); if(!u || !u.email) return;
+  var b=document.createElement('div');
+  b.id='banner-nube';
+  b.style.cssText='position:fixed;left:12px;right:12px;bottom:calc(64px + env(safe-area-inset-bottom));z-index:420;background:var(--bg2);border:1px solid var(--acc);border-radius:12px;padding:12px 14px;box-shadow:0 4px 20px rgba(0,0,0,.5);';
+  b.innerHTML='<div style="font-size:13px;font-weight:700;color:var(--acc2);margin-bottom:4px;">☁️ '+(caducada?'Tu sesión en la nube caducó':'Protege tu historial en la nube')+'</div>'
+    +'<div style="font-size:11px;color:var(--t2);line-height:1.5;margin-bottom:9px;">Introduce tu contraseña para vincular tu cuenta. Tu historial se guardará de forma segura y lo recuperarás en cualquier dispositivo.</div>'
+    +'<input type="password" id="banner-nube-pw" placeholder="Tu contraseña" style="width:100%;margin-bottom:8px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:9px 11px;font-size:14px;">'
+    +'<div style="display:flex;gap:8px;"><button class="btn btn-acc" style="flex:1;" onclick="vincularNube()">Vincular</button>'
+    +'<button class="btn btn-ghost" onclick="document.getElementById(\'banner-nube\').remove()">Ahora no</button></div>'
+    +'<div id="banner-nube-err" style="font-size:11px;color:var(--red);margin-top:6px;"></div>';
+  document.body.appendChild(b);
+}
+window.ofrecerVinculoNube=ofrecerVinculoNube;
+
+async function vincularNube(){
+  var u=U(); var pw=($('banner-nube-pw')||{}).value||'';
+  var err=$('banner-nube-err');
+  if(!pw){ if(err) err.textContent='Escribe tu contraseña'; return; }
+  if(err) err.textContent='Conectando...';
+  try{
+    var r=await nubeEntrar(u.email,pw);
+    if(!r.ok && r.estado===401){
+      // Cuenta que nunca estuvo en ninguna nube: se crea ahora.
+      if(pw.length<8){ if(err) err.textContent='La contraseña debe tener al menos 8 caracteres'; return; }
+      var alta=await nubeRegistrar(u,pw);
+      if(!alta.d.ok){ if(err) err.textContent=alta.d.error||'No se pudo crear la cuenta'; return; }
+      r={ok:true};
+    }
+    if(!r.ok){ if(err) err.textContent=r.error; return; }
+    // Se une lo que hay en el móvil con lo que había en la nube.
+    if(r.datos){
+      u.sessions=fusionarPorId(u.sessions||[], r.datos.sessions||[]);
+      u.measures=fusionarPorId(u.measures||[], r.datos.measures||[]);
+    }
+    saveAll();
+    await nubeSincronizar(true);
+    var b=document.getElementById('banner-nube'); if(b) b.remove();
+    toast('✓ Cuenta vinculada · historial a salvo en la nube');
+  }catch(e){ diagLog('NUBE-VINCULAR',e.message); if(err) err.textContent='Sin conexión. Inténtalo más tarde.'; }
+}
+window.vincularNube=vincularNube;
+
+// Pantalla de inicio de sesión con el Worker activo. La nube manda; si no
+// hay conexión y la contraseña coincide con la guardada en el dispositivo,
+// se entra en local para no dejar a nadie fuera en el gimnasio sin cobertura.
+async function entrarConNube(email, pw, h){
+  var err=$('lg-err'), btn=$('btn-login');
+  var mostrar=function(t){ if(err){ err.textContent=t; err.style.display='block'; } };
+  if(err) err.style.display='none';
+  if(btn){ btn.disabled=true; btn.textContent='Entrando...'; }
+  try{
+    var r=await nubeEntrar(email,pw);
+    if(!r.ok){ mostrar(r.error); return; }
+    var nu=_usuarioDesdeNube(r.datos,h);
+    var idx=APP.users.findIndex(function(x){ return String(x.email||'').toLowerCase()===String(nu.email||'').toLowerCase(); });
+    if(idx>=0){
+      nu.sessions=fusionarPorId(APP.users[idx].sessions||[], nu.sessions);
+      nu.measures=fusionarPorId(APP.users[idx].measures||[], nu.measures);
+      nu.hydration=APP.users[idx].hydration||nu.hydration;
+      APP.users[idx]=nu; APP.cur=idx;
+    } else { APP.users.push(nu); APP.cur=APP.users.length-1; }
+    saveAll();
+    $('onb').style.display='none';
+    initApp();
+    nubeSincronizar(true);
+    toast('✓ Recuperado: '+nu.sessions.length+' sesiones · '+nu.measures.length+' medidas');
+  }catch(e){
+    diagLog('NUBE-LOGIN',e.message);
+    var u=APP.users.find(function(x){ return String(x.email||'').toLowerCase()===String(email||'').toLowerCase() && x.pw===h; });
+    if(u){
+      APP.cur=APP.users.indexOf(u); saveAll();
+      $('onb').style.display='none'; initApp();
+      toast('Sin conexión: entras con los datos de este dispositivo','var(--amber)');
+    } else mostrar('Sin conexión y sin datos de este usuario en el dispositivo');
+  }finally{
+    if(btn){ btn.disabled=false; btn.textContent='Entrar →'; }
+  }
+}
+window.entrarConNube=entrarConNube;
+
+
 // ── SINCRONIZACIÓN CON LA NUBE 5.0 ─────────────────────────────────────────
 // El backend siempre supo guardar sesiones (saveSession/getSessions existian
 // desde la v1) pero la app nunca las enviaba. Resultado: el login prometia
@@ -3408,6 +3913,7 @@ window.fusionarPorId = fusionarPorId;
 // Sube en bloque lo que aun no esta en la nube. Una sola peticion en vez de
 // una por sesion, para no agotar la cuota de Apps Script con historiales largos.
 function syncNube(silencioso){
+  if(nubeWorker()) return nubeSincronizar(silencioso);
   var u = U();
   var gasUrl = localStorage.getItem('specimen_gas_url') || '';
   if(!gasUrl || !u || !u.cloudUid){
@@ -3449,6 +3955,7 @@ window.syncNube = syncNube;
 
 // Empuja los cambios de perfil (incluidas las alergias) a la nube.
 function syncPerfil(){
+  if(nubeWorker()){ nubeSincronizar(true,true); return; }
   var u = U();
   var gasUrl = localStorage.getItem('specimen_gas_url') || '';
   if(!gasUrl || !u || !u.cloudUid) return;
@@ -3495,6 +4002,7 @@ function dedupUsers(){
 }
 
 function initApp(){
+  setTimeout(function(){ try{ ofrecerVinculoNube(); }catch(e){} }, 1500);
   dedupUsers();
   updateUserSwitcher();
   checkSesionDraft();
@@ -3624,6 +4132,7 @@ function initApp(){
   }
   $('btn-logout').addEventListener('click',function(){
     if(confirm('¿Cerrar sesión? Tu progreso se mantiene guardado.')){
+      if(nubeWorker() && _tokenApi()){ api('/api/logout',{}).catch(function(){}); _guardarTokenApi(''); }
       APP.users=[];APP.cur=0;
       // Keep users data but clear session
       var saved=localStorage.getItem(STORE_KEY);
@@ -3855,7 +4364,7 @@ function renderPlanEj(){
           +'</div>'
         +'</div>'
         +'<button onclick="swapPlanEx(event,'+i+','+exIdx+',\''+emus+'\')" title="Cambiar ejercicio" style="flex-shrink:0;width:30px;height:30px;border-radius:50%;background:var(--bg3);border:1px solid var(--border2);color:var(--t3);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-left:4px;">🔄</button>'
-        +(YOUTUBE_LINKS[e.id||'']?'<button onclick="openYouTube(\''+YOUTUBE_LINKS[e.id||'']+'\')" title="Ver en YouTube" style="flex-shrink:0;width:30px;height:30px;border-radius:50%;background:#FF0000;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-left:0px;padding:0;"><svg width="12" height="9" viewBox="0 0 16 12" fill="white"><path d="M15.7 1.9A2 2 0 0 0 14.3.5C13 .1 8 .1 8 .1S3 .1 1.7.5A2 2 0 0 0 .3 1.9C0 3.2 0 6 0 6s0 2.8.3 4.1A2 2 0 0 0 1.7 11.5C3 11.9 8 11.9 8 11.9s5 0 6.3-.4a2 2 0 0 0 1.4-1.4C16 8.8 16 6 16 6s0-2.8-.3-4.1zM6.4 8.5V3.5l4.2 2.5-4.2 2.5z"/></svg></button>':'')
+        +(urlVideoDe(e.n)?'<button onclick="abrirVideoEj(\''+ename+'\')" title="Ver técnica en vídeo" style="flex-shrink:0;width:30px;height:30px;border-radius:50%;background:#FF0000;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-left:0px;padding:0;"><svg width="12" height="9" viewBox="0 0 16 12" fill="white"><path d="M15.7 1.9A2 2 0 0 0 14.3.5C13 .1 8 .1 8 .1S3 .1 1.7.5A2 2 0 0 0 .3 1.9C0 3.2 0 6 0 6s0 2.8.3 4.1A2 2 0 0 0 1.7 11.5C3 11.9 8 11.9 8 11.9s5 0 6.3-.4a2 2 0 0 0 1.4-1.4C16 8.8 16 6 16 6s0-2.8-.3-4.1zM6.4 8.5V3.5l4.2 2.5-4.2 2.5z"/></svg></button>':'')
         +'</div>';
     }).join('');
 
@@ -3890,6 +4399,8 @@ function renderPlanNut(){
   // 5.0: red de seguridad — avisa si algun alimento del plan choca con una
   // alergia declarada. Si esto salta, hay una etiqueta mal puesta en el catalogo.
   var _rst=normalizarRests(u.rests||[]);
+  // Planes guardados antes del saneador: se corrigen al mostrarlos.
+  if(_rst.length && u.planNut){ sanearPlanAlergenos(u.planNut,_rst,u.pais||'es',_semillaMenu(u)); saveAll(); }
   var _avisos=validarPlanAlergenos(u.planNut||[], _rst);
   var _banner='';
   if(_rst.length){
@@ -4184,8 +4695,8 @@ function renderExList(){
     var pct=ex.series.length?Math.round(seriesDone/ex.series.length*100):0;
     var card=document.createElement('div');
     card.className='ex-card';
-    var ytUrl=YOUTUBE_LINKS[ex.id||'']||'';
-    var ytBtn=ytUrl?'<button onclick="openYouTube(\''+ytUrl+'\')" title="Ver en YouTube" style="flex-shrink:0;width:20px;height:20px;background:#FF0000;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;border:none;cursor:pointer;padding:0;vertical-align:middle;margin-left:6px;"><svg width="9" height="7" viewBox="0 0 16 12" fill="white"><path d="M15.7 1.9A2 2 0 0 0 14.3.5C13 .1 8 .1 8 .1S3 .1 1.7.5A2 2 0 0 0 .3 1.9C0 3.2 0 6 0 6s0 2.8.3 4.1A2 2 0 0 0 1.7 11.5C3 11.9 8 11.9 8 11.9s5 0 6.3-.4a2 2 0 0 0 1.4-1.4C16 8.8 16 6 16 6s0-2.8-.3-4.1zM6.4 8.5V3.5l4.2 2.5-4.2 2.5z"/></svg></button>':'';
+    var ytUrl=urlVideoDe(ex.n);
+    var ytBtn=ytUrl?'<button onclick="event.stopPropagation();abrirVideoEj(this.dataset.n)" data-n="'+String(ex.n||'').replace(/"/g,'&quot;')+'" title="Ver técnica en vídeo" style="flex-shrink:0;width:20px;height:20px;background:#FF0000;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;border:none;cursor:pointer;padding:0;vertical-align:middle;margin-left:6px;"><svg width="9" height="7" viewBox="0 0 16 12" fill="white"><path d="M15.7 1.9A2 2 0 0 0 14.3.5C13 .1 8 .1 8 .1S3 .1 1.7.5A2 2 0 0 0 .3 1.9C0 3.2 0 6 0 6s0 2.8.3 4.1A2 2 0 0 0 1.7 11.5C3 11.9 8 11.9 8 11.9s5 0 6.3-.4a2 2 0 0 0 1.4-1.4C16 8.8 16 6 16 6s0-2.8-.3-4.1zM6.4 8.5V3.5l4.2 2.5-4.2 2.5z"/></svg></button>':'';
     // Header del ejercicio
     var hdr='<div class="ex-card-hdr">'
       +'<div style="flex:1;min-width:0;">'
@@ -4536,6 +5047,56 @@ function renderMedidas(){
 }
 
 // ── IA ANÁLISIS SEMANAL ───────────────────────
+// Parser de la respuesta IA, a nivel superior para poder probarlo aislado.
+var _ETIQUETAS = [
+  ['nivel',      ['NIVEL','LEVEL']],
+  ['resumen',    ['RESUMEN','ANALISIS','ANÁLISIS','SUMMARY']],
+  ['entreno1',   ['ENTRENO1','ENTRENO 1','ENTRENAMIENTO1','ENTRENAMIENTO 1','AJUSTE1','AJUSTE 1','TRAINING1','TRAINING 1']],
+  ['entreno2',   ['ENTRENO2','ENTRENO 2','ENTRENAMIENTO2','ENTRENAMIENTO 2','AJUSTE2','AJUSTE 2','TRAINING2','TRAINING 2']],
+  ['nutricion1', ['NUTRICION1','NUTRICION 1','NUTRICIÓN1','NUTRICIÓN 1','NUTRITION1','NUTRITION 1']],
+  ['nutricion2', ['NUTRICION2','NUTRICION 2','NUTRICIÓN2','NUTRICIÓN 2','NUTRITION2','NUTRITION 2']],
+  ['plan',       ['PLAN','DIRECTIVA','RECOMENDACION','RECOMENDACIÓN','NEXT WEEK']]
+];
+function _normEtq(s){
+  return String(s||'').toUpperCase()
+    .replace(/[ÁÀÄÂ]/g,'A').replace(/[ÉÈËÊ]/g,'E').replace(/[ÍÌÏÎ]/g,'I')
+    .replace(/[ÓÒÖÔ]/g,'O').replace(/[ÚÙÜÛ]/g,'U').replace(/\s+/g,' ').trim();
+}
+function parsearIA(texto){
+  var out = {};
+  var lineas = String(texto||'').split(/\r?\n/);
+  var actual = null;
+  lineas.forEach(function(linea){
+    // 5.0: admite dígitos (ENTRENO1, NUTRICION2...) y la negrita de Markdown
+    // alrededor de la etiqueta. Sin los dígitos, los ajustes de la IA nunca
+    // se reconocían y llegaba al informe el texto de respaldo.
+    var m = linea.match(/^\s*[*#>\-•\s]*([A-Za-zÁÉÍÓÚÑáéíóúñ0-9 ]{3,30}?)\s*\**\s*[:：]\s*\**\s*(.*)$/);
+    var abrio = false;
+    if (m) {
+      var etq = _normEtq(m[1]).replace(/[*#>•]/g,'').trim();
+      for (var i = 0; i < _ETIQUETAS.length; i++) {
+        var clave = _ETIQUETAS[i][0];
+        var alias = _ETIQUETAS[i][1];
+        for (var j = 0; j < alias.length; j++) {
+          if (_normEtq(alias[j]) === etq) {
+            actual = clave;
+            out[clave] = (m[2] || '').replace(/\*\*/g,'').trim();
+            abrio = true;
+            break;
+          }
+        }
+        if (abrio) break;
+      }
+    }
+    // Continuacion del valor anterior (respuestas que ocupan varias lineas)
+    if (!abrio && actual && linea.trim()) {
+      out[actual] = ((out[actual] || '') + ' ' + linea.trim()).trim();
+    }
+  });
+  return out;
+}
+window.parsearIA=parsearIA;
+
 async function runIA(){
   var u=U(); var $r=$('ia-result');
   $r.innerHTML='<div style="text-align:center;padding:16px;color:var(--t2);"><div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div><div style="margin-top:8px;font-size:13px;">Analizando tu semana...</div></div>';
@@ -4544,7 +5105,7 @@ async function runIA(){
   var meds=u.measures||[]; var lastMed=meds[meds.length-1]||{}; var prevMed=meds[meds.length-2]||{};
 
   // ── Análisis automático sin API key ──
-  if(!GEMINI_KEY && !ANTHROPIC_KEY){
+  if(!GEMINI_KEY && !ANTHROPIC_KEY && !usarIAServidor()){
     var mac2=u.macros||calcMacros(u);
     var numSes=sesUlt7.length;
     var rpeArr=sesUlt7.map(function(s){return parseFloat(s.rpe)||7;});
@@ -4780,7 +5341,9 @@ async function runIA(){
     +'IMPORTANTE: responde SOLO con las 7 líneas del formato. Sin introducciones ni texto extra.';
   try{
     var resp, txt;
-    if(ANTHROPIC_KEY){
+    if(usarIAServidor()){
+      txt=await iaProxy({prompt:prompt,max_tokens:2000});
+    } else if(ANTHROPIC_KEY){
       resp=await fetch('https://api.anthropic.com/v1/messages',{
         method:'POST',
         headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
@@ -4825,50 +5388,6 @@ async function runIA(){
     // Ahora se parsea por lineas: una etiqueta solo cuenta si abre la linea y
     // va seguida de dos puntos, que es el formato que pide el prompt. El texto
     // de cada valor puede ocupar varias lineas y nunca se corta a mitad.
-    var _ETIQUETAS = [
-      ['nivel',      ['NIVEL','LEVEL']],
-      ['resumen',    ['RESUMEN','ANALISIS','ANÁLISIS','SUMMARY']],
-      ['entreno1',   ['ENTRENO1','ENTRENO 1','ENTRENAMIENTO1','ENTRENAMIENTO 1','AJUSTE1','AJUSTE 1','TRAINING1','TRAINING 1']],
-      ['entreno2',   ['ENTRENO2','ENTRENO 2','ENTRENAMIENTO2','ENTRENAMIENTO 2','AJUSTE2','AJUSTE 2','TRAINING2','TRAINING 2']],
-      ['nutricion1', ['NUTRICION1','NUTRICION 1','NUTRICIÓN1','NUTRICIÓN 1','NUTRITION1','NUTRITION 1']],
-      ['nutricion2', ['NUTRICION2','NUTRICION 2','NUTRICIÓN2','NUTRICIÓN 2','NUTRITION2','NUTRITION 2']],
-      ['plan',       ['PLAN','DIRECTIVA','RECOMENDACION','RECOMENDACIÓN','NEXT WEEK']]
-    ];
-    function _normEtq(s){
-      return String(s||'').toUpperCase()
-        .replace(/[ÁÀÄÂ]/g,'A').replace(/[ÉÈËÊ]/g,'E').replace(/[ÍÌÏÎ]/g,'I')
-        .replace(/[ÓÒÖÔ]/g,'O').replace(/[ÚÙÜÛ]/g,'U').replace(/\s+/g,' ').trim();
-    }
-    function parsearIA(texto){
-      var out = {};
-      var lineas = String(texto||'').split(/\r?\n/);
-      var actual = null;
-      lineas.forEach(function(linea){
-        var m = linea.match(/^\s*[*#>\-•\s]*([A-Za-zÁÉÍÓÚÑáéíóúñ ]{3,30}?)\s*[:：]\s*(.*)$/);
-        var abrio = false;
-        if (m) {
-          var etq = _normEtq(m[1]).replace(/[*#>•]/g,'').trim();
-          for (var i = 0; i < _ETIQUETAS.length; i++) {
-            var clave = _ETIQUETAS[i][0];
-            var alias = _ETIQUETAS[i][1];
-            for (var j = 0; j < alias.length; j++) {
-              if (_normEtq(alias[j]) === etq) {
-                actual = clave;
-                out[clave] = (m[2] || '').trim();
-                abrio = true;
-                break;
-              }
-            }
-            if (abrio) break;
-          }
-        }
-        // Continuacion del valor anterior (respuestas que ocupan varias lineas)
-        if (!abrio && actual && linea.trim()) {
-          out[actual] = ((out[actual] || '') + ' ' + linea.trim()).trim();
-        }
-      });
-      return out;
-    }
     var _p = parsearIA(txt);
     // Compatibilidad: extractLine/extractAny siguen existiendo por si alguna
     // rama antigua las llama, pero ahora leen del parseo por lineas.
@@ -5947,7 +6466,7 @@ var KONGO_QUICK=[
 ];
 
 function renderKongo(){
-  var hasKey=!!(ANTHROPIC_KEY||GEMINI_KEY);
+  var hasKey=!!(ANTHROPIC_KEY||GEMINI_KEY||usarIAServidor());
   // Mostrar/ocultar secciones con los IDs correctos
   var nokey=$('kongo-nokey');
   var msgs=$('kongo-msgs');
@@ -5956,7 +6475,7 @@ function renderKongo(){
   if(nokey) nokey.style.display=hasKey?'none':'flex';
   if(msgs)  msgs.style.display=hasKey?'flex':'none';
   if(bar)   bar.style.display=hasKey?'flex':'none';
-  if(st)    st.textContent=hasKey?(ANTHROPIC_KEY?'Claude conectado':'Gemini conectado'):'';
+  if(st)    st.textContent=hasKey?(ANTHROPIC_KEY?'Claude conectado':GEMINI_KEY?'Gemini conectado':'IA SpeciMen conectada'):'';
   if(!hasKey) return;
 
   // Chips de preguntas rápidas (scroll horizontal)
@@ -7666,7 +8185,9 @@ async function kongoSend(){
 
   try{
     var respText='';
-    if(ANTHROPIC_KEY){
+    if(usarIAServidor()){
+      respText=await iaProxy({system:systemPrompt,messages:apiMsgs,max_tokens:2000});
+    } else if(ANTHROPIC_KEY){
       var r=await fetch('https://api.anthropic.com/v1/messages',{
         method:'POST',
         headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
@@ -7967,12 +8488,238 @@ window.addHoraInicioHist=addHoraInicioHist;
   });
 })();
 
+// ═══════════════════════════════════════════════════════════════════════════
+// PUERTA LEGAL 5.0 — consentimiento informado antes de entrar
+// ---------------------------------------------------------------------------
+// El RGPD exige que el consentimiento sea libre, especifico, informado e
+// inequivoco (art. 4.11), y que para datos de salud sea ademas EXPLICITO
+// (art. 9.2.a). De ahi tres decisiones de diseño:
+//
+//  1. Casillas SEPARADAS. No se puede agrupar "acepto todo" en una sola:
+//     el consentimiento para datos de salud tiene que poder darse aparte.
+//  2. Ninguna viene premarcada. Una casilla marcada por defecto no es
+//     consentimiento valido (Considerando 32 y sentencia Planet49).
+//  3. El boton no se habilita hasta haber llegado al final del texto, para
+//     que "informado" sea algo mas que una formula.
+//
+// Se guarda version, fecha y que casillas se marcaron, que es la prueba de
+// que el consentimiento se presto (art. 7.1: hay que poder demostrarlo).
+// ═══════════════════════════════════════════════════════════════════════════
+var LEGAL_VERSION='1.0';
+var LEGAL_KEY='specimen_legal';
+
+function legalAceptado(){
+  try{
+    var r=JSON.parse(localStorage.getItem(LEGAL_KEY)||'null');
+    return !!(r && r.version===LEGAL_VERSION && r.terminos && r.salud && r.aviso);
+  }catch(e){ return false; }
+}
+window.legalAceptado=legalAceptado;
+
+function registrarConsentimiento(){
+  var reg={
+    version: LEGAL_VERSION,
+    fecha: new Date().toISOString(),
+    terminos: true,
+    salud: true,
+    aviso: true,
+    // Trazabilidad minima, sin datos de terceros ni huella digital
+    agente: (navigator.userAgent||'').slice(0,120)
+  };
+  try{ localStorage.setItem(LEGAL_KEY, JSON.stringify(reg)); }catch(e){}
+  return reg;
+}
+
+function mostrarPuertaLegal(alTerminar){
+  var gate=document.getElementById('legal-gate');
+  if(!gate) { if(alTerminar) alTerminar(); return; }
+  gate.classList.add('on');
+
+  var body=document.getElementById('lg-body');
+  var btn=document.getElementById('lg-aceptar');
+  var aviso=document.getElementById('lg-aviso');
+  var cajas=['lg-c1','lg-c2','lg-c3'].map(function(id){return document.getElementById(id);});
+  var leido=false;
+
+  function revisar(){
+    var todas=cajas.every(function(c){return c && c.checked;});
+    var ok=todas && leido;
+    btn.disabled=!ok;
+    btn.style.opacity=ok?'1':'.4';
+    if(!leido) aviso.textContent='Desplázate hasta el final para poder aceptar';
+    else if(!todas) aviso.textContent='Debes marcar las tres casillas para continuar';
+    else aviso.textContent='';
+    aviso.style.color=ok?'var(--green)':'var(--amber)';
+  }
+
+  // Detectar lectura completa
+  function comprobarScroll(){
+    if(leido) return;
+    if(body.scrollTop + body.clientHeight >= body.scrollHeight - 60){
+      leido=true;
+      revisar();
+    }
+  }
+  body.addEventListener('scroll', comprobarScroll);
+  // Si el documento cabe entero en pantalla, se considera leido
+  setTimeout(function(){ if(body.scrollHeight <= body.clientHeight + 20){ leido=true; revisar(); } }, 300);
+
+  cajas.forEach(function(c,i){
+    if(!c) return;
+    c.checked=false;   // nunca premarcadas
+    c.addEventListener('change',function(){
+      var cont=document.getElementById('lgc'+(i+1));
+      if(cont) cont.classList.toggle('on', c.checked);
+      revisar();
+    });
+  });
+
+  btn.addEventListener('click',function(){
+    if(btn.disabled) return;
+    registrarConsentimiento();
+    gate.classList.remove('on');
+    if(alTerminar) alTerminar();
+  });
+
+  document.getElementById('lg-rechazar').addEventListener('click',function(){
+    body.scrollTop=0;
+    aviso.style.color='var(--red)';
+    aviso.textContent='Sin aceptar estas condiciones no es posible usar la aplicación, '
+      +'porque el tratamiento de datos de salud requiere tu consentimiento.';
+  });
+
+  revisar();
+}
+window.mostrarPuertaLegal=mostrarPuertaLegal;
+
+// Volver a leer el documento desde Perfil, sin volver a pedir aceptacion.
+function verDocumentoLegal(){
+  var gate=document.getElementById('legal-gate');
+  if(!gate) return;
+  gate.classList.add('on');
+  var foot=document.getElementById('lg-foot');
+  if(foot){
+    foot.innerHTML='<button class="btn btn-full" onclick="document.getElementById(\'legal-gate\').classList.remove(\'on\');location.reload();">Cerrar</button>';
+  }
+  document.getElementById('lg-body').scrollTop=0;
+}
+window.verDocumentoLegal=verDocumentoLegal;
+
+// ── Panel de consentimientos y derechos ────────────────────────────────────
+function verConsentimientos(){
+  var reg={};
+  try{ reg=JSON.parse(localStorage.getItem(LEGAL_KEY)||'{}'); }catch(e){}
+  var f=reg.fecha ? new Date(reg.fecha).toLocaleString('es-ES') : '—';
+  var gas=localStorage.getItem('specimen_gas_url')||'';
+  var ia=(localStorage.getItem('specimen_apikey')||localStorage.getItem('specimen_gemini'))?true:false;
+  var old=document.getElementById('m-consent'); if(old) old.remove();
+  var wrap=document.createElement('div');
+  wrap.innerHTML='<div class="modal-ov open" id="m-consent" onclick="if(event.target===this)closeM(\'m-consent\')">'
+    +'<div class="modal"><div class="modal-hnd"></div>'
+    +'<div class="modal-title">Consentimientos y derechos</div>'
+    +'<div style="font-size:12px;color:var(--t2);line-height:1.7;margin-bottom:12px;">'
+      +'Aceptaste la versión <b>'+(reg.version||'—')+'</b> el <b>'+f+'</b>.</div>'
+    +'<div style="background:var(--bg3);border-radius:9px;padding:11px 13px;margin-bottom:12px;font-size:12px;line-height:1.8;color:var(--t2);">'
+      +'<b style="color:var(--green);">Activo</b><br>'
+      +'· Tratamiento de datos de salud<br>'
+      +'· Sincronización en la nube: <b>'+(gas?'sí':'no')+'</b><br>'
+      +'· Envío de datos a servicios de IA: <b>'+(ia?'sí':'no')+'</b>'
+    +'</div>'
+    +'<button class="btn btn-full" style="margin-bottom:7px;" onclick="closeM(\'m-consent\');exportarJSON();">Descargar todos mis datos (portabilidad)</button>'
+    +'<button class="btn btn-full" style="margin-bottom:7px;" onclick="closeM(\'m-consent\');verDocumentoLegal();">Leer los términos y la política</button>'
+    +'<button class="btn btn-full" style="margin-bottom:7px;" onclick="revocarIA();">Revocar el envío de datos a la IA</button>'
+    +'<button class="btn btn-full" style="margin-bottom:7px;" onclick="revocarNube();">Desactivar la sincronización en la nube</button>'
+    +'<button class="btn btn-d btn-full" onclick="eliminarMisDatos();">Eliminar mi cuenta y todos mis datos</button>'
+    +'<div style="font-size:10.5px;color:var(--t3);line-height:1.6;margin-top:12px;">'
+      +'Puedes reclamar ante la Agencia Española de Protección de Datos (aepd.es) o la '
+      +'Superintendencia de Industria y Comercio de Colombia (sic.gov.co).</div>'
+    +'<div class="modal-actions"><button class="btn btn-ghost btn-full" onclick="closeM(\'m-consent\')">Cerrar</button></div>'
+    +'</div></div>';
+  document.body.appendChild(wrap.firstChild);
+}
+window.verConsentimientos=verConsentimientos;
+
+function revocarIA(){
+  if(!confirm('Se borrarán las claves de Claude y Gemini de este dispositivo.\n\nEl análisis automático sin IA seguirá funcionando. ¿Continuar?')) return;
+  try{
+    localStorage.removeItem('specimen_apikey');
+    localStorage.removeItem('specimen_gemini');
+  }catch(e){}
+  ANTHROPIC_KEY=''; GEMINI_KEY='';
+  toast('✓ Claves de IA eliminadas de este dispositivo');
+  closeM('m-consent');
+}
+window.revocarIA=revocarIA;
+
+function revocarNube(){
+  if(!confirm('Se dejará de sincronizar con la nube.\n\nLo ya guardado en la nube NO se borra con esta opción — para eso usa "Eliminar mi cuenta y todos mis datos". ¿Continuar?')) return;
+  try{ localStorage.removeItem('specimen_gas_url'); }catch(e){}
+  toast('✓ Sincronización desactivada');
+  closeM('m-consent');
+}
+window.revocarNube=revocarNube;
+
+// Derecho de supresion (art. 17 RGPD / art. 8.e Ley 1581).
+function eliminarMisDatos(){
+  var u=U();
+  if(!confirm('ELIMINAR TODOS TUS DATOS\n\nSe borrará de este dispositivo tu perfil, historial, medidas y configuración, y se solicitará la eliminación de tus datos y fotografías en la nube.\n\nEsta acción NO se puede deshacer.\n\n¿Continuar?')) return;
+  if(!confirm('Última confirmación.\n\n¿Has descargado antes tu copia en JSON? Si no, se perderá todo.\n\n¿Eliminar definitivamente?')) return;
+
+  var gasUrl=localStorage.getItem('specimen_gas_url')||'';
+  var fin=function(){
+    _guardarTokenApi('');
+    try{
+      ['specimen_v3','specimen_ses_draft','specimen_apikey','specimen_gemini',
+       'specimen_gas_url','specimen_email_dest','specimen_diag',LEGAL_KEY].forEach(function(k){
+        localStorage.removeItem(k);
+      });
+    }catch(e){}
+    alert('Tus datos han sido eliminados de este dispositivo.\n\nSi la solicitud a la nube no pudo enviarse, escribe al correo de contacto para completarla.');
+    location.reload();
+  };
+
+  if(nubeWorker() && _tokenApi()){
+    api('/api/borrar',{}).then(function(r){ if(!r.d.ok) diagLog('BORRADO','La nube respondió: '+(r.d.error||r.estado)); })
+      .catch(function(e){ diagLog('BORRADO',e.message); }).then(fin, fin);
+    return;
+  }
+  if(gasUrl && u && u.cloudUid){
+    var fd=new FormData();
+    fd.append('data',JSON.stringify({action:'deleteUser',uid:u.cloudUid,email:u.email}));
+    fetch(gasUrl,{method:'POST',body:fd})
+      .then(function(r){return r.json();})
+      .then(function(res){
+        if(!res||!res.ok) diagLog('BORRADO','La nube respondió: '+((res&&res.error)||'sin respuesta'));
+      })
+      .catch(function(e){ diagLog('BORRADO',e.message); })
+      .then(fin, fin);
+  } else {
+    fin();
+  }
+}
+window.eliminarMisDatos=eliminarMisDatos;
+
 // ── BOOT ──────────────────────────────────────
 (function boot(){
   loadAll();
-  if(APP.users.length&&APP.users[APP.cur]&&APP.users[APP.cur].nombre){
-    $('onb').style.display='none';
-    initApp();
+  // 5.0: nada de la app se muestra hasta que el consentimiento esta prestado.
+  // Si cambia LEGAL_VERSION, se vuelve a pedir — es lo que exige el RGPD
+  // cuando el tratamiento cambia de forma sustancial.
+  var arrancar=function(){
+    if(APP.users.length&&APP.users[APP.cur]&&APP.users[APP.cur].nombre){
+      $('onb').style.display='none';
+      initApp();
+    }
+  };
+  if(legalAceptado()){
+    arrancar();
+  } else {
+    var onb=$('onb'); if(onb) onb.style.display='none';
+    mostrarPuertaLegal(function(){
+      var o=$('onb');
+      if(APP.users.length&&APP.users[APP.cur]&&APP.users[APP.cur].nombre){ arrancar(); }
+      else if(o){ o.style.display=''; }
+    });
   }
 })();
 
