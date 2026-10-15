@@ -604,7 +604,9 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
       <tr><td><b style="color:var(--red);">Salud (categoría especial)</b></td>
           <td>Fecha de nacimiento, sexo biológico, altura, peso, porcentaje de grasa corporal, perímetros
           corporales (cintura, cuello, cadera, pecho, brazo, muslo, pantorrilla), <b>alergias e
-          intolerancias alimentarias</b>, nivel de esfuerzo percibido, fatiga y notas personales</td></tr>
+          intolerancias alimentarias</b>, <b>lesiones o condiciones de salud que declares</b>
+          (por ejemplo, molestias articulares, tensión alta o embarazo) y las notas que escribas sobre
+          ellas, nivel de esfuerzo percibido, fatiga y notas personales</td></tr>
       <tr><td><b style="color:var(--red);">Imágenes (categoría especial)</b></td>
           <td>Fotografías de progreso corporal, <b>estrictamente voluntarias</b></td></tr>
       <tr><td>Actividad</td><td>Sesiones de entrenamiento, ejercicios, series, cargas, duración, hidratación,
@@ -786,13 +788,13 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     <!-- 5.0: las casillas solo aparecen al final, después de leerlo todo. -->
     <div id="lg-acepta" style="margin-top:12px;">
       <label class="lg-check" id="lgc1"><input type="checkbox" id="lg-c1"><span>He leído y acepto los <b>Términos de uso</b> y la <b>Política de privacidad</b>, y confirmo que soy <b>mayor de 18 años</b>.</span></label>
-      <label class="lg-check" id="lgc2"><input type="checkbox" id="lg-c2"><span><b>Consiento expresamente</b> el tratamiento de mis <b>datos de salud</b> (peso, medidas, porcentaje de grasa, alergias) para calcular mis planes.</span></label>
+      <label class="lg-check" id="lgc2"><input type="checkbox" id="lg-c2"><span><b>Consiento expresamente</b> el tratamiento de mis <b>datos de salud</b> (peso, medidas, porcentaje de grasa, alergias y las lesiones o condiciones que declare) para calcular mis planes.</span></label>
       <label class="lg-check" id="lgc3"><input type="checkbox" id="lg-c3"><span>Entiendo que esta app es <b>orientativa</b>, que <b>no sustituye a un médico ni a un nutricionista</b>, y que el filtrado de alérgenos <b>no garantiza</b> la ausencia de trazas.</span></label>
       <button class="btn btn-acc btn-full" id="lg-aceptar" disabled style="opacity:.4;margin-top:4px;">Aceptar y continuar</button>
       <button class="btn btn-ghost btn-full" id="lg-rechazar" style="margin-top:7px;font-size:12px;">No acepto</button>
     </div>
     <p style="font-size:10.5px;color:var(--t3);text-align:center;margin-top:14px;">
-      Versión 1.0 · Agosto de 2026<br>
+      Versión 1.1 · Octubre de 2026<br>
       SpeciMen Gym App® · Cristhian Andrés Serna Salazar © 2026
     </p>
   </div>
@@ -836,7 +838,8 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     <div class="fg"><label>Contraseña</label><div class="pw-wrap"><input type="password" id="lg-pw" placeholder="Tu contraseña"><button class="pw-eye" type="button" onclick="togglePw('lg-pw',this)" tabindex="-1"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
     <div id="lg-err" style="color:var(--red);font-size:13px;margin-bottom:10px;display:none;"></div>
     <button class="btn btn-acc btn-full" id="btn-login">Entrar →</button>
-    <div style="text-align:center;margin-top:14px;"><button class="btn btn-ghost btn-sm" id="go-register">← Crear cuenta</button></div>
+    <div style="text-align:center;margin-top:12px;"><button class="btn btn-ghost btn-sm" onclick="abrirRecuperar()" style="font-size:12px;">He olvidado mi contraseña</button></div>
+    <div style="text-align:center;margin-top:6px;"><button class="btn btn-ghost btn-sm" id="go-register">← Crear cuenta</button></div>
   </div>
 
   <!-- S2: Datos físicos -->
@@ -948,6 +951,11 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     <div class="onb-title">Alergias / intolerancias</div>
     <div class="onb-sub">Selecciona los alimentos que debes evitar. Tu plan nutricional los excluirá automáticamente.</div>
     <div id="rest-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:16px;"></div>
+    <div class="sep" style="margin:4px 0 12px;"></div>
+    <div class="onb-title" style="font-size:17px;">🩺 Salud y lesiones <span style="font-size:12px;font-weight:400;color:var(--t3);">(opcional)</span></div>
+    <div class="onb-sub">Si marcas algo, el plan evitará los ejercicios que suelen molestar con esa dolencia y pondrá otros del mismo músculo. <b>Es una guía: no sustituye a tu médico.</b></div>
+    <div id="salud-grid" style="margin-bottom:12px;"></div>
+    <div class="fg"><label>Algo más que debamos tener en cuenta (opcional)</label><input type="text" id="salud-notas" maxlength="300" placeholder="Ej: operación de menisco en 2024"></div>
     <div style="display:flex;gap:8px;margin-top:auto;">
       <button class="btn btn-ghost" id="s3-back">← Volver</button>
       <button class="btn btn-acc btn-full" id="s3-next">Crear mi plan →</button>
@@ -1033,10 +1041,12 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   <button onclick="abrirModalPlanIA()" style="width:100%;margin-bottom:10px;padding:11px;border-radius:10px;border:1.5px solid var(--acc);background:var(--accb);color:var(--acc2);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
     🤖 Generar plan personalizado con IA + evidencia científica
   </button>
+  <button class="btn btn-full" style="margin-bottom:10px;border:1.5px solid var(--border2);font-size:13px;" onclick="abrirVariarPlan()">🔄 Variar ejercicios · mesociclo nuevo (gratis)</button>
   <button class="btn btn-ghost btn-full" style="margin-bottom:12px;border:1.5px dashed var(--border2);" onclick="openExSearch()">+ Buscar ejercicio en base de datos</button>
   <div id="plan-ej-list"></div>
 </div>
   <div id="pv-nut" style="display:none">
+  <button class="btn btn-full" style="margin-bottom:10px;border:1.5px solid var(--border2);font-size:13px;" onclick="variarComidas()">🔄 Variar comidas · mismos macros (gratis)</button>
   <button class="btn btn-acc btn-full" style="margin-bottom:12px;" onclick="openFoodSearch()">+ Buscar y añadir alimento</button>
   <div id="plan-nut-list"></div>
 </div>
@@ -1162,6 +1172,17 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
       <div id="perfil-supls"></div>
     </div>
   </details>
+  <details class="pf-sec" id="pf-salud" ontoggle="if(this.open)renderSaludGrid('salud-grid-pf')">
+    <summary><span class="pf-ico">🩺</span><span><div class="pf-tit">Salud y lesiones</div><div class="pf-sub">Adapta los ejercicios a tus dolencias</div></span></summary>
+    <div class="pf-body">
+      <div style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:10px;">Marca lo que te afecte. El plan evitará los ejercicios que suelen dar problemas y pondrá otros del mismo músculo. <b>Esto es orientativo y no sustituye a un médico ni a un fisioterapeuta.</b></div>
+      <div id="salud-grid-pf"></div>
+      <div class="fg" style="margin-top:12px;"><label>Notas (opcional)</label><input type="text" id="salud-notas-pf" maxlength="300" placeholder="Ej: operación de menisco en 2024"></div>
+      <button class="btn btn-acc btn-full" onclick="guardarSalud()">Guardar y adaptar mi plan</button>
+      <button class="btn btn-full" onclick="verAvisosSalud()" style="margin-top:8px;font-size:13px;">Ver qué ha cambiado en mi plan</button>
+    </div>
+  </details>
+
   <details class="pf-sec pf-main" id="pf-config">
     <summary><span class="pf-ico">⚙️</span><span><div class="pf-tit">Configuración</div><div class="pf-sub">Preferencias, IA, nube, copias y privacidad</div></span></summary>
     <div class="pf-body">
@@ -1259,7 +1280,8 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
       <details class="pf-sub-sec">
         <summary>🔒 Privacidad y legal</summary>
         <div class="pf-body">
-        <button class="btn btn-full" onclick="verConsentimientos()" style="margin-bottom:8px;font-size:13px;">🔒 Consentimientos y mis derechos</button>
+        <button class="btn btn-full" onclick="abrirCambiarClave()" style="margin-bottom:8px;font-size:13px;">🔑 Cambiar mi contraseña</button>
+    <button class="btn btn-full" onclick="verConsentimientos()" style="margin-bottom:8px;font-size:13px;">🔒 Consentimientos y mis derechos</button>
         <button class="btn btn-full" onclick="verDocumentoLegal()" style="margin-bottom:8px;font-size:13px;">📄 Términos y política de privacidad</button>
         <button class="btn btn-full" onclick="verDiagnostico()" style="margin-bottom:8px;font-size:13px;">🩺 Diagnóstico y estado de la app</button>
         </div>
@@ -1898,6 +1920,7 @@ function esAlergiaGrave(k){
 var RESTS=ALERGENOS.map(function(a){return a.n;});
 
 function renderRestGrid(){
+  try{ renderSaludGrid(); }catch(e){}
   var el=$('rest-grid');
   if(!el) return;
   el.style.display='block';
@@ -2005,6 +2028,8 @@ function sesionesKB(u){
     ]}
   ];
 }
+var _sesionesKBBase=sesionesKB;
+sesionesKB=function(u){ return adaptarPorSalud(_sesionesKBBase(u), u||U()||{}); };
 window.sesionesKB=sesionesKB;
 
 // Días del plan + sesiones de pesa rusa. Es lo que se puede elegir al entrenar.
@@ -2090,6 +2115,8 @@ function sesionesCB(u){
     ]}
   ];
 }
+var _sesionesCBBase=sesionesCB;
+sesionesCB=function(u){ return adaptarPorSalud(_sesionesCBBase(u), u||U()||{}); };
 window.sesionesCB=sesionesCB;
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -2284,9 +2311,232 @@ function sesionesBW(u){
     ]}
   ];
 }
+var _sesionesBWBase=sesionesBW;
+sesionesBW=function(u){ return adaptarPorSalud(_sesionesBWBase(u), u||U()||{}); };
 window.sesionesBW=sesionesBW;
 
+// ═══════════════════════════════════════════════════════════════════════════
+// SALUD Y LESIONES — 5.0
+// ---------------------------------------------------------------------------
+// Sirve para UNA cosa: quitar del plan los ejercicios que suelen dar problemas
+// con esa dolencia y poner en su lugar otro del mismo músculo. No es un
+// diagnóstico ni un tratamiento, y no sustituye a un médico ni a un
+// fisioterapeuta. Ante una lesión aguda o dolor, lo que toca es parar y
+// consultar, no cambiar de ejercicio.
+//
+// Es un dato de salud: se guarda igual que el peso o las alergias (cifrado en
+// la nube, visible solo para el usuario) y entra en el consentimiento que se
+// acepta al entrar. Se puede dejar en blanco y la app funciona igual.
+// ═══════════════════════════════════════════════════════════════════════════
+var CONDICIONES_SALUD=[
+  {k:'hombro',   ico:'💪', n:'Hombro delicado',        g:'Articulaciones'},
+  {k:'codo',     ico:'🦾', n:'Codo (epicondilitis)',   g:'Articulaciones'},
+  {k:'muneca',   ico:'✋', n:'Muñeca delicada',        g:'Articulaciones'},
+  {k:'cervical', ico:'🧣', n:'Cuello / cervicales',    g:'Articulaciones'},
+  {k:'lumbar',   ico:'🩹', n:'Espalda baja / lumbar',  g:'Articulaciones'},
+  {k:'rodilla',  ico:'🦵', n:'Rodilla delicada',       g:'Articulaciones'},
+  {k:'cadera',   ico:'🫃', n:'Cadera delicada',        g:'Articulaciones'},
+  {k:'tobillo',  ico:'🦶', n:'Tobillo / pie',          g:'Articulaciones'},
+  {k:'hernia',   ico:'⚠️', n:'Hernia (discal o abdominal)', g:'Articulaciones'},
+  {k:'tension',  ico:'🩺', n:'Tensión alta',           g:'Salud general'},
+  {k:'corazon',  ico:'❤️', n:'Problema cardíaco',      g:'Salud general'},
+  {k:'asma',     ico:'🫁', n:'Asma o problema respiratorio', g:'Salud general'},
+  {k:'diabetes', ico:'🩸', n:'Diabetes',               g:'Salud general'},
+  {k:'embarazo', ico:'🤰', n:'Embarazo o posparto',    g:'Salud general'},
+  {k:'osteo',    ico:'🦴', n:'Osteoporosis',           g:'Salud general'},
+  {k:'varices',  ico:'🩻', n:'Varices o circulación',  g:'Salud general'}
+];
+
+// Qué se evita con cada cosa y por qué. Las expresiones miran el NOMBRE del
+// ejercicio, que es lo que ve el usuario.
+var CONTRA_SALUD={
+  hombro:  {evita:/press militar|press de hombro|arnold|fondos|pino|handstand|snatch|clean|jal[oó]n tras nuca|elevaciones laterales con/i,
+            nota:'Se evitan los empujes por encima de la cabeza y los fondos.'},
+  codo:    {evita:/press franc|extensi[oó]n tr[ií]ceps|fondos|diamante|patada de tr[ií]ceps/i,
+            nota:'Se evita el trabajo que carga el tendón del codo.'},
+  muneca:  {evita:/flexiones|pino|handstand|clean|snatch|palmada|burpee|rueda abdominal/i,
+            nota:'Se evitan los apoyos con la muñeca doblada y cargada.'},
+  cervical:{evita:/encogimiento|press militar|pino|handstand|sprawl|jal[oó]n tras nuca/i,
+            nota:'Se evita cargar el cuello y las posturas forzadas.'},
+  lumbar:  {evita:/peso muerto|buenos d[ií]as|remo con barra|sentadilla con barra|swing|snatch|hiperextensi|russian twist|sentadilla frontal/i,
+            nota:'Se evita la carga axial y los giros con peso en la espalda baja.'},
+  rodilla: {evita:/salto|pistol|box jump|burpee|prensa|zancada|sentadilla b[uú]lgara|comba|sprint/i,
+            nota:'Se evitan los impactos y la flexión profunda con carga.'},
+  cadera:  {evita:/sentadilla sumo|peso muerto sumo|zancada|sentadilla b[uú]lgara|abducci|aducci/i,
+            nota:'Se evitan los rangos amplios de cadera con carga.'},
+  tobillo: {evita:/salto|comba|burpee|sprint|box jump|zancada|escalador/i,
+            nota:'Se evitan los impactos y los saltos.'},
+  hernia:  {evita:/peso muerto|sentadilla con barra|buenos d[ií]as|crunch|russian twist|elevaci[oó]n de piernas|swing|snatch|hiperextensi/i,
+            nota:'Se evita la presión abdominal alta y la flexión de columna con carga.'},
+  tension: {evita:/pino|handstand|isom[eé]trico|plancha|press militar|peso muerto/i,
+            nota:'Se evitan los isométricos largos y los esfuerzos con apnea.'},
+  corazon: {evita:/hiit|sprint|burpee|box jump|saco|snatch|comba/i,
+            nota:'Se evita la intensidad máxima; el trabajo queda en intensidad moderada.'},
+  asma:    {evita:/hiit|sprint|burpee|comba/i,
+            nota:'Se evitan los intervalos muy exigentes.'},
+  diabetes:{evita:/ayun/i,
+            nota:'Sin cambios en los ejercicios: recuerda controlar la glucosa antes y después.'},
+  embarazo:{evita:/crunch|plancha|russian twist|elevaci[oó]n de piernas|hollow|abdominal|salto|sprawl|peso muerto|burpee|sentadilla con barra/i,
+            nota:'Se evita el trabajo abdominal clásico, los impactos y la carga axial.'},
+  osteo:   {evita:/salto|pliom[eé]tric|box jump|crunch|russian twist|burpee|palmada/i,
+            nota:'Se evitan los impactos y la flexión de columna.'},
+  varices: {evita:/sentadilla con salto|salto|isom[eé]trico|prensa/i,
+            nota:'Se evita estar mucho tiempo de pie bajo carga y los saltos.'}
+};
+
+function condicionesDe(u){
+  u=u||U()||{};
+  return (u.salud||[]).filter(function(k){ return !!CONTRA_SALUD[k]; });
+}
+window.condicionesDe=condicionesDe;
+
+function nombreCondicion(k){
+  var c=CONDICIONES_SALUD.find(function(x){ return x.k===k; });
+  return c ? c.n : k;
+}
+window.nombreCondicion=nombreCondicion;
+
+// ¿Este ejercicio choca con alguna dolencia declarada? Devuelve la primera.
+function motivoContra(nombre, u){
+  var ks=condicionesDe(u);
+  for(var i=0;i<ks.length;i++){
+    var c=CONTRA_SALUD[ks[i]];
+    if(c && c.evita.test(String(nombre||''))) return {k:ks[i], nombre:nombreCondicion(ks[i]), nota:c.nota};
+  }
+  return null;
+}
+window.motivoContra=motivoContra;
+
+// Cambia los ejercicios problemáticos por otros del mismo músculo y material.
+// Si no hay ninguno seguro, se quita el ejercicio antes que arriesgar.
+function adaptarPorSalud(dias, u, registrar){
+  u=u||U()||{};
+  if(!condicionesDe(u).length) return dias;
+  var avisos=[];
+  (dias||[]).forEach(function(d){
+    if(!d||!d.exs||!d.exs.length) return;
+    var usados={};
+    d.exs.forEach(function(e){ usados[_plegarNombre(e.n)]=true; });
+    d.exs=d.exs.filter(function(e){
+      var m=motivoContra(e.n,u);
+      if(!m) return true;
+      var cand=_candidatosPara(e,_materialDe(e)).filter(function(n){
+        return !motivoContra(n,u) && !usados[_plegarNombre(n)];
+      });
+      if(cand.length){
+        var nuevo=cand[0];
+        avisos.push({dia:d.dia, antes:e.n, ahora:nuevo, motivo:m});
+        usados[_plegarNombre(nuevo)]=true;
+        e.n=nuevo;
+        e.id=getSvgIdForName(nuevo);
+        return true;
+      }
+      avisos.push({dia:d.dia, antes:e.n, ahora:null, motivo:m});
+      return false;    // nada seguro para ese músculo: fuera
+    });
+    if(avisos.length) d.adaptado=true;
+  });
+  if(registrar) u._avisosSalud=avisos;   // solo el plan deja constancia
+  return dias;
+}
+window.adaptarPorSalud=adaptarPorSalud;
+
+// ── Ficha: marcar dolencias ───────────────────────────────────────────────
+function renderSaludGrid(idGrid){
+  var cajaNotas=document.getElementById('salud-notas-pf')||document.getElementById('salud-notas');
+  if(cajaNotas && U() && U().saludNotas) cajaNotas.value=U().saludNotas;
+  var el=document.getElementById(idGrid||'salud-grid');
+  if(!el) return;
+  var u=U()||{};
+  var marcadas=(u.salud||[]);
+  el.innerHTML='';
+  ['Articulaciones','Salud general'].forEach(function(g){
+    var h=document.createElement('div');
+    h.style.cssText='font-size:11px;font-weight:700;color:var(--acc2);text-transform:uppercase;letter-spacing:.06em;margin:12px 0 7px;';
+    h.textContent=g;
+    el.appendChild(h);
+    var wrap=document.createElement('div');
+    wrap.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:7px;';
+    CONDICIONES_SALUD.filter(function(c){ return c.g===g; }).forEach(function(c){
+      var b=document.createElement('button');
+      b.type='button';
+      b.dataset.k=c.k;
+      var on=marcadas.indexOf(c.k)>=0;
+      b.className='rest-chip'+(on?' on':'');
+      b.style.cssText='text-align:left;padding:9px 10px;border-radius:9px;font-size:12px;cursor:pointer;'
+        +'border:1.5px solid '+(on?'var(--acc)':'var(--border2)')+';background:'+(on?'var(--accb)':'var(--bg3)')+';'
+        +'color:'+(on?'var(--acc2)':'var(--t2)')+';';
+      b.innerHTML=c.ico+' '+c.n;
+      b.onclick=function(){ alternarCondicion(c.k, b); };
+      wrap.appendChild(b);
+    });
+    el.appendChild(wrap);
+  });
+}
+window.renderSaludGrid=renderSaludGrid;
+
+function alternarCondicion(k, btn){
+  var u=U(); if(!u) return;
+  u.salud=u.salud||[];
+  var i=u.salud.indexOf(k);
+  if(i>=0) u.salud.splice(i,1); else u.salud.push(k);
+  var on=u.salud.indexOf(k)>=0;
+  btn.style.border='1.5px solid '+(on?'var(--acc)':'var(--border2)');
+  btn.style.background=on?'var(--accb)':'var(--bg3)';
+  btn.style.color=on?'var(--acc2)':'var(--t2)';
+  saveAll();
+}
+window.alternarCondicion=alternarCondicion;
+
+// Guardar y rehacer el plan con las dolencias marcadas.
+function guardarSalud(){
+  var u=U(); if(!u) return;
+  var notas=document.getElementById('salud-notas-pf')||document.getElementById('salud-notas');
+  if(notas) u.saludNotas=(notas.value||'').trim().slice(0,300);
+  u.macros=calcMacros(u);
+  u.planEj=getPlanEjercicio(u);
+  saveAll();
+  renderPerfil();
+  renderPlanEj();
+  if(nubeWorker()) nubeSincronizar(true,true);
+  var n=(u._avisosSalud||[]).length;
+  toast(n?('✓ Plan adaptado · '+n+' ejercicios cambiados'):'✓ Guardado');
+}
+window.guardarSalud=guardarSalud;
+
+// Resumen de lo que se ha cambiado por salud, para que no sea una caja negra.
+function verAvisosSalud(){
+  var u=U(); if(!u) return;
+  getPlanEjercicio(u);                      // recalcula y rellena _avisosSalud
+  var avisos=u._avisosSalud||[];
+  var filas=avisos.length?avisos.map(function(a){
+    return '<div class="srch-item" style="cursor:default;">'
+      +'<div class="srch-item-name" style="font-size:13px;">'+(a.ahora||'Quitado del plan')+'</div>'
+      +'<div class="srch-item-sub" style="color:var(--t3);">'+a.dia+' · en vez de '+a.antes+' · '+a.motivo.nombre+'</div>'
+      +'</div>';
+  }).join(''):'<div class="srch-empty">No ha hecho falta cambiar nada.</div>';
+  var html='<div class="modal-ov open" id="m-salud" onclick="if(event.target===this)closeM(\'m-salud\')">'
+    +'<div class="modal"><div class="modal-hnd"></div>'
+    +'<div class="modal-title">🩺 Ajustes por tu salud</div>'
+    +'<div style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:12px;">'
+      +'Esto es una guía, no una indicación médica. Si tienes dolor o una lesión reciente, '
+      +'para y consulta con tu médico o fisioterapeuta antes de entrenar.</div>'
+    +'<div class="srch-results" style="max-height:55vh;overflow-y:auto;">'+filas+'</div>'
+    +'<div class="modal-actions"><button class="btn btn-full" onclick="closeM(\'m-salud\')">Cerrar</button></div>'
+    +'</div></div>';
+  var old=document.getElementById('m-salud');
+  if(old) old.parentNode.removeChild(old);
+  var div=document.createElement('div');
+  div.innerHTML=html;
+  document.body.appendChild(div.firstChild);
+}
+window.verAvisosSalud=verAvisosSalud;
+
+// El plan sale del perfil y, al final, se adapta a las dolencias marcadas.
 function getPlanEjercicio(u){
+  return adaptarPorSalud(_planSegunPerfil(u), u, true);
+}
+function _planSegunPerfil(u){
   var obj=u.obj||'recomp';
   var esH=u.genero==='H';
   // Si hay un plan generado por IA guardado, usarlo
@@ -2319,6 +2569,7 @@ async function generarPlanIA(){
   var trabajo={sedentario:'sedentario (oficina)',moderado:'moderado (de pie)',activo:'activo (esfuerzo físico)'}[u.trabajo||'moderado'];
 
   var prompt='Eres un científico del ejercicio (CSCS). Diseña un plan de entrenamiento semanal basado en evidencia científica 2025 para este usuario.\n\n'
+    +(condicionesDe(u).length?'LESIONES/CONDICIONES A RESPETAR (no propongas ejercicios que las agraven): '+condicionesDe(u).map(nombreCondicion).join(', ')+(u.saludNotas?' · '+u.saludNotas:'')+String.fromCharCode(10):'')
     +'USUARIO: '+(u.genero==='H'?'Hombre':'Mujer')+', '+calcEdad(u.fnac)+' años, '+obj+', '
     +mac.masaMagra+'kg masa magra, '+u.grasa+'% grasa, IMC '+mac.imc+', '
     +'experiencia '+exp+', trabajo '+trabajo+', entrena '+u.horaEntreno+'\n'
@@ -2378,6 +2629,214 @@ async function generarPlanIA(){
   }
 }
 window.generarPlanIA=generarPlanIA;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// VARIAR LOS EJERCICIOS (mesociclo nuevo) — 5.0
+// ---------------------------------------------------------------------------
+// Al cabo de unas semanas el cuerpo se acostumbra y el progreso se frena. Esto
+// cambia los EJERCICIOS manteniendo lo demás: los mismos días, los mismos
+// grupos musculares y las mismas series y repeticiones, que salen del objetivo
+// y la experiencia del usuario.
+//
+// Reglas:
+//  - Se sustituye por un ejercicio del MISMO material: lo de gimnasio por
+//    gimnasio, lo de pesa rusa por pesa rusa, lo de peso corporal por peso
+//    corporal. El entrenamiento no cambia de estilo.
+//  - No se repite nada entrenado en las últimas 6 semanas, ni dos veces el
+//    mismo ejercicio el mismo día.
+//  - Solo se proponen ejercicios que tengan vídeo de técnica.
+//  - No se tocan los días de cardio ni de descanso.
+//  - Se guarda el plan anterior para poder volver con un botón.
+// Es gratis e instantáneo: no usa la IA ni gasta cupo.
+// ═══════════════════════════════════════════════════════════════════════════
+var SEMANAS_MESOCICLO = 4;
+
+function _materialDe(ex){
+  var id=(ex&&ex.id)||'';
+  if(/^kb-/.test(id)) return 'kb';
+  if(/^bw-/.test(id)) return 'bw';
+  if(/^cb-/.test(id)) return 'cb';
+  var n=_plegarNombre((ex&&ex.n)||ex||'');
+  if(/pesa rusa|kettlebell/.test(n)) return 'kb';
+  if(/sombra|saco|footwork|sprawl|balon medicinal|sprint/.test(n)) return 'cb';
+  if(/flexion|dominada|plancha|hollow|burpee|escalador|pistol|superman|dead bug|fondos en banco|puente/.test(n)) return 'bw';
+  return 'gym';
+}
+
+// Nombres entrenados en las últimas `semanas` semanas.
+function _ejerciciosRecientes(u, semanas){
+  var desde=new Date(Date.now()-(semanas||6)*7*86400000).toISOString().slice(0,10);
+  var vistos={};
+  (u.sessions||[]).forEach(function(s){
+    if(String(s.fecha||'')<desde) return;
+    (s.exs||[]).forEach(function(e){ if(e&&e.n) vistos[_plegarNombre(e.n)]=true; });
+  });
+  return vistos;
+}
+
+// Los planes nombran el músculo de muchas formas ("Deltoides", "Dorsal ancho",
+// "Isquio"...). Aquí se traducen al grupo que usan las listas de alternativas.
+var MUSCULO_ALIAS=[
+  [/deltoid|hombro/, 'Hombros'],
+  [/pecho|pectoral/, 'Pecho'],
+  [/dorsal|espalda|romboid|trapecio|serrato/, 'Espalda'],
+  [/triceps/, 'Tríceps'],
+  [/biceps|brazo/, 'Bíceps'],
+  [/cuadriceps|pierna|gemelo|soleo|pantorrilla/, 'Cuádriceps'],
+  [/gluteo|cadera/, 'Glúteo'],
+  [/isquio|femoral|cadena posterior/, 'Isquiotibiales'],
+  [/core|abdomen|abs|oblicuo|lumbar|agarre|equilibrio/, 'Core'],
+  [/cardio|coordinacion|potencia|tecnica|cuerpo entero/, 'Cardio'],
+  [/movilidad|recuperacion/, 'Recuperación']
+];
+function _grupoDe(musculo){
+  var m=_plegarNombre(String(musculo||'').split('/')[0]);
+  for(var i=0;i<MUSCULO_ALIAS.length;i++) if(MUSCULO_ALIAS[i][0].test(m)) return MUSCULO_ALIAS[i][1];
+  return null;
+}
+
+// Candidatos del mismo músculo y del mismo material, con vídeo.
+function _candidatosPara(ex, material){
+  var clave=_grupoDe(ex.mus);
+  var lista=[].concat(EX_ALTERNATIVES[clave]||[], ALT_SIN_MAQUINA[clave]||[]);
+  return lista.filter(function(n){
+    return _materialDe(n)===material && _plegarNombre(n)!==_plegarNombre(ex.n) && urlVideoDe(n) && !motivoContra(n);
+  });
+}
+
+function variarEjercicios(u){
+  u=u||U(); if(!u||!u.planEj) return null;
+  var recientes=_ejerciciosRecientes(u,6);
+  var cambios=[];
+  var plan=JSON.parse(JSON.stringify(u.planEj));
+  plan.forEach(function(d){
+    if(!d||d.tipo==='descanso'||d.tipo==='cardio'||!d.exs) return;
+    var enEsteDia={};
+    d.exs.forEach(function(e){ enEsteDia[_plegarNombre(e.n)]=true; });
+    d.exs.forEach(function(e){
+      var material=_materialDe(e);
+      var cand=_candidatosPara(e, material).filter(function(n){
+        var p=_plegarNombre(n);
+        return !enEsteDia[p] && !recientes[p];
+      });
+      // Si todo lo del mismo músculo se ha hecho hace poco, se permite repetir
+      // antes que dejar el plan igual.
+      if(!cand.length) cand=_candidatosPara(e, material).filter(function(n){ return !enEsteDia[_plegarNombre(n)]; });
+      if(!cand.length) return;
+      var nuevo=cand[Math.floor(Math.random()*cand.length)];
+      cambios.push({dia:d.dia, antes:e.n, ahora:nuevo});
+      enEsteDia[_plegarNombre(nuevo)]=true;
+      delete enEsteDia[_plegarNombre(e.n)];
+      e.n=nuevo;
+      e.id=getSvgIdForName(nuevo);
+    });
+  });
+  return {plan:plan, cambios:cambios};
+}
+window.variarEjercicios=variarEjercicios;
+
+function abrirVariarPlan(){
+  var u=U(); if(!u) return;
+  var r=variarEjercicios(u);
+  if(!r||!r.cambios.length){ toast('No encuentro alternativas para variar ahora mismo','var(--amber)'); return; }
+  APP._variacion=r;
+  var semanas=_semanasConEstePlan(u);
+  var filas=r.cambios.slice(0,30).map(function(c){
+    return '<div class="srch-item" style="cursor:default;">'
+      +'<div class="srch-item-name" style="font-size:13px;">'+c.ahora+'</div>'
+      +'<div class="srch-item-sub" style="color:var(--t3);">'+c.dia+' · antes: '+c.antes+'</div>'
+      +'</div>';
+  }).join('');
+  var html='<div class="modal-ov open" id="m-variar" onclick="if(event.target===this)closeM(\'m-variar\')">'
+    +'<div class="modal"><div class="modal-hnd"></div>'
+    +'<div class="modal-title">🔄 Variar los ejercicios</div>'
+    +'<div style="font-size:12.5px;color:var(--t2);line-height:1.65;margin-bottom:12px;">'
+      +'Mismos días, mismos músculos y mismas series: cambian los ejercicios. '
+      +'Se evitan los que has hecho en las últimas 6 semanas.'
+      +(semanas?' Llevas <b>'+semanas+' semanas</b> con este plan.':'')
+    +'</div>'
+    +'<div style="font-size:11px;font-weight:700;color:var(--acc2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;">'
+      +r.cambios.length+' cambios propuestos</div>'
+    +'<div class="srch-results" style="max-height:46vh;overflow-y:auto;">'+filas+'</div>'
+    +'<div class="modal-actions">'
+      +'<button class="btn btn-acc btn-full" onclick="aplicarVariacion()">Aplicar</button>'
+      +'<button class="btn btn-full" onclick="abrirVariarPlan()" style="margin-top:8px;">🎲 Proponme otros</button>'
+      +(u.planEjAnterior?'<button class="btn btn-full" onclick="volverPlanAnterior()" style="margin-top:8px;">↩️ Volver a los ejercicios anteriores</button>':'')
+      +'<button class="btn btn-full" onclick="closeM(\'m-variar\')" style="margin-top:8px;">Cancelar</button>'
+    +'</div></div></div>';
+  var old=document.getElementById('m-variar');
+  if(old) old.parentNode.removeChild(old);
+  var div=document.createElement('div');
+  div.innerHTML=html;
+  document.body.appendChild(div.firstChild);
+}
+window.abrirVariarPlan=abrirVariarPlan;
+
+function aplicarVariacion(){
+  var u=U(); var r=APP._variacion;
+  if(!u||!r) return;
+  u.planEjAnterior=JSON.parse(JSON.stringify(u.planEj));   // para poder volver
+  u.planEj=r.plan;
+  if(u.planEjIA) u.planEjIA=r.plan;                        // si venía de la IA, se mantiene la vía
+  u.planDesde=new Date().toISOString().slice(0,10);
+  u.planVariaciones=(u.planVariaciones||0)+1;
+  saveAll();
+  closeM('m-variar');
+  renderPlanEj();
+  if(nubeWorker()) nubeSincronizar(true);
+  toast('✓ '+r.cambios.length+' ejercicios nuevos · mesociclo '+(u.planVariaciones+1));
+}
+window.aplicarVariacion=aplicarVariacion;
+
+function volverPlanAnterior(){
+  var u=U(); if(!u||!u.planEjAnterior) return;
+  closeM('m-variar');
+  if(!confirm('¿Volver a los ejercicios anteriores?')) return;
+  u.planEj=u.planEjAnterior;
+  if(u.planEjIA) u.planEjIA=u.planEjAnterior;
+  delete u.planEjAnterior;
+  u.planVariaciones=Math.max(0,(u.planVariaciones||1)-1);
+  saveAll();
+  renderPlanEj();
+  if(nubeWorker()) nubeSincronizar(true);
+  toast('Plan anterior restaurado');
+}
+window.volverPlanAnterior=volverPlanAnterior;
+
+// Semanas entrenando con los mismos ejercicios (desde la última variación, o
+// desde la primera sesión registrada si nunca se ha variado).
+function _semanasConEstePlan(u){
+  var desde=u.planDesde;
+  if(!desde){
+    var fechas=(u.sessions||[]).map(function(s){ return String(s.fecha||''); }).filter(Boolean).sort();
+    desde=fechas[0];
+  }
+  if(!desde) return 0;
+  var dias=(Date.now()-Date.parse(desde+'T12:00:00Z'))/86400000;
+  return dias>0 ? Math.floor(dias/7) : 0;
+}
+window._semanasConEstePlan=_semanasConEstePlan;
+
+// Aviso a las 4 semanas, una sola vez por mesociclo y sin interrumpir.
+function avisarMesociclo(){
+  var u=U();
+  if(!u||(u.sessions||[]).length<6) return;   // sin historial no hay nada que variar
+  var semanas=_semanasConEstePlan(u);
+  if(semanas<SEMANAS_MESOCICLO) return;
+  if(u.avisoMesociclo===semanas) return;      // ya se avisó esta semana
+  u.avisoMesociclo=semanas; saveAll();
+  var b=document.createElement('div');
+  b.id='banner-mesociclo';
+  b.style.cssText='position:fixed;left:12px;right:12px;bottom:calc(64px + env(safe-area-inset-bottom));z-index:420;background:var(--bg2);border:1px solid var(--acc);border-radius:12px;padding:12px 14px;box-shadow:0 4px 20px rgba(0,0,0,.5);';
+  b.innerHTML='<div style="font-size:13px;font-weight:700;color:var(--acc2);margin-bottom:4px;">🔄 Llevas '+semanas+' semanas con los mismos ejercicios</div>'
+    +'<div style="font-size:11px;color:var(--t2);line-height:1.5;margin-bottom:9px;">Cambiarlos cada 4-6 semanas ayuda a seguir progresando. Mantendrás tus días, músculos y series.</div>'
+    +'<div style="display:flex;gap:8px;">'
+      +'<button class="btn btn-acc" style="flex:1;" onclick="document.getElementById(\'banner-mesociclo\').remove();abrirVariarPlan()">Ver cambios</button>'
+      +'<button class="btn btn-ghost" onclick="document.getElementById(\'banner-mesociclo\').remove()">Ahora no</button>'
+    +'</div>';
+  document.body.appendChild(b);
+}
+window.avisarMesociclo=avisarMesociclo;
 
 function abrirModalPlanIA(){
   var u=U(); if(!u) return;
@@ -3063,7 +3522,8 @@ function _semillaMenu(u){
   for (var i = 0; i < e.length; i++) base = ((base << 5) - base + e.charCodeAt(i)) | 0;
   var d = new Date();
   var semana = Math.floor((d - new Date(d.getFullYear(), 0, 1)) / 604800000);
-  return Math.abs(base + semana * 7);
+  // Cada "variar comidas" suma un salto a la semilla: otros alimentos, mismos macros.
+  return Math.abs(base + semana * 7 + ((u && u.semillaExtra) || 0) * 101);
 }
 
 // Elige un alimento del rol, excluyendo SIEMPRE los alérgenos declarados.
@@ -4014,6 +4474,8 @@ function crearPerfil(rests){
   u.planNut=getPlanNutricion(u,mac,rests);
 
   // Reemplaza si ya existe este email, si no añade
+  var _sn=document.getElementById('salud-notas');
+  if(_sn&&_sn.value) u.saludNotas=_sn.value.trim().slice(0,300);
   var idx=APP.users.findIndex(function(x){return x.email===u.email;});
   if(idx>=0) APP.users[idx]=u; else APP.users.push(u);
   APP.cur=APP.users.length-1;
@@ -4604,6 +5066,141 @@ function syncPerfil(){
 }
 window.syncPerfil = syncPerfil;
 
+// ── RECUPERAR LA CONTRASEÑA (olvidada) ────────────────────────────────────
+// Una contraseña no se puede "recuperar": nadie la guarda, ni el servidor.
+// Lo que se hace es demostrar que el correo es tuyo con un código de 6 cifras
+// y poner una nueva. El código caduca a los 15 minutos y solo vale una vez.
+function abrirRecuperar(){
+  var email=($('lg-email')&&$('lg-email').value||'').trim();
+  var html='<div class="modal-ov open" id="m-recuperar" onclick="if(event.target===this)closeM(\'m-recuperar\')">'
+    +'<div class="modal"><div class="modal-hnd"></div>'
+    +'<div class="modal-title">🔑 Cambiar la contraseña</div>'
+    +'<div id="rec-paso1">'
+      +'<div style="font-size:12.5px;color:var(--t2);line-height:1.6;margin-bottom:12px;">'
+        +'Escribe tu email y te enviamos un código de 6 cifras para poner una contraseña nueva.</div>'
+      +'<div class="fg"><label>Email de tu cuenta</label><input type="email" id="rec-email" inputmode="email" placeholder="tu@email.com" value="'+email.replace(/"/g,'&quot;')+'"></div>'
+      +'<div id="rec-err1" style="color:var(--red);font-size:12px;margin-bottom:8px;display:none;"></div>'
+      +'<button class="btn btn-acc btn-full" id="rec-btn1" onclick="pedirCodigoRec()">Enviarme el código</button>'
+    +'</div>'
+    +'<div id="rec-paso2" style="display:none;">'
+      +'<div style="font-size:12.5px;color:var(--t2);line-height:1.6;margin-bottom:12px;" id="rec-aviso"></div>'
+      +'<div class="fg"><label>Código de 6 cifras</label><input type="text" id="rec-codigo" inputmode="numeric" maxlength="6" placeholder="000000" style="letter-spacing:6px;font-size:20px;text-align:center;"></div>'
+      +'<div class="fg"><label>Contraseña nueva</label><input type="password" id="rec-pw1" placeholder="Mínimo 8 caracteres"></div>'
+      +'<div class="fg"><label>Repítela</label><input type="password" id="rec-pw2" placeholder="Otra vez"></div>'
+      +'<div id="rec-err2" style="color:var(--red);font-size:12px;margin-bottom:8px;display:none;"></div>'
+      +'<button class="btn btn-green btn-full" id="rec-btn2" onclick="cambiarConCodigo()">Guardar y entrar</button>'
+      +'<div style="text-align:center;margin-top:10px;"><button class="btn btn-ghost btn-sm" onclick="pedirCodigoRec(true)">No me ha llegado: enviar otro</button></div>'
+    +'</div>'
+    +'<div class="modal-actions"><button class="btn btn-full" onclick="closeM(\'m-recuperar\')">Cancelar</button></div>'
+    +'</div></div>';
+  var old=document.getElementById('m-recuperar');
+  if(old) old.parentNode.removeChild(old);
+  var div=document.createElement('div');
+  div.innerHTML=html;
+  document.body.appendChild(div.firstChild);
+}
+window.abrirRecuperar=abrirRecuperar;
+
+async function pedirCodigoRec(reenvio){
+  var email=($('rec-email')&&$('rec-email').value||'').trim().toLowerCase();
+  var err=$('rec-err1'), btn=$('rec-btn1');
+  var fallo=function(t){ if(err){ err.textContent=t; err.style.display='block'; } };
+  if(err) err.style.display='none';
+  if(!email||email.indexOf('@')<0){ fallo('Escribe tu email'); return; }
+  if(!nubeWorker()){ fallo('Necesitas conexión con la nube para esto'); return; }
+  if(btn&&!reenvio){ btn.disabled=true; btn.textContent='Enviando...'; }
+  try{
+    await api('/api/recuperar',{email:email});
+    APP._recEmail=email;
+    $('rec-paso1').style.display='none';
+    $('rec-paso2').style.display='';
+    $('rec-aviso').innerHTML='Si <b>'+email.replace(/</g,'&lt;')+'</b> tiene cuenta, en un minuto recibirás un código. '
+      +'Mira también en spam. Caduca en 15 minutos.';
+    var c=$('rec-codigo'); if(c) c.focus();
+    if(reenvio) toast('Código reenviado');
+  }catch(e){
+    diagLog('RECUPERAR',e.message);
+    fallo('No se pudo conectar. Inténtalo en un momento.');
+  }finally{
+    if(btn){ btn.disabled=false; btn.textContent='Enviarme el código'; }
+  }
+}
+window.pedirCodigoRec=pedirCodigoRec;
+
+async function cambiarConCodigo(){
+  var codigo=($('rec-codigo').value||'').trim();
+  var p1=$('rec-pw1').value||'', p2=$('rec-pw2').value||'';
+  var err=$('rec-err2'), btn=$('rec-btn2');
+  var fallo=function(t){ if(err){ err.textContent=t; err.style.display='block'; } };
+  if(err) err.style.display='none';
+  if(!/^[0-9]{6}$/.test(codigo)){ fallo('El código son 6 cifras'); return; }
+  if(p1.length<8){ fallo('La contraseña debe tener al menos 8 caracteres'); return; }
+  if(p1!==p2){ fallo('Las dos contraseñas no coinciden'); return; }
+  if(btn){ btn.disabled=true; btn.textContent='Guardando...'; }
+  try{
+    var r=await api('/api/restablecer',{email:APP._recEmail,codigo:codigo,password:p1});
+    if(!r.d.ok){ fallo(r.d.error||'El código no es correcto o ha caducado'); return; }
+    closeM('m-recuperar');
+    toast('✓ Contraseña cambiada');
+    // Ya hay sesión abierta: se entra con la nueva contraseña.
+    var h=hashStr(p1);
+    await entrarConNube(APP._recEmail, p1, h);
+  }catch(e){
+    diagLog('RESTABLECER',e.message);
+    fallo('No se pudo conectar. Inténtalo en un momento.');
+  }finally{
+    if(btn){ btn.disabled=false; btn.textContent='Guardar y entrar'; }
+  }
+}
+window.cambiarConCodigo=cambiarConCodigo;
+
+// ── CAMBIAR LA CONTRASEÑA SABIENDO LA ACTUAL ─────────────────────────────
+function abrirCambiarClave(){
+  var html='<div class="modal-ov open" id="m-clave" onclick="if(event.target===this)closeM(\'m-clave\')">'
+    +'<div class="modal"><div class="modal-hnd"></div>'
+    +'<div class="modal-title">🔑 Cambiar contraseña</div>'
+    +'<div style="font-size:12.5px;color:var(--t2);line-height:1.6;margin-bottom:12px;">'
+      +'Al cambiarla se cerrará la sesión en los demás dispositivos.</div>'
+    +'<div class="fg"><label>Contraseña actual</label><input type="password" id="cl-act" placeholder="La de ahora"></div>'
+    +'<div class="fg"><label>Contraseña nueva</label><input type="password" id="cl-n1" placeholder="Mínimo 8 caracteres"></div>'
+    +'<div class="fg"><label>Repítela</label><input type="password" id="cl-n2" placeholder="Otra vez"></div>'
+    +'<div id="cl-err" style="color:var(--red);font-size:12px;margin-bottom:8px;display:none;"></div>'
+    +'<button class="btn btn-green btn-full" id="cl-btn" onclick="guardarClaveNueva()">Guardar</button>'
+    +'<div class="modal-actions"><button class="btn btn-full" onclick="closeM(\'m-clave\')">Cancelar</button></div>'
+    +'</div></div>';
+  var old=document.getElementById('m-clave');
+  if(old) old.parentNode.removeChild(old);
+  var div=document.createElement('div');
+  div.innerHTML=html;
+  document.body.appendChild(div.firstChild);
+}
+window.abrirCambiarClave=abrirCambiarClave;
+
+async function guardarClaveNueva(){
+  var act=$('cl-act').value||'', n1=$('cl-n1').value||'', n2=$('cl-n2').value||'';
+  var err=$('cl-err'), btn=$('cl-btn');
+  var fallo=function(t){ if(err){ err.textContent=t; err.style.display='block'; } };
+  if(err) err.style.display='none';
+  if(!act){ fallo('Escribe tu contraseña actual'); return; }
+  if(n1.length<8){ fallo('La nueva debe tener al menos 8 caracteres'); return; }
+  if(n1!==n2){ fallo('Las dos contraseñas no coinciden'); return; }
+  if(!nubeWorker()||!_tokenApi()){ fallo('Inicia sesión en la nube para cambiarla'); return; }
+  if(btn){ btn.disabled=true; btn.textContent='Guardando...'; }
+  try{
+    var r=await api('/api/clave',{actual:act,nueva:n1});
+    if(!r.d.ok){ fallo(r.d.error||'No se pudo cambiar'); return; }
+    var u=U(); if(u){ u.pw=hashStr(n1); saveAll(); }
+    closeM('m-clave');
+    toast('✓ Contraseña cambiada');
+  }catch(e){
+    diagLog('CLAVE',e.message);
+    fallo('No se pudo conectar. Inténtalo en un momento.');
+  }finally{
+    if(btn){ btn.disabled=false; btn.textContent='Guardar'; }
+  }
+}
+window.guardarClaveNueva=guardarClaveNueva;
+
 function hashStr(s){
   var h=0;for(var i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return h.toString(36);
 }
@@ -4645,6 +5242,8 @@ function initApp(){
       if(nubeWorker() && _tokenApi()) setTimeout(function(){ nubeSincronizar(true); }, 2500);
     }
   }catch(e){ diagLog('DUPLICADOS', e.message); }
+  // A las 4 semanas con los mismos ejercicios se propone variarlos.
+  setTimeout(function(){ try{ avisarMesociclo(); }catch(e){ diagLog('MESOCICLO', e.message); } }, 4000);
   updateUserSwitcher();
   checkSesionDraft();
   // Guardar borrador cada 5 segundos (+ inmediatamente en cada input/check)
@@ -5074,6 +5673,40 @@ window.toggleDay=function(hdr){
   var b=hdr.nextElementSibling,c=hdr.querySelector('.plan-chev');
   b.classList.toggle('open');c.classList.toggle('open');
 };
+
+// ── VARIAR LAS COMIDAS ────────────────────────────────────────────────────
+// Los menús ya cambian solos cada semana (la semilla incluye la semana del
+// año). Esto permite pedir un cambio cuando se quiera, sin esperar al lunes:
+// se suma un número a la semilla y el generador elige otros alimentos.
+//
+// Lo que NO cambia: las calorías y los macros (salen del perfil) ni el
+// filtrado de alergias e intolerancias, que se aplica igual que siempre.
+function variarComidas(){
+  var u=U(); if(!u) return;
+  var antesKcal=(u.macros&&u.macros.kcal)||0;
+  u.planNutAnterior=JSON.parse(JSON.stringify(u.planNut||{}));
+  u.semillaExtra=(u.semillaExtra||0)+1;
+  u.macros=calcMacros(u);
+  u.planNut=getPlanNutricion(u,u.macros,normalizarRests(u.rests||[]));
+  saveAll();
+  renderPlanNut();
+  if(nubeWorker()) nubeSincronizar(true,true);
+  var mismas=((u.macros&&u.macros.kcal)||0)===antesKcal;
+  toast('✓ Menús nuevos'+(mismas?' · mismas calorías y macros':''));
+}
+window.variarComidas=variarComidas;
+
+function volverComidasAnterior(){
+  var u=U(); if(!u||!u.planNutAnterior) return;
+  u.planNut=u.planNutAnterior;
+  delete u.planNutAnterior;
+  u.semillaExtra=Math.max(0,(u.semillaExtra||1)-1);
+  saveAll();
+  renderPlanNut();
+  if(nubeWorker()) nubeSincronizar(true,true);
+  toast('Menús anteriores restaurados');
+}
+window.volverComidasAnterior=volverComidasAnterior;
 
 function renderPlanNut(){
   var u=U(); var dow=new Date().getDay(); var idxMap=[6,0,1,2,3,4,5]; var hoyIdx=idxMap[dow];
@@ -6012,6 +6645,7 @@ async function runIA(){
   var sesData=sesUlt7.map(function(s){return (s.tipo||'?')+' RPE '+(s.rpe||'?');}).join(', ')||'Sin sesiones registradas';
   var prompt='Eres un fisiologista clínico y entrenador certificado. Analiza este progreso semanal y responde EXACTAMENTE en el formato indicado, sin texto adicional.\n\n'
     +'DATOS:\n'
+    +(condicionesDe(u).length?'CONDICIONES DE SALUD (tenlas en cuenta y no propongas nada que las agrave): '+condicionesDe(u).map(nombreCondicion).join(', ')+(u.saludNotas?' · '+u.saludNotas:'')+String.fromCharCode(10):'')
     +'Género: '+(u.genero==='H'?'Hombre':'Mujer')+' · Edad: '+calcEdad(u.fnac)+' años · Objetivo: '+LABEL_OBJ[u.obj||'recomp']+'\n'
     +'Peso anterior: '+(prevMed.peso||u.peso||'—')+' kg → Actual: '+(lastMed.peso||u.peso||'—')+' kg\n'
     +'Cintura: '+(prevMed.cin||'—')+' → '+(lastMed.cin||'—')+' cm\n'
@@ -8997,6 +9631,7 @@ async function kongoSend(){
     +'- Calorías objetivo: '+mac.kcal+' kcal/día (BMR: '+mac.bmr+' | TDEE: '+mac.tdee+')\n'
     +'- Macros: '+mac.prot+'g proteína | '+mac.carbs+'g carbs | '+mac.grasa+'g grasa\n'
     +'- Déficit/Superávit: '+(mac.deficitReal||0)+'% | Agua: '+Math.round((mac.agua||2500)/100)/10+'L/día\n'
+    +(condicionesDe(u).length?'- SALUD (no propongas ejercicios que lo agraven): '+condicionesDe(u).map(nombreCondicion).join(', ')+(u.saludNotas?'. '+u.saludNotas:'')+String.fromCharCode(10):'')
     +(u.rests&&u.rests.length?'- INTOLERANCIAS (excluir siempre): '+normalizarRests(u.rests).map(nombreAlergeno).join(', ')+'\n':'')
     +'- Últimas sesiones: '+sesRecientes+'\n'
     +'\nUsa estos datos exactos cuando respondas. Si preguntan sobre proteína, di exactamente '+( mac.prot)+'g. '
@@ -9301,7 +9936,7 @@ window.addHoraInicioHist=addHoraInicioHist;
 // Se guarda version, fecha y que casillas se marcaron, que es la prueba de
 // que el consentimiento se presto (art. 7.1: hay que poder demostrarlo).
 // ═══════════════════════════════════════════════════════════════════════════
-var LEGAL_VERSION='1.0';
+var LEGAL_VERSION='1.1';   // 1.1 (15/10/2026): se añaden las lesiones y condiciones de salud declaradas
 var LEGAL_KEY='specimen_legal';
 
 function legalAceptado(){
