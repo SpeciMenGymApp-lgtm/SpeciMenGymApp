@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="SpeciMen®">
@@ -62,11 +62,28 @@
       {src:_logoUri,sizes:"512x512",type:"image/webp",purpose:"any maskable"}
     ]
   };
-  var _blob=new Blob([JSON.stringify(_manifest)],{type:'application/json'});
-  var _url=URL.createObjectURL(_blob);
   var _link=document.createElement('link');
-  _link.rel='manifest';_link.href=_url;
+  _link.rel='manifest';
+  _link.href='manifest.webmanifest';
   document.currentScript.parentNode.appendChild(_link);
+  // Si ese archivo no está (por ejemplo en la copia de GitHub Pages), se
+  // vuelve al manifiesto de siempre para no quedarse sin ninguno.
+  fetch('manifest.webmanifest',{method:'GET'}).then(function(r){
+    if(r.ok) return;
+    throw new Error('sin archivo');
+  }).catch(function(){
+    var _blob=new Blob([JSON.stringify(_manifest)],{type:'application/json'});
+    _link.href=URL.createObjectURL(_blob);
+  });
+</script>
+<script>
+  // Copia local de la app para abrirla sin cobertura. Siempre intenta la
+  // red primero, así que al publicar una versión nueva se ve enseguida.
+  if('serviceWorker' in navigator && location.protocol==='https:'){
+    window.addEventListener('load',function(){
+      navigator.serviceWorker.register('sw.js').catch(function(){ /* sin archivo: la app funciona igual */ });
+    });
+  }
 </script>
 <title>SpeciMen® Gym App</title>
 <style>
@@ -91,11 +108,19 @@
   --teal:#5a9ab5;--tb:rgba(90,154,181,0.12);
   --r:10px;--rl:14px;
   --safe:env(safe-area-inset-bottom,0px);
+  /* Bordes del móvil. En un iPhone con isla dinámica el de arriba son unos
+     60px; en Android casi siempre 0. El navegador los calcula solo. */
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-left:env(safe-area-inset-left,0px);
+  --safe-right:env(safe-area-inset-right,0px);
 }
 html{height:100%;height:100dvh;}body{height:100%;height:100dvh;overflow:hidden;max-height:100dvh;}
-body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:15px;line-height:1.5;display:flex;flex-direction:column;}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:15px;line-height:1.5;display:flex;flex-direction:column;
+  /* Android: evita que al arrastrar hacia abajo se recargue la app y se
+     pierda lo que se está anotando en la sesión. */
+  overscroll-behavior-y:contain;}
 
-.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 16px;height:54px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:10;}
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 16px;height:calc(54px + env(safe-area-inset-top));padding-top:env(safe-area-inset-top);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:10;}
 .topbar-logo{display:flex;align-items:center;flex-shrink:0;}
 .topbar-title{font-size:13px;font-weight:600;color:var(--t2);}
 .user-switch{display:flex;gap:4px;}
@@ -103,7 +128,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .user-btn.active-m{background:var(--accb);color:var(--acc2);border-color:var(--acc);}
 .user-btn.active-f{background:var(--pb);color:var(--pink);border-color:var(--pink);}
 
-.content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 13px;padding-bottom:calc(74px + var(--safe));min-height:0;}
+.content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px calc(13px + var(--safe-right)) 14px calc(13px + var(--safe-left));padding-bottom:calc(74px + var(--safe));min-height:0;}
 
 .bnav{position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid var(--border);display:flex;padding-bottom:var(--safe);z-index:100;}
 .bn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 2px 7px;border:none;background:transparent;color:var(--t3);font-size:9px;font-weight:500;cursor:pointer;gap:2px;min-height:52px;transition:color 0.15s;}
@@ -191,7 +216,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 
 .modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:200;align-items:flex-end;justify-content:center;}
 .modal-ov.open{display:flex;}
-.modal{background:var(--bg2);border-radius:20px 20px 0 0;padding:18px 16px;width:100%;max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.modal{background:var(--bg2);border-radius:20px 20px 0 0;padding:18px 16px calc(18px + var(--safe));width:100%;max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .modal-hnd{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 14px;}
 .modal-title{font-size:17px;font-weight:800;margin-bottom:14px;}
 .modal-actions{display:flex;gap:8px;margin-top:13px;padding-bottom:calc(var(--safe)+6px);}
@@ -209,7 +234,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .tip.warn{border-left-color:var(--amber);}
 
 .onb{position:fixed;inset:0;background:var(--bg);z-index:500;overflow-y:auto;-webkit-overflow-scrolling:touch;}
-.onb-inner{min-height:100%;display:flex;flex-direction:column;padding:28px 22px;padding-bottom:calc(var(--safe)+28px);}
+.onb-inner{min-height:100%;display:flex;flex-direction:column;padding:calc(28px + var(--safe-top)) calc(22px + var(--safe-right)) 28px calc(22px + var(--safe-left));padding-bottom:calc(var(--safe)+28px);}
 .onb-logo{font-size:26px;font-weight:900;letter-spacing:-1px;background:linear-gradient(135deg,#f0c040,#c9a84c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;}
 .onb-tag{display:inline-block;font-size:10px;font-weight:700;padding:3px 9px;border-radius:100px;background:var(--accb);color:var(--acc2);margin-bottom:22px;}
 .onb-title{font-size:24px;font-weight:900;letter-spacing:-0.5px;margin-bottom:6px;}
@@ -288,7 +313,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .serie-row{display:grid;grid-template-columns:28px 1fr 1fr auto;gap:7px;align-items:center;margin-bottom:7px;}
 .serie-num{width:26px;height:26px;border-radius:50%;background:var(--bg4);color:var(--t2);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .serie-num.done{background:var(--green);color:#fff;}
-.serie-input{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:inherit;font-size:14px;font-weight:600;padding:8px 10px;text-align:center;width:100%;outline:none;-webkit-appearance:none;}
+.serie-input{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:inherit;font-size:16px;font-weight:600;padding:8px 10px;text-align:center;width:100%;outline:none;-webkit-appearance:none;}
 .serie-input:focus{border-color:var(--acc);}
 .serie-input.filled{border-color:var(--green);background:rgba(34,197,94,0.06);}
 .serie-check{width:32px;height:32px;border-radius:8px;border:2px solid var(--border2);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;transition:all 0.15s;}
@@ -449,9 +474,9 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 <style>
 #legal-gate{position:fixed;inset:0;background:var(--bg);z-index:9500;display:none;flex-direction:column;}
 #legal-gate.on{display:flex;}
-#lg-head{flex-shrink:0;padding:calc(var(--safe) + 14px) 18px 12px;border-bottom:1px solid var(--border);background:var(--bg2);}
+#lg-head{flex-shrink:0;padding:calc(var(--safe-top) + 14px) calc(var(--safe-right) + 18px) 12px calc(var(--safe-left) + 18px);border-bottom:1px solid var(--border);background:var(--bg2);}
 #lg-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 18px 20px;}
-#lg-foot{flex-shrink:0;padding:12px 16px calc(var(--safe) + 12px);border-top:1px solid var(--border);background:var(--bg2);}
+#lg-foot{flex-shrink:0;padding:12px calc(var(--safe-right) + 16px) calc(var(--safe) + 12px) calc(var(--safe-left) + 16px);border-top:1px solid var(--border);background:var(--bg2);}
 #lg-body h2{font-size:14px;color:var(--acc2);margin:20px 0 7px;letter-spacing:.02em;}
 #lg-body h3{font-size:12.5px;color:var(--text);margin:14px 0 5px;}
 #lg-body p,#lg-body li{font-size:12.5px;line-height:1.72;color:var(--t2);margin-bottom:8px;}
@@ -1283,7 +1308,8 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
         <button class="btn btn-full" onclick="abrirCambiarClave()" style="margin-bottom:8px;font-size:13px;">🔑 Cambiar mi contraseña</button>
     <button class="btn btn-full" onclick="verConsentimientos()" style="margin-bottom:8px;font-size:13px;">🔒 Consentimientos y mis derechos</button>
         <button class="btn btn-full" onclick="verDocumentoLegal()" style="margin-bottom:8px;font-size:13px;">📄 Términos y política de privacidad</button>
-        <button class="btn btn-full" onclick="verDiagnostico()" style="margin-bottom:8px;font-size:13px;">🩺 Diagnóstico y estado de la app</button>
+        <button class="btn btn-full" onclick="instalarApp()" style="margin-bottom:8px;font-size:13px;">📲 Instalar la app en este teléfono</button>
+    <button class="btn btn-full" onclick="verDiagnostico()" style="margin-bottom:8px;font-size:13px;">🩺 Diagnóstico y estado de la app</button>
         </div>
       </details>
     </div>
@@ -1551,21 +1577,64 @@ function saveSesionDraft(){
       campos: campos,
       ts: Date.now()
     };
-    localStorage.setItem(SES_DRAFT_KEY,JSON.stringify(draft));
-  }catch(e){}
+    var texto=JSON.stringify(draft);
+    // La copia anterior se conserva: si esta escritura falla a medias, el
+    // botón Recuperar todavía tiene de dónde tirar.
+    var previo=localStorage.getItem(SES_DRAFT_KEY);
+    if(previo && previo.length>40) localStorage.setItem(SES_DRAFT_KEY+"_prev", previo);
+    localStorage.setItem(SES_DRAFT_KEY,texto);
+    // Comprobar que de verdad se ha escrito (la memoria del móvil se llena).
+    if(localStorage.getItem(SES_DRAFT_KEY)!==texto) throw new Error("no se guardó entero");
+  }catch(e){
+    diagLog('BORRADOR','fallo al guardar: '+e.message);
+    try{
+      // Segundo intento sin lo que ocupa y no hace falta para recuperar.
+      var minimo={exTemp:(APP.exTemp||[]).map(function(ex){
+        return {id:ex.id,n:ex.n,mus:ex.mus,seriesPlan:ex.seriesPlan,repsPlan:ex.repsPlan,rir:ex.rir,series:ex.series,notas:ex.notas,extra:ex.extra};
+      }), tipo:APP._exTempTipo||'', diaIdx:APP._sesionDiaIdx||0, campos:(typeof leerCamposSesion==='function'?leerCamposSesion():{}), ts:Date.now()};
+      localStorage.setItem(SES_DRAFT_KEY,JSON.stringify(minimo));
+    }catch(e2){ toast('⚠️ No se puede guardar la sesión: memoria del móvil llena','var(--red)'); }
+  }
 }
+
+// Android cierra las apps en segundo plano: hay que guardar al salir.
+document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState==='hidden'){ try{ saveSesionDraft(); }catch(e){} }
+});
+window.addEventListener('pagehide',function(){ try{ saveSesionDraft(); }catch(e){} });
+window.addEventListener('blur',function(){ try{ saveSesionDraft(); }catch(e){} });
 function clearSesionDraft(){try{localStorage.removeItem(SES_DRAFT_KEY);}catch(e){}}
+// Devuelve el borrador con datos: el último, o la copia anterior si el
+// último se quedó vacío o corrupto.
+function _leerBorrador(){
+  var intentos=[SES_DRAFT_KEY, SES_DRAFT_KEY+'_prev'];
+  var mejor=null;
+  for(var i=0;i<intentos.length;i++){
+    try{
+      var raw=localStorage.getItem(intentos[i]);
+      if(!raw) continue;
+      var d=JSON.parse(raw);
+      if(!d) continue;
+      var series=0;
+      (d.exTemp||[]).forEach(function(ex){ (ex.series||[]).forEach(function(s){ if(s.done||s.kg||s.reps) series++; }); });
+      d._series=series;
+      if(!mejor || series>mejor._series) mejor=d;
+    }catch(e){}
+  }
+  return mejor;
+}
+window._leerBorrador=_leerBorrador;
+
 function checkSesionDraft(){
   try{
-    var raw=localStorage.getItem(SES_DRAFT_KEY);
-    if(!raw) return;
-    var d=JSON.parse(raw);
+    var d=_leerBorrador();
+    if(!d) return;
     if(!d || Date.now()-d.ts>24*3600*1000){clearSesionDraft();return;}
     var nEx=(d.exTemp||[]).length;
     // Series realmente anotadas, para que el aviso diga algo util
     var nSeries=0;
     (d.exTemp||[]).forEach(function(ex){
-      (ex.series||[]).forEach(function(s){ if(s.done||s.kg||s.reps) nSeries++; });
+      (ex.series||[]).forEach(function(s){ if(s.done||s.kg) nSeries++; });
     });
     if(!nEx && !nSeries) { clearSesionDraft(); return; }
     var mins=Math.round((Date.now()-d.ts)/60000);
@@ -1593,9 +1662,8 @@ window.descartarSesionDraft=descartarSesionDraft;
 
 function recoverSesionDraft(){
   try{
-    var raw=localStorage.getItem(SES_DRAFT_KEY);
-    if(!raw){toast('No hay borrador que recuperar','var(--amber)');return;}
-    var d=JSON.parse(raw);
+    var d=_leerBorrador();
+    if(!d){toast('No hay borrador que recuperar','var(--amber)');return;}
     var banner=document.getElementById('ses-recover-banner');
     if(banner) banner.remove();
 
@@ -1605,6 +1673,9 @@ function recoverSesionDraft(){
     // "Recuperar" borraba la sesion en lugar de traerla de vuelta.
     // Ahora se navega primero y se restaura despues.
     APP._sesionDiaIdx=d.diaIdx||0;
+    // Mientras se restaura, la pantalla no puede cargar la plantilla del
+    // día encima de lo anotado.
+    APP._restaurando=true;
     goTo('sesion');
 
     // Tipo de entreno antes que nada, para que el select no lo pise
@@ -1612,17 +1683,32 @@ function recoverSesionDraft(){
       var sel=$('sf-tipo');
       if(sel){
         var existe=[].slice.call(sel.options).some(function(o){return o.value===d.tipo;});
-        if(existe) sel.value=d.tipo;
+        if(!existe){
+          // El plan ha cambiado desde que se empezó: se añade igualmente
+          // para que el desplegable diga la verdad.
+          var o=document.createElement('option');
+          o.value=d.tipo; o.textContent=d.tipo;
+          sel.appendChild(o);
+        }
+        sel.value=d.tipo;
       }
     }
     APP.exTemp=d.exTemp||[];
     APP._exTempTipo=d.tipo||'';
     escribirCamposSesion(d.campos);
     renderExList();
+    // Se vuelve a pintar un instante después por si algo quedó en camino.
+    setTimeout(function(){
+      APP._restaurando=false;
+      APP.exTemp=d.exTemp||[];
+      APP._exTempTipo=d.tipo||'';
+      renderExList();
+      saveSesionDraft();
+    },350);
 
     var nSeries=0;
     (APP.exTemp||[]).forEach(function(ex){
-      (ex.series||[]).forEach(function(s){ if(s.done||s.kg||s.reps) nSeries++; });
+      (ex.series||[]).forEach(function(s){ if(s.done||s.kg) nSeries++; });
     });
     toast('✓ Sesión recuperada · '+nSeries+' series');
   }catch(e){
@@ -4113,14 +4199,17 @@ function openYouTube(url, titulo, canal){
     :url;
   var div=document.createElement('div');
   div.id='m-youtube';
-  div.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:10000;display:flex;flex-direction:column;';
+  div.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:10000;display:flex;flex-direction:column;'
+    +'padding:var(--safe-top) var(--safe-right) var(--safe) var(--safe-left);';
   div.innerHTML=
-    '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#111;flex-shrink:0;">'
-      +'<div style="font-size:13px;font-weight:700;color:#fff;max-width:80%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">▶ '+(titulo||'Tutorial')+'</div>'
-      +'<button onclick="document.getElementById(\'m-youtube\').remove()" style="background:#333;border:none;color:#fff;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;">✕ Cerrar</button>'
+    '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;background:#111;flex-shrink:0;min-height:56px;">'
+      +'<div style="font-size:13px;font-weight:700;color:#fff;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">▶ '+(titulo||'Tutorial')+'</div>'
+      +'<button onclick="document.getElementById(\'m-youtube\').remove()" style="background:#333;border:none;color:#fff;border-radius:10px;min-width:92px;min-height:44px;padding:0 14px;font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0;">✕ Cerrar</button>'
     +'</div>'
     +(videoId
-      ?'<iframe src="'+embedUrl+'" style="flex:1;width:100%;border:none;" allowfullscreen allow="autoplay;fullscreen" frameborder="0"></iframe>'
+      ?'<div style="flex:1;min-height:0;display:flex;align-items:center;justify-content:center;background:#000;">'
+         +'<iframe src="'+embedUrl+'" style="width:100%;max-width:calc((100vh - 170px) * 1.7778);aspect-ratio:16/9;max-height:100%;border:none;display:block;" allowfullscreen allow="autoplay;fullscreen" frameborder="0"></iframe>'
+       +'</div>'
       :'<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;">'
         +'<div style="color:#aaa;font-size:13px;">No se puede incrustar este video.</div>'
         +'<a href="'+url+'" target="_blank" rel="noopener" style="background:#FF0000;color:#fff;padding:12px 24px;border-radius:8px;font-weight:700;text-decoration:none;">Abrir en YouTube</a>'
@@ -4139,7 +4228,7 @@ window.openYouTube=openYouTube;
 // descartaron los de 'errores', opinión, comparativas y variantes distintas.
 // v=id · t=título · s=segundos · c=canal. El primero es el recomendado.
 // ═══════════════════════════════════════════════════════════════════════════
-var VIDEOS_MOV={"abduccion":[{"v":"HJLzMM_naPg","t":"Como realizar abducción en maquina correctamente","s":19,"c":"Abraham Ysas"},{"v":"QSPI-I5vjmw","t":"ABDUCCIÓN DE CADERA EN MÁQUINA","s":56,"c":"Laura Rozo | Médica esp. en nutrición humana"}],"abduccion_banda":[{"v":"GoeqVgJdWak","t":"Abducción de Cadera Sentado con Banda","s":40,"c":"Coach Luis Solís"},{"v":"qgwrbh4T1m0","t":"103. Abducción de cadera con banda elastica y piernas abiertas","s":17,"c":"Proet Ejercicio Terapéutico "}],"aduccion":[{"v":"ghrWOwqn5eM","t":"Usa correctamente maquina de abducciones y aducciones","s":18,"c":"Karen Zárate"},{"v":"zYYR_W9BTEQ","t":"Aducción de cadera [Máquina sentado]","s":14,"c":"Centro Wellness On"}],"air_bike":[{"v":"1K2GIpSd8ws","t":"How to Assault Air Bike in 15 seconds","s":15,"c":"The Gym In The North"},{"v":"NQUvO0ohAoE","t":"Assault Bike - Technique video Socials: @Paulpait","s":12,"c":"Perrin Paul"}],"aperturas_cable":[{"v":"BuCWCL6OEoU","t":"CÓMO HACER CRUCES DE POLEA SEGÚN TU OBJETIVO","s":51,"c":"Fit Generation"},{"v":"QEW6RO0O-ak","t":"Cómo hacer cable crossover/cruces en polea","s":17,"c":"AmCoder Fit"}],"aperturas_mancuernas":[{"v":"-4U8vckpVAU","t":"Como hacer las Aperturas de pectoral con mancuerna bien hechas?","s":23,"c":"Daniel Hernandez Rubio"},{"v":"089rPTZ3mEI","t":"Apertura con mancuernas en suelo","s":22,"c":"Clafitness"}],"battle_ropes":[{"v":"F_xkxgwiO0s","t":"CÓMO usar la Battle ROPE en el gym !","s":15,"c":"Andres Henriquez Reyes"},{"v":"XLYh2lLCv-I","t":"APRENDE A USAR LA BATTLE ROPE O CUERDA DE BATALLA !","s":59,"c":"Andres Henriquez Reyes"}],"bici_estatica":[{"v":"h2WtDZrLHmk","t":"Pasos para ajustar la bicicleta","s":54,"c":"Bestcycling"},{"v":"M9ODrHwSBXk","t":"Con ESTE CONSEJO, disfrutarás mejor del SPINNING","s":24,"c":"Corporación Municipal de Deportes de Peñalolén"}],"box_jump":[{"v":"L9l2YZ_TIZc","t":"Cómo saltar al cajon - Box jump de Crossfit","s":58,"c":"Training Norte · Academia TN"},{"v":"aSNHbD9pqWA","t":"Un tip con el que ganarás velocidad en tus saltos de cajón.","s":18,"c":"Alvaro Andrades"}],"buenos_dias":[{"v":"ap-omoO-ZAg","t":"Como hacer un buenos dias o good morning","s":48,"c":"El Mundo GYM"},{"v":"RGZd_udGVeE","t":"¿CÓMO HACER el BUENOS DÍAS?","s":32,"c":"Olaya Baker"}],"burpees":[{"v":"ojiK-zPu09I","t":"(Cámara lenta) Cómo hacer un burpee correctamente - Besttraining","s":52,"c":"Bestcycling"},{"v":"awbFx6HqWns","t":"Como hacer burpees correctamente","s":32,"c":"Runnea.com"}],"caminata_inclinada":[{"v":"fczGADaKC-k","t":"Caminar Cinta Inclinado","s":28,"c":"RepsDown"},{"v":"tBZVYkK8SDw","t":"Incline Walking On The Treadmill","s":15,"c":"Health & Fitness"}],"comba":[{"v":"AyZTUWP4ofI","t":"Tutorial para Aprender a Saltar la Cuerda como un BOXEADOR!","s":52,"c":"Asgardrope®"},{"v":"JKTdN8OfXzU","t":"Tutorial para aprender a saltar la cuerda como un BOXEADOR PROFESIONAL!","s":16,"c":"Asgardrope®"}],"crunch":[{"v":"HLAPlJhxqEE","t":"Cómo hacer CRUNCH ABDOMINAL CORRECTAMENTE","s":59,"c":"El Nivel Fit"},{"v":"BzYrN4o5X5o","t":"Guía completa para hacer crunch abdominal correctamente","s":28,"c":"ClaudiaFitness"}],"crunch_polea":[{"v":"p-kdPTKDgNs","t":"Cómo hacer CRUNCH en POLEA correctamente (Abdominales)","s":26,"c":"Fit Generation"},{"v":"xYIVO1nCm3E","t":"Crunch en polea alta","s":34,"c":"Priscilla_bc"}],"curl_arana":[{"v":"1MbBr8xkQac","t":"Curl Araña","s":53,"c":"Alberto Hiciano IFBB PRO"},{"v":"B_SDP425oEc","t":"Pasos para hacer el Spider Curl para biceps!","s":41,"c":"Tomy Medina"}],"curl_barra":[{"v":"MqYBweUzDT4","t":"Así se hace el curl de Bíceps con Barra","s":39,"c":"Gym Topz"},{"v":"QejmaMkb7eo","t":"Curl de bíceps con barra","s":34,"c":"Alberto Hiciano IFBB PRO"}],"curl_concentrado":[{"v":"-fWXrhX3hGI","t":"Como hacer curl concentrado con mancuerna","s":31,"c":"CosmicCoach"},{"v":"nqZMDLo8yHo","t":"CLAVES CURL CONCENTRADO","s":59,"c":"IRON Masters"}],"curl_ez":[{"v":"gGSLcJp6h18","t":"Como desarollar tus biceps con BARRA z","s":34,"c":"Maru lekhal"},{"v":"yaAyYKZ5iO0","t":"[Curl de bíceps] con Barra Z correctamente","s":19,"c":"fitnessdigital"}],"curl_femoral":[{"v":"9xbBr5Ytl8c","t":"Cómo Hacer Curl Femoral Tumbado en Máquina · Técnica Correcta","s":42,"c":"Vitar Club"},{"v":"wxtfjSYC9yY","t":"CURL FEMORAL ¿CUÁL HACER?","s":32,"c":"Fit Generation"}],"curl_femoral_sentado":[{"v":"CBCPBnMzsMI","t":"Curl Femoral Sentado en Máquina · Técnica Correcta","s":46,"c":"Vitar Club"},{"v":"XG2XVE_VcTM","t":"Estás DESAPROVECHANDO tu CURL FEMORAL SENTADO","s":20,"c":"Nowtrain"}],"curl_inclinado":[{"v":"jktjmrPmOrs","t":"Curl Biceps En Banco Inclinado Con Mancuernas","s":51,"c":"Coach Honorio Landa"},{"v":"2bzTfdB3j4M","t":"Curl en banco inclinado, hazlo bien así","s":30,"c":"Alberto Mareque"}],"curl_mancuernas":[{"v":"LQcQNJiVY24","t":"Cómo hacer Curl de Bíceps correctamente","s":13,"c":"Samuel Delgado"},{"v":"Q9FDIWJmEAM","t":"Cómo hacer CURL BÍCEPS Mancuerna de pie // Ejercicios Bíceps Brazos","s":12,"c":"Guille GTS Fitness"}],"curl_martillo":[{"v":"XhM67ihE3ks","t":"Curl martillo: hazlo así","s":42,"c":"Alberto Tuya"},{"v":"PzmSQcFSNPI","t":"El truco del curl MARTILLO","s":37,"c":"BlueGym Animation"}],"curl_nordico":[{"v":"B3miixeFsec","t":"Curl Nórdico 3 Formas de Adaptarlo para trabajar tus Isquios, Fortalecerlos + Prevenir Lesiones","s":57,"c":"Ninolift"},{"v":"QZdcn8POwbw","t":"Curl Nórdico desde cero! (Técnica Correcta)","s":15,"c":"Miguel Leon Trainer"}],"curl_polea":[{"v":"vDnOrc_bZKM","t":"ASÍ SE DEBE HACER EL CURL DE BÍCEPS EN POLEA","s":30,"c":"Haro Fitness"},{"v":"BNxez0L-9LQ","t":"CURL DE BICEPS EN POLEA BAJA","s":25,"c":"CARLOS Online Coach"}],"curl_predicador":[{"v":"uO5OUPTT5fE","t":"Como posicionarte curl predicador","s":15,"c":"CosmicCoach"},{"v":"BSiwAVGzRBI","t":"CURL SCOTT NO SUBAS DEL TODO POR FAVOR","s":57,"c":"IRON Masters"}],"dead_bug":[{"v":"i8-JzNik6VQ","t":"Dead Bug","s":52,"c":"Baptist Health"},{"v":"d3PjEIuyis8","t":"Dead Bug, Exercise Is Medicine, University of Arkansas","s":26,"c":"UARK College of Education and Health Professions"}],"dominadas":[{"v":"6E3tt4ajzSs","t":"CÓMO HACER UNA PULL-UP O DOMINADA (TÉCNICA PERFECTA)","s":48,"c":"coachcalistenia"},{"v":"aUqc3c1p6Os","t":"DOMINADAS: Cómo colocar nuestro cuerpo correctamente","s":37,"c":"Jéssica Martín Moreno"}],"elev_frontal":[{"v":"PTRTYb1ZZv0","t":"Cómo Hacer Elevaciones Frontales con Mancuernas Correctamente","s":21,"c":"Your House Fitness"},{"v":"jk7YrK79ciA","t":"Elevaciones Frontales con mancuernas","s":41,"c":"Alberto Hiciano IFBB PRO"}],"elev_lateral":[{"v":"lvUvnvXgh-Y","t":"TÉCNICA CORRECTA en ELEVACIONES LATERALES","s":29,"c":"Fit Generation"},{"v":"zEANAIh1l9g","t":"Aprende la tecnica correcta de elevaciones laterales con mancuernas","s":28,"c":"Karen Zárate"}],"elev_lateral_polea":[{"v":"SaoW-iSUxfk","t":"Cómo hacer Elevaciones Laterales en Polea","s":40,"c":"BlueGym Animation"},{"v":"2g-26KtNp1A","t":"Elevaciones laterales en polea baja","s":44,"c":"Priscilla_bc"}],"elev_piernas":[{"v":"KxWX2jGMe8I","t":"COMO HACER ELEVACION DE PIERNAS DE FORMA CORRECTA","s":28,"c":"soyjosefitness"},{"v":"hTm5SjiW4gY","t":"Elevaciones de piernas tumbado","s":49,"c":"Priscilla_bc"}],"elev_piernas_colgado":[{"v":"_jLskVdzS4o","t":"Hanging leg raise tutorial","s":44,"c":"Rod J Cooper "},{"v":"2n4UqRIJyk4","t":"How to Properly Perform Hanging Leg Raises With Good Form For Shredded Abs (Exercise Demonstration)","s":15,"c":"Gerardi Performance"}],"eliptica":[{"v":"MSA1ZZ0AWrs","t":"ELIPTICA · ¿Cómo usarla CORRECTAMENTE?","s":60,"c":"May Abad"},{"v":"-vPOM0ULsg0","t":"Cómo Usar la Bicicleta Elíptica en el Gimnasio · PROCLUB","s":36,"c":"Pro Club Panama"}],"encogimientos":[{"v":"QgokS_HikVo","t":"Encogimiento de hombros","s":52,"c":"Alberto Hiciano IFBB PRO"},{"v":"n-LJZYfNWxA","t":"Encogimientos para trapecio BIEN hechos","s":40,"c":"Ocean Fitness"}],"ext_cuadriceps":[{"v":"FtXooCm3wdQ","t":"La manera correcta de realizar las extensiones de cuadriceps (DÍA DE PIERNAS)","s":20,"c":"Chuyst"},{"v":"7zbn-i_fxGU","t":"EXTENSIONES DE CUÁDRICEPS: AJUSTA BIEN LA MÁQUINA","s":51,"c":"Trainologym"}],"ext_triceps_cabeza":[{"v":"LvYIcAEy1Ws","t":"EXTENSIÓN DE TRÍCEPS POR ENCIMA DE LA CABEZA CON MANCUERNA","s":15,"c":"NFIT"},{"v":"xiXJxlGKryY","t":"Get the most out of your overhead tricep extensions with this tip!","s":13,"c":"LisaFiitt Workouts"}],"ext_triceps_polea":[{"v":"a4Yxi1vyc2A","t":"TRICEPS CON POLEA CORRECTA EJECUCION","s":12,"c":"Educación Física MC"},{"v":"FELcywKlkqE","t":"Extensión de tríceps en polea alta - Hazlo bien","s":60,"c":"Galvistrainer"}],"face_pull":[{"v":"4otcO1StZHQ","t":"Cómo hacer un Facepull PERFECTO! Vídeo completo en la descripción","s":28,"c":"BlueGym Animation"},{"v":"CkIoZeOKfPw","t":"Haz el face pull de Esta manera","s":26,"c":"Maru lekhal"}],"flexiones":[{"v":"S44aVCTshH8","t":"Como hacer flexiones correctamente","s":42,"c":"Flaco Fuertaco"},{"v":"NCVSqd3cAgg","t":"COMO HACER TU PRIMERA FLEXIÓN","s":24,"c":"Lucius"}],"fondos":[{"v":"cvyZAIa7heU","t":"TÉCNICA CORRECTA de FONDOS en PARALELAS","s":58,"c":"Jéssica Martín Moreno"},{"v":"1fR3Ss8OFug","t":"Cómo hacer Fondos Correctamente","s":24,"c":"Arceo Fitness"}],"fondos_banco":[{"v":"hVwojhhQhj4","t":"Como hacer Fondos en Banco","s":23,"c":"Pipe Arenas"},{"v":"oVs-HluNKP0","t":"Está es la técnica correcta en los fondos en banco","s":15,"c":"Mas Barras"}],"frog_pump":[{"v":"S4zgfIb3k8M","t":"Pumpen tus GLÚTEOS con Frog pump","s":43,"c":"Maria Lopez Polo"},{"v":"RLKHj4RTSu0","t":"An easy tip for weighted frog pumps and glute bridges!","s":24,"c":"Bret Contreras Glute Guy"}],"gemelo":[{"v":"pfM1DK7SRH0","t":"Elevación de gemelos / GEMELOS","s":17,"c":"FIBER GYM"},{"v":"1BL4681pIz4","t":"697. Elevación de gemelos de pie con mancuernas","s":14,"c":"Proet Ejercicio Terapéutico "}],"gemelo_sentado":[{"v":"3ra-uyR1Aus","t":"GEMELO SENTADO correctamente","s":20,"c":"Martinhm"},{"v":"_LWs5rtRk_k","t":"Gemelos sentado","s":19,"c":"Licenciada Rocío Pedre"}],"hip_thrust":[{"v":"bE76E1sa5rA","t":"Técnica perfecta para Hip Thrust","s":33,"c":"Fit Generation"},{"v":"OSOP3JAApGk","t":"HIP THRUST TÉCNICA CORRECTA","s":22,"c":"Lee Ortiz"}],"hip_thrust_unilateral":[{"v":"RaKaj5gtk1A","t":"Realiza correctamente el hip thrust unilateral","s":17,"c":"Karen Zárate"},{"v":"alV5rbdX1ug","t":"HIP THRUST A UNA PIERNA · ¿Te ayuda a lograr unos glúteos más grandes?","s":60,"c":"Oscar Banderas | Nattybody"}],"hiperextensiones":[{"v":"neoUfYkJVwM","t":"Como hacer hiperextensiones correctamente para fortalecer lumbares sin lastimarte la espalda baja","s":43,"c":"Entrena inteligente"}],"hollow":[{"v":"YRmzConjl8c","t":"Cómo hacer el HOLLOW de forma correcta","s":28,"c":"Nachogst"},{"v":"lj_nWQiY3lE","t":"Cómo realizar hollow Hold","s":27,"c":"Camilo Avila Trainer"}],"jalon":[{"v":"TcYwpzaRS1I","t":"Cómo hacer Jalón de Pecho PERFECTO! Tenéis el vídeo completo en mi canal","s":49,"c":"BlueGym Animation"},{"v":"3e-76jcA91w","t":"Cómo hacer Jalón de Pecho PERFECTO! Vídeo completo en la descripción","s":45,"c":"BlueGym Animation"}],"kettlebell_swing":[{"v":"2gXtvqLa_T8","t":"Correctly Perform Kettlebell Swings!","s":60,"c":"Squat University"},{"v":"jwILQCx61ts","t":"Fix Your Kettlebell Swing","s":57,"c":"FitnessFAQs"}],"pajaros":[{"v":"Vhxgy-pj35I","t":"Cómo Hacer PÁJAROS Correctamente para el DELTOIDES POSTERIOR","s":16,"c":"Guille 3D"},{"v":"dnUpZK26C4A","t":"Pájaros Con Mancuernas - HAZLO BIEN !","s":43,"c":"Manuel Escalera"}],"pallof":[{"v":"WCKzrxJPEqo","t":"Press Pallof en Polea Técnica","s":60,"c":"Dra. Isabel Junio"},{"v":"ZUEtG54s1_s","t":"PRESS PALLOF","s":54,"c":"Priscilla_bc"}],"paseo_granjero":[{"v":"B_zT15qcucE","t":"CAMINATA DE GRANJERO. El dios de los trapecios","s":46,"c":"PREFIT-X"},{"v":"Q5NaIXAfjY4","t":"El paseo o Caminata del Granjero \"Farmers walk” El ejercicio mas importante que no estas haciendo!!!","s":32,"c":"Rob Diesel"}],"patada_gluteo":[{"v":"_RovolXS2m8","t":"Patada de glúteo en polea :técnica correcta","s":20,"c":"NATALI CAMERO "},{"v":"B9Fqo0KqeWc","t":"Patada glúteo polea baja","s":59,"c":"Priscilla_bc"}],"patada_triceps":[{"v":"35U1T7p8MME","t":"Patada Triceps de la manera correcta","s":19,"c":"Sergio Orduz"},{"v":"K2smm4Oohpw","t":"Ejecuta correctamente esta patada de Tríceps con mancuerna","s":17,"c":"Deportika Online"}],"peck_deck":[{"v":"GTZ0aQ7GMZo","t":"APERTURAS en máquina para PECTORAL [Contractora de PECHO]","s":26,"c":"Javi NewBody"},{"v":"vpfZk2kdlTM","t":"APERTURAS EN MÁQUINA PECK DECK / MARIPOSA.","s":15,"c":"Flor Fit"}],"peso_muerto":[{"v":"rzpikhhtwwA","t":"PESO MUERTO CONVENCIONAL · BARBELL DEADLIFT [EXPLICACIÓN TÉCNICA] **TIPS Y TRUCOS","s":60,"c":"Luis Serra"},{"v":"7BdVi5qJ7E4","t":"Cómo hacer peso muerto en 5 pasos","s":57,"c":"Jeremy Ethier en Español"}],"peso_muerto_sumo":[{"v":"10igkYVL4c0","t":"Cómo hacer un Sumo Deadlift","s":47,"c":"Squat University Español"},{"v":"YE7rtn57tP4","t":"Cómo hacer un PESO MUERTO SUMO","s":34,"c":"La Ciencia del Chándal"}],"plancha":[{"v":"4j8op027Ibk","t":"TÉCNICA para una PLANCHA perfecta y efectiva para tu ZONA ABDOMINAL","s":59,"c":"GABY WELLNESS"},{"v":"lsjf_EgsfXc","t":"ASI SE HACE LA PLANCHA ABDOMINAL","s":42,"c":"Angel Franquines"}],"plancha_lateral":[{"v":"45t3tTcRcKE","t":"PLANCHA LATERAL ISOMÉTRICA para ABDOMINALES · CÓMO SE HACE","s":34,"c":"APTA Vital Sport"},{"v":"qPtIWsI0Fws","t":"Ejercicio de plancha lateral","s":54,"c":"Fisiovalle Fisioterapia y Osteopatía"}],"plancha_toques":[{"v":"jstseIj_vDM","t":"Plancha alta con toque de hombros","s":53,"c":"GO Green Order"},{"v":"VVElHrIm5r4","t":"Toques de Hombro en Plancha (Plank Shoulder Taps)","s":22,"c":"ISoft Colombia"}],"pm_kettlebell":[{"v":"eqp8MP92idk","t":"Mejora tus de peso muerto con kettlebells","s":51,"c":"Mari Sanso Workouts"},{"v":"2Puq3mI6oLI","t":"KB deadlift - peso muerto con pesa rusa","s":15,"c":"Dra. Ana Karen Vázquez"}],"pm_rumano":[{"v":"BSLuRD7fZwc","t":"Cómo hacer peso muerto rumano (RDL) sin dolor de espalda","s":60,"c":"Squat University Español"},{"v":"8qNrTuZ0rXM","t":"PESO MUERTO RUMANO RDL · HAZLO CORRECTAMENTE","s":44,"c":"ATHLEAN-X Español"}],"pm_rumano_unilateral":[{"v":"V0SfMaC_t6c","t":"Peso muerto rumano unilateral","s":42,"c":"Priscilla_bc"},{"v":"YXjc7TURwfE","t":"PESO MUERTO RUMANO UNILATERAL CON MANCUERNA","s":35,"c":"CARLOS Online Coach"}],"prensa":[{"v":"mnmjGgfJ6Q0","t":"Como Hacer Ejercicios de Prensa de Pierna de Forma Efectiva","s":60,"c":"SHORTS ENTRENAMIENTO"},{"v":"wt_xO5AbCp8","t":"HAZ LA PRENSA DE PIERNAS BIEN, CRACK","s":27,"c":"Trainologym"}],"press_arnold":[{"v":"llERM60yGZc","t":"Cómo hacer un ARNOLD PRESS de la forma correcta","s":35,"c":"Ruben Stouth"},{"v":"wpsaMyaEJk4","t":"Press Arnold con mancuerna.","s":26,"c":"GymTravelerOrg"}],"press_banca":[{"v":"_avc-tV_v0A","t":"Técnica PRESS BANCA","s":40,"c":"Martinhm"},{"v":"wLayV1XggbM","t":"Cómo realizar el Press de Banca correctamente - GO fit","s":28,"c":"GOfit"}],"press_cerrado":[{"v":"v8z-nqlNfaE","t":"Cómo hacer un Press de Banca (agarre cerrado)","s":31,"c":"La Ciencia del Chándal"},{"v":"odbDcJ35444","t":"Press de Banca con AGARRE CERRADO ¿Lo haces bien? ·","s":30,"c":"Fit Generation"}],"press_declinado":[{"v":"KlLUp-LMq9o","t":"Cómo Hacer Press de Banca Declinado · Técnica y Consejos para un Pecho Más Fuerte","s":27,"c":"Eduardo Fitness"},{"v":"a2ObGBMss4M","t":"Cómo Hacer Press Declinado con Mancuernas · Ejercicio para Pecho”","s":20,"c":"Your House Fitness"}],"press_frances":[{"v":"L3bEz-vcdGU","t":"Cómo hacer PRESS FRANCÉS","s":32,"c":"BlueGym Animation"},{"v":"5Lafu9_9O_U","t":"COMO HACER CORRECTAMENTE EL PRESS FRANCÉS / ROMPECRANEOS.","s":14,"c":"Chriso Aesthetic"}],"press_hombro_mancuerna":[{"v":"sWJoAATDlGM","t":"PRESS de HOMBRO con MANCUERNAS (sentado)","s":38,"c":"Laura Rozo | Médica esp. en nutrición humana"},{"v":"IuR427toLXE","t":"Press de hombros con mancuernas, hazlo bien así","s":35,"c":"Alberto Mareque"}],"press_inclinado":[{"v":"HboHdKXrYG8","t":"CÓMO hacer un Press de Banca Inclinado con Barra PERFECTO","s":45,"c":"La Ciencia del Chándal"},{"v":"SqT0lZDPm-Y","t":"CÓMO EJECUTAR EL PRESS EN BANCA INCLINADA","s":28,"c":"CosmicCoach"}],"press_mancuernas":[{"v":"DfzDjXCO2Nw","t":"¿Cómo hacer PRESS DE PECHO con mancuernas?","s":24,"c":"FDR Fitness"},{"v":"JcNt92ufIzM","t":"Press plano con mancuerna.","s":31,"c":"GymTravelerOrg"}],"press_maquina":[{"v":"Nbh72taMf4w","t":"Hammer Strength Chest Press Demonstration","s":59,"c":"Life Fitness Australia"},{"v":"7HIn3hh9hQo","t":"Hammer Strength Flat Press","s":42,"c":"Parabellum Coaching"}],"press_militar":[{"v":"BTwSz8baoyc","t":"PRESS MILITAR ¡TÉCNICA CORRECTA!","s":59,"c":"FRANK SERAPIÓN"},{"v":"yaOyBuco_mY","t":"CLAVES para hacer correctamente el PRESS MILITAR","s":58,"c":"Powerexplosive"}],"puente_gluteo":[{"v":"vRHav61cjVU","t":"¿Cómo hacer PUENTE DE GLÚTEO?","s":38,"c":"FDR Fitness"},{"v":"UACIKae85Sk","t":"COMO HACER PUENTE DE GLÚTEOS","s":13,"c":"Paola | Entrenamiento de glúteo "}],"pullover_mancuerna":[{"v":"X0qV-Gs69MM","t":"Pullover con mancuerna: técnica perfecta para el pecho","s":54,"c":"karlos Doncel"},{"v":"Y2WPDYf4Zzw","t":"Cómo Hacer el Pullover con Mancuerna Correctamente","s":29,"c":"Your House Fitness"}],"pullover_polea":[{"v":"E7CiaycXvXU","t":"PULLOVER en POLEA ALTA [HAZLO ASÍ]","s":59,"c":"Javi NewBody"},{"v":"kXLRGQLISG4","t":"Pull over polea alta","s":57,"c":"Priscilla_bc"}],"remo_barra":[{"v":"VSdKfoQxj5o","t":"Como hacer el remo con barra","s":34,"c":"Maru lekhal"},{"v":"xyh5wKA5jBs","t":"Como hacer Remo con barra","s":16,"c":"Gym Topz"}],"remo_meadows":[{"v":"yTqX3JHtwUY","t":"Remo meadows","s":30,"c":"Instituto de Entrenamiento Personal"},{"v":"U2iIrowyRZc","t":"Remo Meadows/ Meadows Row","s":25,"c":"Mii Body - Dani Santolaya"}],"remo_menton":[{"v":"SZ9yjw3Fvic","t":"REMO al MENTÓN con BARRA","s":43,"c":"Laura Rozo | Médica esp. en nutrición humana"}],"remo_pendlay":[{"v":"BAf9AUf1IUQ","t":"Técnica remo pendlay con barra","s":47,"c":"Alexis Chamut"},{"v":"ICAibpi-2Vk","t":"Cómo hacer REMO PENDLAY paso a paso · Soy Powerlifter","s":22,"c":"Soy Powerlifter"}],"remo_polea":[{"v":"D_UXjlrZIBw","t":"Como hacer el Remo en polea baja","s":24,"c":"Maru lekhal"},{"v":"own3uEE4wP8","t":"Remo con polea, hazlo bien","s":25,"c":"Deportika Online"}],"remo_t":[{"v":"betz4CEWgxs","t":"TÉCNICA DE REMO EN T","s":29,"c":"Trillo"},{"v":"MzAh0xw_TKI","t":"REMO EN T · En menos de 1 minuto","s":43,"c":"Martinhm"}],"remo_unilateral":[{"v":"-RngKKzbEnI","t":"Cómo hacer el remo con mancuerna para una ESPALDA FUERTE","s":46,"c":"Julien LEPRETRE"},{"v":"N_KrUuUsg9k","t":"No sabes cómo hacer el remo unilateral con mancuerna ? Hazlo así","s":15,"c":"Asaad"}],"remoergometro":[{"v":"XSxsNjyes5c","t":"Te compartimos algunos tips para mejorar tu técnica de remo","s":12,"c":"Fitness Shop Guatemala"}],"rueda_abdominal":[{"v":"3D0gH8OYrAI","t":"Tutorial de la Rueda abdominal ¿Como usar el AB Roller?","s":54,"c":"Chuy Almada"},{"v":"cRy6GbL2QKY","t":"TUTORIAL de como EMPEZAR A USAR la RUEDA para ABDOMINALES","s":31,"c":"Johan Zambrano"}],"russian_twist":[{"v":"_d5cpAre7_w","t":"HOW TO PROPERLY DO RUSSIAN TWISTS","s":26,"c":"Colossus Fitness"},{"v":"iFQV6q4xRXM","t":"How to Actually Train the Obliques on Russian Twists / Pocket Pickers","s":12,"c":"TylerPath"}],"sentadilla":[{"v":"HW4NEytEiO0","t":"Cómo hacer sentadilla con barra correctamente","s":60,"c":"Galvistrainer"},{"v":"ZeOk4QLP0XQ","t":"Cómo hacer la sentadilla perfecta en 5 pasos thesaiyankiwi","s":60,"c":"The Saiyan Kiwi"}],"sentadilla_bulgara":[{"v":"-3d_wieNNHA","t":"Cómo realizar la Sentadilla Búlgara desde 0","s":59,"c":"Helys Fit"},{"v":"vNoLabSf5Mk","t":"La posición correcta en la sentadilla búlgara","s":13,"c":"Gym Topz"}],"sentadilla_frontal":[{"v":"SJ97z1-YVGs","t":"Técnica para Sentadilla Frontal","s":60,"c":"Dra. Isabel Junio"},{"v":"XhnCxbeMH_o","t":"Técnica de la sentadilla frontal o front squat","s":49,"c":"Juan Burpees"}],"sentadilla_goblet":[{"v":"lRYBbchqxtI","t":"HOW TO DO A GOBLET SQUAT","s":22,"c":"SquatCouple"},{"v":"ohgaarm26-c","t":"Sentadilla Goblet","s":60,"c":"mariadelastrainers"}],"sentadilla_hack":[{"v":"_K5qW_sENbg","t":"How to do HACK SQUAT MACHINE properlyComo hacer en correctamente","s":23,"c":"G Personal Trader"},{"v":"itmlCUc0P3k","t":"CÓMO HACER UNA SENTADILLA HACK - GO fit","s":39,"c":"GOfit"}],"sentadilla_sumo":[{"v":"6N38tqZ-6F4","t":"CONSEJOS PARA UNA SENTADILLA SUMO","s":60,"c":"Priscilla_bc"},{"v":"zOBlkYvFUQs","t":"Sentadilla sumo","s":38,"c":"Gala Trainer"}],"stairmaster":[{"v":"CEaPU7bVfjk","t":"How To Use the Stairmaster Correctly · Cómo Usar la Escaladora Correctamente","s":18,"c":"Santiago Tobon "},{"v":"6mYp_BNYD5Y","t":"The ONLY CORRECT way to use the stair master","s":12,"c":"TylerPath"}],"step_up":[{"v":"9XWxpd_kVko","t":"Técnica para Step-Ups o Subidas al Banco","s":55,"c":"Dra. Isabel Junio"},{"v":"yHyrYdgE36M","t":"COMO HACER STEP UP EN CAJON PARA GLÚTEOS","s":28,"c":"damaris Ximena07"}],"superman":[{"v":"MSO0yVf3Cvw","t":"EL EJERCICIO DEL SUPERMAN PARA TU ESPALDA","s":49,"c":"Marcos Sacristán | Fisioterapia a tu alcance"},{"v":"-oQLyLJb7tE","t":"Ejercicio Superman para dolor de espalda baja. Fortalece tu core, postura, estabilidad.","s":33,"c":"Quiropractico Monterrey"}],"trineo":[{"v":"JaYkEunOGU4","t":"CONSEJOS para el SLED PUSH.","s":60,"c":"Víctor Esparza | Entrenamiento híbrido"},{"v":"snlWx6b1qG4","t":"¿Te gustaría saber más de Sled push o empuje de trineo?","s":27,"c":"Eulises Hernández"}],"vacio_abdominal":[{"v":"vyva7cz7Nug","t":"Cómo hacer el “VACUUM” (vacío abdominal)⁉ -","s":50,"c":"Yeray Posing"},{"v":"epgNJZkdXSM","t":"Aprende como hacer hipopresivos, el vacío abdominal mejorará tu postura y aliviará tu dolor lumbar","s":50,"c":"yoelballega"}],"zancadas":[{"v":"Xcfs_3DMKlc","t":"(Cámara lenta) Cómo hacer una zancada correctamente - Besttraining","s":45,"c":"Bestcycling"},{"v":"m0ap8Io_kQs","t":"Cómo hacer ZANCADAS CORRECTAMENTE (para Glúteos)","s":33,"c":"Gluteoenforma"}],"zancadas_inversas":[{"v":"kz-UpxOKc0c","t":"ZANCADA INVERSA: ENFOQUE GLÚTEOS ! Desde cero!","s":34,"c":"Paula Suárez"},{"v":"m8lDdyiGtXc","t":"Zancadas alternas atrás","s":23,"c":"Coach Pablo Fraga"}],"kb_clean":[{"v":"IllQL3AlcYs","t":"Master the Kettlebell Clean | Kettlebell Athletes","s":30,"c":"Bij & Gab - Kettlebell Athletes"},{"v":"xQb9Tc3iQpI","t":"Kettlebell CLEAN ✅ #kettlebell","s":50,"c":"Zack Henderson"},{"v":"rbw6RjYXrA8","t":"Kettlebell Cleans Tips","s":16,"c":"Adriell mayes"},{"v":"3UKQ6dK3BWA","t":"Kettlebell cleans like a PRO","s":56,"c":"NOMAD Fitness"}],"kb_front_squat":[{"v":"tzqbe-Jb6xQ","t":"SENTADILLA FRONTAL CON KETTLEBELL","s":32,"c":"FRANK SERAPIÓN"},{"v":"rp-PBpxJpmU","t":"Kettlebell Front Rack Squat","s":18,"c":"Carl Hughes"},{"v":"2Gsr0ckOWi8","t":"Ejercicios con kettlebell :Sentadilla. frontal en posición de rack 1.5.","s":22,"c":"Sebastian"}],"kb_halo":[{"v":"HlNu0zaXNQg","t":"Entrenamiento: Kettlebell halo | Men's Health España","s":20,"c":"Men's Health España"},{"v":"QMZESgDILV4","t":"Standing Kettlebell Halo Exercise","s":15,"c":"Spine Science Front Desk"},{"v":"7oPYzH80bM4","t":"Standing Kettle Bell Halo","s":35,"c":"Kraken Exercise Library"}],"kb_pm_1pierna":[{"v":"p3upSmtEHbQ","t":"Peso muerto a una pierna con Kettlebell","s":16,"c":"Carlos Rodríguez Parejo"},{"v":"NJIYTf5aJx8","t":"Peso muerto a una pierna con pesa rusa 4 de 12 por pierna 🙌🏼💪","s":22,"c":"Entrenamiento fit"},{"v":"zkLGFTK9_CE","t":"⛔Peso muerto a una pierna. ✅ Kettlebells con piernas. Miembros inferiores con pesa rusa.","s":30,"c":"Jeronimo Milo"},{"v":"uyumlijTXG0","t":"Peso muerto a una pierna de la manera correcta","s":16,"c":"Deportika Online"}],"kb_press":[{"v":"nhpvy8LNKEw","t":"Cómo hacer press militar unilateral con kettlebell #jrfitonline #fitness #entrenamiento","s":26,"c":"JRFITONLINE"},{"v":"5iu2D0cz-Jk","t":"Press Militar con Kettlebell","s":15,"c":"Jesús Marqués Campillo"},{"v":"lpwFfvxWalQ","t":"Press militar con kettlebell - Infinite Strength","s":38,"c":"Shoshin Academy Costa Rica"}],"kb_press_suelo":[{"v":"HSBQV42cYkw","t":"Kettlebell Floor Press (Crush Grip)","s":15,"c":"Back to Barbell Rehabilitation & Performance"},{"v":"F9rjdbL51IE","t":"Press banco en suelo con Kettlebell","s":21,"c":"Coach.Bastian"},{"v":"d-MQfQmgTuQ","t":"press de pecho con kettlebells en el suelo","s":21,"c":"Anderson C. Ortega"}],"kb_remo_kb":[{"v":"lULHK5rvXEU","t":"SERRUCHO O REMO UNILATERAL PESA RUSA - @Byflorsosa_fit #bibliotecadeejercicios","s":20,"c":"Byflorsosa"},{"v":"LBIIm6gBTpQ","t":"Claves para hacer: Remo con Kettlebell","s":19,"c":"Instituto de Entrenamiento Personal"},{"v":"PzvvvZmNdq0","t":"Bent Over Kettlebell Row","s":23,"c":"Kraken Exercise Library"},{"v":"285t3qvq0eg","t":"CÓMO HACER UN REMO CON MANCUERNA / KETTLEBELL","s":19,"c":"Mauricio Fitness"}],"kb_snatch":[{"v":"ya--7q3Cm0I","t":"KETTLEBELL SNATCH. Explicación.","s":30,"c":"David Pintos"},{"v":"AnTTKDizpU8","t":"Snatch deportivo con Kettlebell / Kettlebell Snatch sportstyle","s":14,"c":"Norberto Torrero"},{"v":"i3vqWKtZBdU","t":"snatch variante con pesa rusa","s":18,"c":"sergio castillo ENTRENADOR ONLINE"}],"kb_swing_1m":[{"v":"SHeqA4jn-LE","t":"Swing kettlebell una mano alterna","s":19,"c":"ANA LOMBAO- FITNESS ANA"},{"v":"8UHn_KNfvr4","t":"Single Hand Kettlebell Swing","s":14,"c":"Think Fit"}],"kb_turkish":[{"v":"pue9vLSQGrY","t":"Master the Turkish Get Up","s":23,"c":"Bij & Gab - Kettlebell Athletes"},{"v":"XVEMTDlNLyU","t":"Kettlebell Turkish Get Up","s":13,"c":"Tribe Fitness"},{"v":"-Zsx2JTfGsU","t":"Turkish getup. #turkishgetup #TGU #kettlebell #kettlebells #hardstyle","s":25,"c":"Rebecca Rouse"}],"kb_windmill":[{"v":"2mQKCGg0brA","t":"Molino con kettlebell en 40 segundos (pesa rusa WINDMILL).","s":37,"c":"Jeronimo Milo"},{"v":"k1g44y2PsPY","t":"Kettlebell Windmill","s":17,"c":"Perform Physical Therapy and Wellness"},{"v":"EZWHnzAjctU","t":"Kettlebell Windmill Tutorial","s":60,"c":"Kettlebell Kings"}],"kb_zancada_rack":[{"v":"EvoMwBQ_dZQ","t":"Zancada hacia detrás front rack kettlebell homolateral","s":12,"c":"Juanma Gálvez | Entrenador personal online"},{"v":"Mk2GPDwX_dE","t":"Kettlebell Front Rack Reverse Lunge","s":14,"c":"Grown Strong"},{"v":"k-XLL527IBM","t":"Kettlebell Front Rack Lunge","s":19,"c":"Carl Hughes"},{"v":"uEnyqgbDyI0","t":"How to do a Single Rack Kettlebell Reverse Lunge, easy steps | Coach Sean #coachsean #howto #fitness","s":33,"c":"Coach Sean"}],"bw_arquero":[{"v":"bouCFhjGytc","t":"¿CÓMO HACER FLEXIONES DE ARQUERO? - Seric Andrés","s":33,"c":"Seric Andrés"},{"v":"rjhwgocBqow","t":"Truco para lograr las flexiones Archer","s":14,"c":"Gavyfit"},{"v":"ARawRw_9ltA","t":"ARCHER PUSH UPS - HAZLO DE ESTA MANERA! Calistenia | FLEXIONES ARQUERO","s":35,"c":"Olwyn Kubebarz"}],"bw_australiana":[{"v":"FxiuPz8xsQo","t":"DOMINADAS AUSTRALIANAS","s":30,"c":"CARLOS Online Coach"},{"v":"bEbh0uB94Bc","t":"Australian pull ups / Inverted rows / Dominadas australianas | Ejercicios calistenia | Pull exercise","s":35,"c":"NO GYM NO PROBLEM"},{"v":"FOHbel4wlzs","t":"AUSTRALIAN PULL UPS | Dominadas Australianas - HAZLO DE ESTA MANERA! Calistenia","s":36,"c":"Olwyn Kubebarz"},{"v":"5QWq0VcLE2I","t":"dominada australiana ó remo invertido fuerza en el core | inverted rows","s":53,"c":"calistenia para principiantes"}],"bw_diamante":[{"v":"bZJW_GR9jUk","t":"Técnica correcta en flexiones diamante ✅","s":17,"c":"Pipe Arenas"},{"v":"ryOSB7evhiI","t":"Flexiones Diamante","s":35,"c":"Alberto Hiciano IFBB PRO"}],"bw_escalador":[{"v":"ukJ81jb4Kh0","t":"Realiza los Mountain climbers de manera correcta #deportikashorts #shorts #ejercicio","s":19,"c":"Deportika Online"},{"v":"jIzWec7cSyc","t":"Mountain climbers o escalador de montaña","s":25,"c":"Roman Rosin Entrenador"},{"v":"tQkpdUWK8KU","t":"Home Exercise: Mountain climber","s":15,"c":"DIY Active"}],"bw_palmada":[{"v":"7-u6X4Yg3zs","t":"Flexiones pliométricas (palmada)","s":25,"c":"Six Sport"},{"v":"2As8lQYdJ8o","t":"COMO HACER FLEXIONES CON PALMADA","s":60,"c":"Cesar Borja"},{"v":"lPVWIs7fgDA","t":"2 Progresiones para Conseguir FLEXIONES con PALMADA #calisteniaparaprincipiantes #calistenia","s":49,"c":"Jéssica Martín Moreno"}],"bw_pike":[{"v":"If2jAXhKKtY","t":"Cómo hacer PIKE PUSH UPS con técnica perfecta","s":18,"c":"Paulo Iracheta"},{"v":"6esmbGzzF6w","t":"Posición Correcta Pike Push Ups","s":17,"c":"Arceo Fitness"},{"v":"fBbxrN74ELA","t":"Pike Push ups #gym #gymastics #crossfit #strenght","s":13,"c":"Martin Pazzaglia KIPOINT"},{"v":"eG20L9cl81w","t":"Pike Push Ups Made Easy (3 Steps)","s":16,"c":"Stozfit"}],"bw_pino_flexion":[{"v":"uy8caCUFhME","t":"Cómo hacer flexiones de pino por niveles 😱","s":18,"c":"PetruWorkout"},{"v":"zDwSXjDBR08","t":"Cómo Hacer Flexiones de Pino (Handstand Push-Ups) | Técnica Correcta y Puntos Clave #calistenia","s":54,"c":"Japp Calisthenics"},{"v":"862lhECl9Dk","t":"Como lograr el Pino a fuerza - Handstand Press Calistenia","s":18,"c":"Lautaro Pavlin"}],"bw_pistol":[{"v":"HPiZKt7OvlA","t":"Aprende a hacer pistols (sentadillas a una pierna)","s":60,"c":"CrossFit España"},{"v":"EVjBjRGQZME","t":"Como Hacer PISTOL SQUAT - Sentadilla a una pierna","s":60,"c":"Cesar Borja"},{"v":"IfESGr170DY","t":"Easiest ways to learn pistol squats (one leg squat tutorial) #calisthenics #pistolsquat","s":13,"c":"struckbyluck"},{"v":"2c0gUVLfBLs","t":"Aprende a hacer pistol squats desde cero #sentadillapistol #pistolsquat #sentadilla","s":60,"c":"Karen Zárate"}],"bw_sentadilla_libre":[{"v":"cqoNTr02fRk","t":"Cómo se hacen las SENTADILLAS correctamente✅","s":15,"c":"TRANSFÓRMATE LA VIDA"},{"v":"XHY2sT2hZXw","t":"Técnica correcta de la sentadilla libre sin peso - entrenamiento en casa","s":23,"c":"Juan José Garcia / Project180 / Running"},{"v":"IuZggeqWdec","t":"Sentadilla sin peso EJERCICIO","s":13,"c":"Andrea Sanchez"},{"v":"VHzmO9QMeJI","t":"¿Cómo hacer la sentadilla correctamente?","s":22,"c":"NAYLA Vlogs"}],"bw_sentadilla_salto":[{"v":"qEgNkdAK380","t":"Sentadilla con Salto medio✅ Técnica Correcta","s":12,"c":"ERRE Academy"},{"v":"2VoHEWxXG4s","t":"SENTADILLAS CON SALTO - ¿CÓMO HACERLAS CORRECTAMENTE?","s":40,"c":"Facu neyra"},{"v":"IiHH0EWo8-k","t":"Sentadillas Con Salto","s":22,"c":"Strong Runner"},{"v":"LLB7iwq3IG8","t":"Sentadilla con Saltos","s":26,"c":"ejercicios․com"}],"bw_tyson":[{"v":"AuHUzBCTpVk","t":"Flexiones tipo Mike Tyson. CALISTENIA 👍☕🚲","s":15,"c":"Victorio Altuve"},{"v":"QJUGZUZBeds","t":"Mike Tyson Pushup Explanation","s":13,"c":"One Minute Tutorial"},{"v":"0_FQgAuaxmo","t":"🔥Mike Tyson push ups. Best exercise for shoulders, chest, abs and legs at home","s":24,"c":"TIMUR AZIZOV"}],"bw_zancada_salto":[{"v":"1LIacGEMIbY","t":"Zancada con salto alterno - Lunge with alternate jump #shorts","s":35,"c":"Workoutmax"},{"v":"acLvV5Gwi7o","t":"How To: Jumping Lunges","s":23,"c":"Summit Performance Club"},{"v":"iJMsF7fzrOM","t":"JUMP LUNGE","s":17,"c":"Atomic Athlete"},{"v":"cIkkHg8YZQU","t":"Lunge, Jumping","s":32,"c":"FitnessBlender"}],"cb_footwork":[{"v":"fsKV88ZMzxQ","t":"¡MEJORA TU JUEGO DE PIES DE BOXEO PARA PRINCIPIANTES! Pt.2🥊 #boxeo #footwork #tips #fighter","s":19,"c":"Imbrserker"},{"v":"JfukX4C638g","t":"Todos los desplazamientos de boxeo 👌#boxeo #footwork #boxing #boxingtraining #parati #tutorial #fyp","s":24,"c":"team Sanchez"},{"v":"FNXyNs5xRJ4","t":"Los desplazamientos son fundamentales. Veamos un tutorial muy simple . #boxing #boxeo #boxinglife","s":32,"c":"Federico Devesa Boxing"},{"v":"a9QFTHrbUxg","t":"Mejora tu juego de piernas con estos drills🥊💪. #boxeo #footwork #boxingfootwork #boxingdrills","s":15,"c":"Gal Boxing"}],"cb_saco":[{"v":"RqndtL50Cw4","t":"💥 TRABAJO BASICO DE SACO💥 #boxeo #boxeoparaprincipiantes #entrenamientoboxeo #boxeoespañol","s":13,"c":"Gorilas Boxing Club"},{"v":"pNOzNe3jygw","t":"Trabajo de saco | técnica #k1 #boxing #artesmarciales #mma #sparring #kickboxing","s":14,"c":"Vajtan Shanava"},{"v":"dGNpkPQgTJk","t":"EJERCICIO DE SACO PARA GANAR RESISTENCIA EN PELAS🥊🔥🔝#boxeo #saco #tutorial #resistencia #fondo","s":60,"c":"VERNEDA BOXING CLUB"}],"cb_slam":[{"v":"TUyXIzxS7FM","t":"Medball slam o lanzamiento de balon medicinal contra el suelo","s":12,"c":"EASY FISIOTERAPIA"},{"v":"RzRJ1_zit-c","t":"Slam con balón medicinal al centro y laterales | Técnica correcta","s":12,"c":"Telmo Fit"},{"v":"VD0Q6Vyw6gY","t":"LANZAMIENTO DE BALON MEDICINAL | SLAM MED BALL 🔥 AUMENTA TU RENDIMIENTO **TIPS Y TRUCOS","s":31,"c":"Luis Serra"}],"cb_sombra":[{"v":"V-vRQ06mktI","t":"Boxeo de sombra EXPLICADO por un medallista olímpico","s":26,"c":"Tony Jeffries Español"},{"v":"zre3YPfpq0w","t":"FORMA CORRECTA DE HACER SOMBRA BOXEO?🤔🥊👊#boxeo #sombra #shadow #espejo #velocidad #comosehace","s":36,"c":"VERNEDA BOXING CLUB"},{"v":"UzkU-XB-ZJo","t":"Como hacer sombra🥊 #boxeo #fitness #ristomejide","s":56,"c":"Tinín Rodríguez"}],"cb_sprawl":[{"v":"9heWljEl4OI","t":"Cómo hacer un sprawl de forma correcta 👍🏽 #sprawl #mma #mmatraining #mmafighter #training #anitta","s":13,"c":"MMA COLOMBIA"},{"v":"_9j0hdWoSVs","t":"The Correct Way To Sprawl #wrestling #ironfaith","s":33,"c":"Iron Faith Wrestling"},{"v":"bibqTwj6uTc","t":"HOW TO SPRAWL - Ben Askren","s":31,"c":"BJJ Fanatics"}],"cb_sprint":[{"v":"I-mQy77zWMs","t":"Realizar Una Aceleración Correcta En El Sprint | KriptoAtletas","s":15,"c":"KriptoAtletas"},{"v":"4K66H-f3Uio","t":"Drills y Ejercicios De Técnica De Carrera Para Aumentar La Velocidad | KriptoAtletas","s":16,"c":"KriptoAtletas"},{"v":"GRMN4pw5Y8A","t":"Técnica de carrera #atletismo #sprint #velocidad #athletics","s":37,"c":"Profe Marina"}]};
+var VIDEOS_MOV={"abduccion":[{"v":"HJLzMM_naPg","t":"Como realizar abducción en maquina correctamente","s":19,"c":"Abraham Ysas"},{"v":"QSPI-I5vjmw","t":"ABDUCCIÓN DE CADERA EN MÁQUINA","s":56,"c":"Laura Rozo | Médica esp. en nutrición humana"}],"abduccion_banda":[{"v":"GoeqVgJdWak","t":"Abducción de Cadera Sentado con Banda","s":40,"c":"Coach Luis Solís"},{"v":"qgwrbh4T1m0","t":"103. Abducción de cadera con banda elastica y piernas abiertas","s":17,"c":"Proet Ejercicio Terapéutico "}],"aduccion":[{"v":"ghrWOwqn5eM","t":"Usa correctamente maquina de abducciones y aducciones","s":18,"c":"Karen Zárate"},{"v":"zYYR_W9BTEQ","t":"Aducción de cadera [Máquina sentado]","s":14,"c":"Centro Wellness On"}],"air_bike":[{"v":"1K2GIpSd8ws","t":"How to Assault Air Bike in 15 seconds","s":15,"c":"The Gym In The North"},{"v":"NQUvO0ohAoE","t":"Assault Bike - Technique video Socials: @Paulpait","s":12,"c":"Perrin Paul"}],"aperturas_cable":[{"v":"BuCWCL6OEoU","t":"CÓMO HACER CRUCES DE POLEA SEGÚN TU OBJETIVO","s":51,"c":"Fit Generation"},{"v":"QEW6RO0O-ak","t":"Cómo hacer cable crossover/cruces en polea","s":17,"c":"AmCoder Fit"}],"aperturas_mancuernas":[{"v":"-4U8vckpVAU","t":"Como hacer las Aperturas de pectoral con mancuerna bien hechas?","s":23,"c":"Daniel Hernandez Rubio"},{"v":"089rPTZ3mEI","t":"Apertura con mancuernas en suelo","s":22,"c":"Clafitness"}],"battle_ropes":[{"v":"F_xkxgwiO0s","t":"CÓMO usar la Battle ROPE en el gym !","s":15,"c":"Andres Henriquez Reyes"},{"v":"XLYh2lLCv-I","t":"APRENDE A USAR LA BATTLE ROPE O CUERDA DE BATALLA !","s":59,"c":"Andres Henriquez Reyes"}],"bici_estatica":[{"v":"h2WtDZrLHmk","t":"Pasos para ajustar la bicicleta","s":54,"c":"Bestcycling"},{"v":"M9ODrHwSBXk","t":"Con ESTE CONSEJO, disfrutarás mejor del SPINNING","s":24,"c":"Corporación Municipal de Deportes de Peñalolén"}],"box_jump":[{"v":"L9l2YZ_TIZc","t":"Cómo saltar al cajon - Box jump de Crossfit","s":58,"c":"Training Norte · Academia TN"},{"v":"aSNHbD9pqWA","t":"Un tip con el que ganarás velocidad en tus saltos de cajón.","s":18,"c":"Alvaro Andrades"}],"buenos_dias":[{"v":"ap-omoO-ZAg","t":"Como hacer un buenos dias o good morning","s":48,"c":"El Mundo GYM"},{"v":"RGZd_udGVeE","t":"¿CÓMO HACER el BUENOS DÍAS?","s":32,"c":"Olaya Baker"}],"burpees":[{"v":"ojiK-zPu09I","t":"(Cámara lenta) Cómo hacer un burpee correctamente - Besttraining","s":52,"c":"Bestcycling"},{"v":"awbFx6HqWns","t":"Como hacer burpees correctamente","s":32,"c":"Runnea.com"}],"caminata_inclinada":[{"v":"fczGADaKC-k","t":"Caminar Cinta Inclinado","s":28,"c":"RepsDown"},{"v":"tBZVYkK8SDw","t":"Incline Walking On The Treadmill","s":15,"c":"Health & Fitness"}],"comba":[{"v":"AyZTUWP4ofI","t":"Tutorial para Aprender a Saltar la Cuerda como un BOXEADOR!","s":52,"c":"Asgardrope®"},{"v":"JKTdN8OfXzU","t":"Tutorial para aprender a saltar la cuerda como un BOXEADOR PROFESIONAL!","s":16,"c":"Asgardrope®"}],"crunch":[{"v":"HLAPlJhxqEE","t":"Cómo hacer CRUNCH ABDOMINAL CORRECTAMENTE","s":59,"c":"El Nivel Fit"},{"v":"BzYrN4o5X5o","t":"Guía completa para hacer crunch abdominal correctamente","s":28,"c":"ClaudiaFitness"}],"crunch_polea":[{"v":"p-kdPTKDgNs","t":"Cómo hacer CRUNCH en POLEA correctamente (Abdominales)","s":26,"c":"Fit Generation"},{"v":"xYIVO1nCm3E","t":"Crunch en polea alta","s":34,"c":"Priscilla_bc"}],"curl_arana":[{"v":"1MbBr8xkQac","t":"Curl Araña","s":53,"c":"Alberto Hiciano IFBB PRO"},{"v":"B_SDP425oEc","t":"Pasos para hacer el Spider Curl para biceps!","s":41,"c":"Tomy Medina"}],"curl_barra":[{"v":"MqYBweUzDT4","t":"Así se hace el curl de Bíceps con Barra","s":39,"c":"Gym Topz"},{"v":"QejmaMkb7eo","t":"Curl de bíceps con barra","s":34,"c":"Alberto Hiciano IFBB PRO"}],"curl_concentrado":[{"v":"-fWXrhX3hGI","t":"Como hacer curl concentrado con mancuerna","s":31,"c":"CosmicCoach"},{"v":"nqZMDLo8yHo","t":"CLAVES CURL CONCENTRADO","s":59,"c":"IRON Masters"}],"curl_ez":[{"v":"gGSLcJp6h18","t":"Como desarollar tus biceps con BARRA z","s":34,"c":"Maru lekhal"},{"v":"yaAyYKZ5iO0","t":"[Curl de bíceps] con Barra Z correctamente","s":19,"c":"fitnessdigital"}],"curl_femoral":[{"v":"9xbBr5Ytl8c","t":"Cómo Hacer Curl Femoral Tumbado en Máquina · Técnica Correcta","s":42,"c":"Vitar Club"},{"v":"wxtfjSYC9yY","t":"CURL FEMORAL ¿CUÁL HACER?","s":32,"c":"Fit Generation"}],"curl_femoral_sentado":[{"v":"CBCPBnMzsMI","t":"Curl Femoral Sentado en Máquina · Técnica Correcta","s":46,"c":"Vitar Club"},{"v":"XG2XVE_VcTM","t":"Estás DESAPROVECHANDO tu CURL FEMORAL SENTADO","s":20,"c":"Nowtrain"}],"curl_inclinado":[{"v":"jktjmrPmOrs","t":"Curl Biceps En Banco Inclinado Con Mancuernas","s":51,"c":"Coach Honorio Landa"},{"v":"2bzTfdB3j4M","t":"Curl en banco inclinado, hazlo bien así","s":30,"c":"Alberto Mareque"}],"curl_mancuernas":[{"v":"LQcQNJiVY24","t":"Cómo hacer Curl de Bíceps correctamente","s":13,"c":"Samuel Delgado"},{"v":"Q9FDIWJmEAM","t":"Cómo hacer CURL BÍCEPS Mancuerna de pie // Ejercicios Bíceps Brazos","s":12,"c":"Guille GTS Fitness"}],"curl_martillo":[{"v":"XhM67ihE3ks","t":"Curl martillo: hazlo así","s":42,"c":"Alberto Tuya"},{"v":"PzmSQcFSNPI","t":"El truco del curl MARTILLO","s":37,"c":"BlueGym Animation"}],"curl_nordico":[{"v":"B3miixeFsec","t":"Curl Nórdico 3 Formas de Adaptarlo para trabajar tus Isquios, Fortalecerlos + Prevenir Lesiones","s":57,"c":"Ninolift"},{"v":"QZdcn8POwbw","t":"Curl Nórdico desde cero! (Técnica Correcta)","s":15,"c":"Miguel Leon Trainer"}],"curl_polea":[{"v":"vDnOrc_bZKM","t":"ASÍ SE DEBE HACER EL CURL DE BÍCEPS EN POLEA","s":30,"c":"Haro Fitness"},{"v":"BNxez0L-9LQ","t":"CURL DE BICEPS EN POLEA BAJA","s":25,"c":"CARLOS Online Coach"}],"curl_predicador":[{"v":"uO5OUPTT5fE","t":"Como posicionarte curl predicador","s":15,"c":"CosmicCoach"},{"v":"BSiwAVGzRBI","t":"CURL SCOTT NO SUBAS DEL TODO POR FAVOR","s":57,"c":"IRON Masters"}],"dead_bug":[{"v":"i8-JzNik6VQ","t":"Dead Bug","s":52,"c":"Baptist Health"},{"v":"d3PjEIuyis8","t":"Dead Bug, Exercise Is Medicine, University of Arkansas","s":26,"c":"UARK College of Education and Health Professions"}],"dominadas":[{"v":"6E3tt4ajzSs","t":"CÓMO HACER UNA PULL-UP O DOMINADA (TÉCNICA PERFECTA)","s":48,"c":"coachcalistenia"},{"v":"aUqc3c1p6Os","t":"DOMINADAS: Cómo colocar nuestro cuerpo correctamente","s":37,"c":"Jéssica Martín Moreno"}],"elev_frontal":[{"v":"PTRTYb1ZZv0","t":"Cómo Hacer Elevaciones Frontales con Mancuernas Correctamente","s":21,"c":"Your House Fitness"},{"v":"jk7YrK79ciA","t":"Elevaciones Frontales con mancuernas","s":41,"c":"Alberto Hiciano IFBB PRO"}],"elev_lateral":[{"v":"lvUvnvXgh-Y","t":"TÉCNICA CORRECTA en ELEVACIONES LATERALES","s":29,"c":"Fit Generation"},{"v":"zEANAIh1l9g","t":"Aprende la tecnica correcta de elevaciones laterales con mancuernas","s":28,"c":"Karen Zárate"}],"elev_lateral_polea":[{"v":"SaoW-iSUxfk","t":"Cómo hacer Elevaciones Laterales en Polea","s":40,"c":"BlueGym Animation"},{"v":"2g-26KtNp1A","t":"Elevaciones laterales en polea baja","s":44,"c":"Priscilla_bc"}],"elev_piernas":[{"v":"KxWX2jGMe8I","t":"COMO HACER ELEVACION DE PIERNAS DE FORMA CORRECTA","s":28,"c":"soyjosefitness"},{"v":"hTm5SjiW4gY","t":"Elevaciones de piernas tumbado","s":49,"c":"Priscilla_bc"}],"elev_piernas_colgado":[{"v":"_jLskVdzS4o","t":"Hanging leg raise tutorial","s":44,"c":"Rod J Cooper "},{"v":"2n4UqRIJyk4","t":"How to Properly Perform Hanging Leg Raises With Good Form For Shredded Abs (Exercise Demonstration)","s":15,"c":"Gerardi Performance"}],"eliptica":[{"v":"MSA1ZZ0AWrs","t":"ELIPTICA · ¿Cómo usarla CORRECTAMENTE?","s":60,"c":"May Abad"},{"v":"-vPOM0ULsg0","t":"Cómo Usar la Bicicleta Elíptica en el Gimnasio · PROCLUB","s":36,"c":"Pro Club Panama"}],"encogimientos":[{"v":"QgokS_HikVo","t":"Encogimiento de hombros","s":52,"c":"Alberto Hiciano IFBB PRO"},{"v":"n-LJZYfNWxA","t":"Encogimientos para trapecio BIEN hechos","s":40,"c":"Ocean Fitness"}],"ext_cuadriceps":[{"v":"FtXooCm3wdQ","t":"La manera correcta de realizar las extensiones de cuadriceps (DÍA DE PIERNAS)","s":20,"c":"Chuyst"},{"v":"7zbn-i_fxGU","t":"EXTENSIONES DE CUÁDRICEPS: AJUSTA BIEN LA MÁQUINA","s":51,"c":"Trainologym"}],"ext_triceps_cabeza":[{"v":"LvYIcAEy1Ws","t":"EXTENSIÓN DE TRÍCEPS POR ENCIMA DE LA CABEZA CON MANCUERNA","s":15,"c":"NFIT"},{"v":"xiXJxlGKryY","t":"Get the most out of your overhead tricep extensions with this tip!","s":13,"c":"LisaFiitt Workouts"}],"ext_triceps_polea":[{"v":"a4Yxi1vyc2A","t":"TRICEPS CON POLEA CORRECTA EJECUCION","s":12,"c":"Educación Física MC"},{"v":"FELcywKlkqE","t":"Extensión de tríceps en polea alta - Hazlo bien","s":60,"c":"Galvistrainer"}],"face_pull":[{"v":"4otcO1StZHQ","t":"Cómo hacer un Facepull PERFECTO! Vídeo completo en la descripción","s":28,"c":"BlueGym Animation"},{"v":"CkIoZeOKfPw","t":"Haz el face pull de Esta manera","s":26,"c":"Maru lekhal"}],"flexiones":[{"v":"S44aVCTshH8","t":"Como hacer flexiones correctamente","s":42,"c":"Flaco Fuertaco"},{"v":"NCVSqd3cAgg","t":"COMO HACER TU PRIMERA FLEXIÓN","s":24,"c":"Lucius"}],"fondos":[{"v":"cvyZAIa7heU","t":"TÉCNICA CORRECTA de FONDOS en PARALELAS","s":58,"c":"Jéssica Martín Moreno"},{"v":"1fR3Ss8OFug","t":"Cómo hacer Fondos Correctamente","s":24,"c":"Arceo Fitness"}],"fondos_banco":[{"v":"hVwojhhQhj4","t":"Como hacer Fondos en Banco","s":23,"c":"Pipe Arenas"},{"v":"oVs-HluNKP0","t":"Está es la técnica correcta en los fondos en banco","s":15,"c":"Mas Barras"}],"frog_pump":[{"v":"S4zgfIb3k8M","t":"Pumpen tus GLÚTEOS con Frog pump","s":43,"c":"Maria Lopez Polo"},{"v":"RLKHj4RTSu0","t":"An easy tip for weighted frog pumps and glute bridges!","s":24,"c":"Bret Contreras Glute Guy"}],"gemelo":[{"v":"pfM1DK7SRH0","t":"Elevación de gemelos / GEMELOS","s":17,"c":"FIBER GYM"},{"v":"1BL4681pIz4","t":"697. Elevación de gemelos de pie con mancuernas","s":14,"c":"Proet Ejercicio Terapéutico "}],"gemelo_sentado":[{"v":"3ra-uyR1Aus","t":"GEMELO SENTADO correctamente","s":20,"c":"Martinhm"},{"v":"_LWs5rtRk_k","t":"Gemelos sentado","s":19,"c":"Licenciada Rocío Pedre"}],"hip_thrust":[{"v":"bE76E1sa5rA","t":"Técnica perfecta para Hip Thrust","s":33,"c":"Fit Generation"},{"v":"OSOP3JAApGk","t":"HIP THRUST TÉCNICA CORRECTA","s":22,"c":"Lee Ortiz"}],"hip_thrust_unilateral":[{"v":"RaKaj5gtk1A","t":"Realiza correctamente el hip thrust unilateral","s":17,"c":"Karen Zárate"},{"v":"alV5rbdX1ug","t":"HIP THRUST A UNA PIERNA · ¿Te ayuda a lograr unos glúteos más grandes?","s":60,"c":"Oscar Banderas | Nattybody"}],"hiperextensiones":[{"v":"neoUfYkJVwM","t":"Como hacer hiperextensiones correctamente para fortalecer lumbares sin lastimarte la espalda baja","s":43,"c":"Entrena inteligente"}],"hollow":[{"v":"YRmzConjl8c","t":"Cómo hacer el HOLLOW de forma correcta","s":28,"c":"Nachogst"},{"v":"lj_nWQiY3lE","t":"Cómo realizar hollow Hold","s":27,"c":"Camilo Avila Trainer"}],"jalon":[{"v":"TcYwpzaRS1I","t":"Cómo hacer Jalón de Pecho PERFECTO! Tenéis el vídeo completo en mi canal","s":49,"c":"BlueGym Animation"},{"v":"3e-76jcA91w","t":"Cómo hacer Jalón de Pecho PERFECTO! Vídeo completo en la descripción","s":45,"c":"BlueGym Animation"}],"kettlebell_swing":[{"v":"2gXtvqLa_T8","t":"Correctly Perform Kettlebell Swings!","s":60,"c":"Squat University"},{"v":"jwILQCx61ts","t":"Fix Your Kettlebell Swing","s":57,"c":"FitnessFAQs"}],"pajaros":[{"v":"Vhxgy-pj35I","t":"Cómo Hacer PÁJAROS Correctamente para el DELTOIDES POSTERIOR","s":16,"c":"Guille 3D"},{"v":"dnUpZK26C4A","t":"Pájaros Con Mancuernas - HAZLO BIEN !","s":43,"c":"Manuel Escalera"}],"pallof":[{"v":"WCKzrxJPEqo","t":"Press Pallof en Polea Técnica","s":60,"c":"Dra. Isabel Junio"},{"v":"ZUEtG54s1_s","t":"PRESS PALLOF","s":54,"c":"Priscilla_bc"}],"paseo_granjero":[{"v":"B_zT15qcucE","t":"CAMINATA DE GRANJERO. El dios de los trapecios","s":46,"c":"PREFIT-X"},{"v":"Q5NaIXAfjY4","t":"El paseo o Caminata del Granjero \"Farmers walk” El ejercicio mas importante que no estas haciendo!!!","s":32,"c":"Rob Diesel"}],"patada_gluteo":[{"v":"_RovolXS2m8","t":"Patada de glúteo en polea :técnica correcta","s":20,"c":"NATALI CAMERO "},{"v":"B9Fqo0KqeWc","t":"Patada glúteo polea baja","s":59,"c":"Priscilla_bc"}],"patada_triceps":[{"v":"35U1T7p8MME","t":"Patada Triceps de la manera correcta","s":19,"c":"Sergio Orduz"},{"v":"K2smm4Oohpw","t":"Ejecuta correctamente esta patada de Tríceps con mancuerna","s":17,"c":"Deportika Online"}],"peck_deck":[{"v":"GTZ0aQ7GMZo","t":"APERTURAS en máquina para PECTORAL [Contractora de PECHO]","s":26,"c":"Javi NewBody"},{"v":"vpfZk2kdlTM","t":"APERTURAS EN MÁQUINA PECK DECK / MARIPOSA.","s":15,"c":"Flor Fit"}],"peso_muerto":[{"v":"rzpikhhtwwA","t":"PESO MUERTO CONVENCIONAL · BARBELL DEADLIFT [EXPLICACIÓN TÉCNICA] **TIPS Y TRUCOS","s":60,"c":"Luis Serra"},{"v":"7BdVi5qJ7E4","t":"Cómo hacer peso muerto en 5 pasos","s":57,"c":"Jeremy Ethier en Español"}],"peso_muerto_sumo":[{"v":"10igkYVL4c0","t":"Cómo hacer un Sumo Deadlift","s":47,"c":"Squat University Español"},{"v":"YE7rtn57tP4","t":"Cómo hacer un PESO MUERTO SUMO","s":34,"c":"La Ciencia del Chándal"}],"plancha":[{"v":"4j8op027Ibk","t":"TÉCNICA para una PLANCHA perfecta y efectiva para tu ZONA ABDOMINAL","s":59,"c":"GABY WELLNESS"},{"v":"lsjf_EgsfXc","t":"ASI SE HACE LA PLANCHA ABDOMINAL","s":42,"c":"Angel Franquines"}],"plancha_lateral":[{"v":"45t3tTcRcKE","t":"PLANCHA LATERAL ISOMÉTRICA para ABDOMINALES · CÓMO SE HACE","s":34,"c":"APTA Vital Sport"},{"v":"qPtIWsI0Fws","t":"Ejercicio de plancha lateral","s":54,"c":"Fisiovalle Fisioterapia y Osteopatía"}],"plancha_toques":[{"v":"jstseIj_vDM","t":"Plancha alta con toque de hombros","s":53,"c":"GO Green Order"},{"v":"VVElHrIm5r4","t":"Toques de Hombro en Plancha (Plank Shoulder Taps)","s":22,"c":"ISoft Colombia"}],"pm_kettlebell":[{"v":"eqp8MP92idk","t":"Mejora tus de peso muerto con kettlebells","s":51,"c":"Mari Sanso Workouts"},{"v":"2Puq3mI6oLI","t":"KB deadlift - peso muerto con pesa rusa","s":15,"c":"Dra. Ana Karen Vázquez"}],"pm_rumano":[{"v":"BSLuRD7fZwc","t":"Cómo hacer peso muerto rumano (RDL) sin dolor de espalda","s":60,"c":"Squat University Español"},{"v":"8qNrTuZ0rXM","t":"PESO MUERTO RUMANO RDL · HAZLO CORRECTAMENTE","s":44,"c":"ATHLEAN-X Español"}],"pm_rumano_unilateral":[{"v":"V0SfMaC_t6c","t":"Peso muerto rumano unilateral","s":42,"c":"Priscilla_bc"},{"v":"YXjc7TURwfE","t":"PESO MUERTO RUMANO UNILATERAL CON MANCUERNA","s":35,"c":"CARLOS Online Coach"}],"prensa":[{"v":"mnmjGgfJ6Q0","t":"Como Hacer Ejercicios de Prensa de Pierna de Forma Efectiva","s":60,"c":"SHORTS ENTRENAMIENTO"},{"v":"wt_xO5AbCp8","t":"HAZ LA PRENSA DE PIERNAS BIEN, CRACK","s":27,"c":"Trainologym"}],"press_arnold":[{"v":"llERM60yGZc","t":"Cómo hacer un ARNOLD PRESS de la forma correcta","s":35,"c":"Ruben Stouth"},{"v":"wpsaMyaEJk4","t":"Press Arnold con mancuerna.","s":26,"c":"GymTravelerOrg"}],"press_banca":[{"v":"_avc-tV_v0A","t":"Técnica PRESS BANCA","s":40,"c":"Martinhm"},{"v":"wLayV1XggbM","t":"Cómo realizar el Press de Banca correctamente - GO fit","s":28,"c":"GOfit"}],"press_cerrado":[{"v":"v8z-nqlNfaE","t":"Cómo hacer un Press de Banca (agarre cerrado)","s":31,"c":"La Ciencia del Chándal"},{"v":"odbDcJ35444","t":"Press de Banca con AGARRE CERRADO ¿Lo haces bien? ·","s":30,"c":"Fit Generation"}],"press_declinado":[{"v":"KlLUp-LMq9o","t":"Cómo Hacer Press de Banca Declinado · Técnica y Consejos para un Pecho Más Fuerte","s":27,"c":"Eduardo Fitness"},{"v":"a2ObGBMss4M","t":"Cómo Hacer Press Declinado con Mancuernas · Ejercicio para Pecho”","s":20,"c":"Your House Fitness"}],"press_frances":[{"v":"L3bEz-vcdGU","t":"Cómo hacer PRESS FRANCÉS","s":32,"c":"BlueGym Animation"},{"v":"5Lafu9_9O_U","t":"COMO HACER CORRECTAMENTE EL PRESS FRANCÉS / ROMPECRANEOS.","s":14,"c":"Chriso Aesthetic"}],"press_hombro_mancuerna":[{"v":"sWJoAATDlGM","t":"PRESS de HOMBRO con MANCUERNAS (sentado)","s":38,"c":"Laura Rozo | Médica esp. en nutrición humana"},{"v":"IuR427toLXE","t":"Press de hombros con mancuernas, hazlo bien así","s":35,"c":"Alberto Mareque"}],"press_inclinado":[{"v":"HboHdKXrYG8","t":"CÓMO hacer un Press de Banca Inclinado con Barra PERFECTO","s":45,"c":"La Ciencia del Chándal"},{"v":"SqT0lZDPm-Y","t":"CÓMO EJECUTAR EL PRESS EN BANCA INCLINADA","s":28,"c":"CosmicCoach"}],"press_mancuernas":[{"v":"DfzDjXCO2Nw","t":"¿Cómo hacer PRESS DE PECHO con mancuernas?","s":24,"c":"FDR Fitness"},{"v":"JcNt92ufIzM","t":"Press plano con mancuerna.","s":31,"c":"GymTravelerOrg"}],"press_maquina":[{"v":"Nbh72taMf4w","t":"Hammer Strength Chest Press Demonstration","s":59,"c":"Life Fitness Australia"},{"v":"7HIn3hh9hQo","t":"Hammer Strength Flat Press","s":42,"c":"Parabellum Coaching"}],"press_militar":[{"v":"BTwSz8baoyc","t":"PRESS MILITAR ¡TÉCNICA CORRECTA!","s":59,"c":"FRANK SERAPIÓN"},{"v":"yaOyBuco_mY","t":"CLAVES para hacer correctamente el PRESS MILITAR","s":58,"c":"Powerexplosive"}],"puente_gluteo":[{"v":"vRHav61cjVU","t":"¿Cómo hacer PUENTE DE GLÚTEO?","s":38,"c":"FDR Fitness"},{"v":"UACIKae85Sk","t":"COMO HACER PUENTE DE GLÚTEOS","s":13,"c":"Paola | Entrenamiento de glúteo "}],"pullover_mancuerna":[{"v":"X0qV-Gs69MM","t":"Pullover con mancuerna: técnica perfecta para el pecho","s":54,"c":"karlos Doncel"},{"v":"Y2WPDYf4Zzw","t":"Cómo Hacer el Pullover con Mancuerna Correctamente","s":29,"c":"Your House Fitness"}],"pullover_polea":[{"v":"E7CiaycXvXU","t":"PULLOVER en POLEA ALTA [HAZLO ASÍ]","s":59,"c":"Javi NewBody"},{"v":"kXLRGQLISG4","t":"Pull over polea alta","s":57,"c":"Priscilla_bc"}],"remo_barra":[{"v":"VSdKfoQxj5o","t":"Como hacer el remo con barra","s":34,"c":"Maru lekhal"},{"v":"xyh5wKA5jBs","t":"Como hacer Remo con barra","s":16,"c":"Gym Topz"}],"remo_meadows":[{"v":"yTqX3JHtwUY","t":"Remo meadows","s":30,"c":"Instituto de Entrenamiento Personal"},{"v":"U2iIrowyRZc","t":"Remo Meadows/ Meadows Row","s":25,"c":"Mii Body - Dani Santolaya"}],"remo_menton":[{"v":"SZ9yjw3Fvic","t":"REMO al MENTÓN con BARRA","s":43,"c":"Laura Rozo | Médica esp. en nutrición humana"}],"remo_pendlay":[{"v":"BAf9AUf1IUQ","t":"Técnica remo pendlay con barra","s":47,"c":"Alexis Chamut"},{"v":"ICAibpi-2Vk","t":"Cómo hacer REMO PENDLAY paso a paso · Soy Powerlifter","s":22,"c":"Soy Powerlifter"}],"remo_polea":[{"v":"D_UXjlrZIBw","t":"Como hacer el Remo en polea baja","s":24,"c":"Maru lekhal"},{"v":"own3uEE4wP8","t":"Remo con polea, hazlo bien","s":25,"c":"Deportika Online"}],"remo_t":[{"v":"betz4CEWgxs","t":"TÉCNICA DE REMO EN T","s":29,"c":"Trillo"},{"v":"MzAh0xw_TKI","t":"REMO EN T · En menos de 1 minuto","s":43,"c":"Martinhm"}],"remo_unilateral":[{"v":"-RngKKzbEnI","t":"Cómo hacer el remo con mancuerna para una ESPALDA FUERTE","s":46,"c":"Julien LEPRETRE"},{"v":"N_KrUuUsg9k","t":"No sabes cómo hacer el remo unilateral con mancuerna ? Hazlo así","s":15,"c":"Asaad"}],"remoergometro":[{"v":"XSxsNjyes5c","t":"Te compartimos algunos tips para mejorar tu técnica de remo","s":12,"c":"Fitness Shop Guatemala"}],"rueda_abdominal":[{"v":"3D0gH8OYrAI","t":"Tutorial de la Rueda abdominal ¿Como usar el AB Roller?","s":54,"c":"Chuy Almada"},{"v":"cRy6GbL2QKY","t":"TUTORIAL de como EMPEZAR A USAR la RUEDA para ABDOMINALES","s":31,"c":"Johan Zambrano"}],"russian_twist":[{"v":"_d5cpAre7_w","t":"HOW TO PROPERLY DO RUSSIAN TWISTS","s":26,"c":"Colossus Fitness"},{"v":"iFQV6q4xRXM","t":"How to Actually Train the Obliques on Russian Twists / Pocket Pickers","s":12,"c":"TylerPath"}],"sentadilla":[{"v":"HW4NEytEiO0","t":"Cómo hacer sentadilla con barra correctamente","s":60,"c":"Galvistrainer"},{"v":"ZeOk4QLP0XQ","t":"Cómo hacer la sentadilla perfecta en 5 pasos thesaiyankiwi","s":60,"c":"The Saiyan Kiwi"}],"sentadilla_bulgara":[{"v":"-3d_wieNNHA","t":"Cómo realizar la Sentadilla Búlgara desde 0","s":59,"c":"Helys Fit"},{"v":"vNoLabSf5Mk","t":"La posición correcta en la sentadilla búlgara","s":13,"c":"Gym Topz"}],"sentadilla_frontal":[{"v":"SJ97z1-YVGs","t":"Técnica para Sentadilla Frontal","s":60,"c":"Dra. Isabel Junio"},{"v":"XhnCxbeMH_o","t":"Técnica de la sentadilla frontal o front squat","s":49,"c":"Juan Burpees"}],"sentadilla_goblet":[{"v":"lRYBbchqxtI","t":"HOW TO DO A GOBLET SQUAT","s":22,"c":"SquatCouple"},{"v":"ohgaarm26-c","t":"Sentadilla Goblet","s":60,"c":"mariadelastrainers"}],"sentadilla_hack":[{"v":"_K5qW_sENbg","t":"How to do HACK SQUAT MACHINE properlyComo hacer en correctamente","s":23,"c":"G Personal Trader"},{"v":"itmlCUc0P3k","t":"CÓMO HACER UNA SENTADILLA HACK - GO fit","s":39,"c":"GOfit"}],"sentadilla_sumo":[{"v":"6N38tqZ-6F4","t":"CONSEJOS PARA UNA SENTADILLA SUMO","s":60,"c":"Priscilla_bc"},{"v":"zOBlkYvFUQs","t":"Sentadilla sumo","s":38,"c":"Gala Trainer"}],"stairmaster":[{"v":"CEaPU7bVfjk","t":"How To Use the Stairmaster Correctly · Cómo Usar la Escaladora Correctamente","s":18,"c":"Santiago Tobon "},{"v":"6mYp_BNYD5Y","t":"The ONLY CORRECT way to use the stair master","s":12,"c":"TylerPath"}],"step_up":[{"v":"9XWxpd_kVko","t":"Técnica para Step-Ups o Subidas al Banco","s":55,"c":"Dra. Isabel Junio"},{"v":"yHyrYdgE36M","t":"COMO HACER STEP UP EN CAJON PARA GLÚTEOS","s":28,"c":"damaris Ximena07"}],"superman":[{"v":"MSO0yVf3Cvw","t":"EL EJERCICIO DEL SUPERMAN PARA TU ESPALDA","s":49,"c":"Marcos Sacristán | Fisioterapia a tu alcance"},{"v":"-oQLyLJb7tE","t":"Ejercicio Superman para dolor de espalda baja. Fortalece tu core, postura, estabilidad.","s":33,"c":"Quiropractico Monterrey"}],"trineo":[{"v":"JaYkEunOGU4","t":"CONSEJOS para el SLED PUSH.","s":60,"c":"Víctor Esparza | Entrenamiento híbrido"},{"v":"snlWx6b1qG4","t":"¿Te gustaría saber más de Sled push o empuje de trineo?","s":27,"c":"Eulises Hernández"}],"vacio_abdominal":[{"v":"vyva7cz7Nug","t":"Cómo hacer el “VACUUM” (vacío abdominal)⁉ -","s":50,"c":"Yeray Posing"},{"v":"epgNJZkdXSM","t":"Aprende como hacer hipopresivos, el vacío abdominal mejorará tu postura y aliviará tu dolor lumbar","s":50,"c":"yoelballega"}],"zancadas":[{"v":"Xcfs_3DMKlc","t":"(Cámara lenta) Cómo hacer una zancada correctamente - Besttraining","s":45,"c":"Bestcycling"},{"v":"m0ap8Io_kQs","t":"Cómo hacer ZANCADAS CORRECTAMENTE (para Glúteos)","s":33,"c":"Gluteoenforma"}],"zancadas_inversas":[{"v":"kz-UpxOKc0c","t":"ZANCADA INVERSA: ENFOQUE GLÚTEOS ! Desde cero!","s":34,"c":"Paula Suárez"},{"v":"m8lDdyiGtXc","t":"Zancadas alternas atrás","s":23,"c":"Coach Pablo Fraga"}],"kb_clean":[{"v":"IllQL3AlcYs","t":"Master the Kettlebell Clean | Kettlebell Athletes","s":30,"c":"Bij & Gab - Kettlebell Athletes"},{"v":"xQb9Tc3iQpI","t":"Kettlebell CLEAN ✅ #kettlebell","s":50,"c":"Zack Henderson"},{"v":"rbw6RjYXrA8","t":"Kettlebell Cleans Tips","s":16,"c":"Adriell mayes"},{"v":"3UKQ6dK3BWA","t":"Kettlebell cleans like a PRO","s":56,"c":"NOMAD Fitness"}],"kb_front_squat":[{"v":"tzqbe-Jb6xQ","t":"SENTADILLA FRONTAL CON KETTLEBELL","s":32,"c":"FRANK SERAPIÓN"},{"v":"rp-PBpxJpmU","t":"Kettlebell Front Rack Squat","s":18,"c":"Carl Hughes"},{"v":"2Gsr0ckOWi8","t":"Ejercicios con kettlebell :Sentadilla. frontal en posición de rack 1.5.","s":22,"c":"Sebastian"}],"kb_halo":[{"v":"HlNu0zaXNQg","t":"Entrenamiento: Kettlebell halo | Men's Health España","s":20,"c":"Men's Health España"},{"v":"QMZESgDILV4","t":"Standing Kettlebell Halo Exercise","s":15,"c":"Spine Science Front Desk"},{"v":"7oPYzH80bM4","t":"Standing Kettle Bell Halo","s":35,"c":"Kraken Exercise Library"}],"kb_pm_1pierna":[{"v":"p3upSmtEHbQ","t":"Peso muerto a una pierna con Kettlebell","s":16,"c":"Carlos Rodríguez Parejo"},{"v":"NJIYTf5aJx8","t":"Peso muerto a una pierna con pesa rusa 4 de 12 por pierna 🙌🏼💪","s":22,"c":"Entrenamiento fit"},{"v":"zkLGFTK9_CE","t":"⛔Peso muerto a una pierna. ✅ Kettlebells con piernas. Miembros inferiores con pesa rusa.","s":30,"c":"Jeronimo Milo"},{"v":"uyumlijTXG0","t":"Peso muerto a una pierna de la manera correcta","s":16,"c":"Deportika Online"}],"kb_press":[{"v":"nhpvy8LNKEw","t":"Cómo hacer press militar unilateral con kettlebell #jrfitonline #fitness #entrenamiento","s":26,"c":"JRFITONLINE"},{"v":"5iu2D0cz-Jk","t":"Press Militar con Kettlebell","s":15,"c":"Jesús Marqués Campillo"},{"v":"lpwFfvxWalQ","t":"Press militar con kettlebell - Infinite Strength","s":38,"c":"Shoshin Academy Costa Rica"}],"kb_press_suelo":[{"v":"HSBQV42cYkw","t":"Kettlebell Floor Press (Crush Grip)","s":15,"c":"Back to Barbell Rehabilitation & Performance"},{"v":"F9rjdbL51IE","t":"Press banco en suelo con Kettlebell","s":21,"c":"Coach.Bastian"},{"v":"d-MQfQmgTuQ","t":"press de pecho con kettlebells en el suelo","s":21,"c":"Anderson C. Ortega"}],"kb_remo_kb":[{"v":"lULHK5rvXEU","t":"SERRUCHO O REMO UNILATERAL PESA RUSA - @Byflorsosa_fit #bibliotecadeejercicios","s":20,"c":"Byflorsosa"},{"v":"LBIIm6gBTpQ","t":"Claves para hacer: Remo con Kettlebell","s":19,"c":"Instituto de Entrenamiento Personal"},{"v":"PzvvvZmNdq0","t":"Bent Over Kettlebell Row","s":23,"c":"Kraken Exercise Library"},{"v":"285t3qvq0eg","t":"CÓMO HACER UN REMO CON MANCUERNA / KETTLEBELL","s":19,"c":"Mauricio Fitness"}],"kb_snatch":[{"v":"ya--7q3Cm0I","t":"KETTLEBELL SNATCH. Explicación.","s":30,"c":"David Pintos"},{"v":"AnTTKDizpU8","t":"Snatch deportivo con Kettlebell / Kettlebell Snatch sportstyle","s":14,"c":"Norberto Torrero"},{"v":"i3vqWKtZBdU","t":"snatch variante con pesa rusa","s":18,"c":"sergio castillo ENTRENADOR ONLINE"}],"kb_swing_1m":[{"v":"SHeqA4jn-LE","t":"Swing kettlebell una mano alterna","s":19,"c":"ANA LOMBAO- FITNESS ANA"},{"v":"8UHn_KNfvr4","t":"Single Hand Kettlebell Swing","s":14,"c":"Think Fit"}],"kb_turkish":[{"v":"pue9vLSQGrY","t":"Master the Turkish Get Up","s":23,"c":"Bij & Gab - Kettlebell Athletes"},{"v":"XVEMTDlNLyU","t":"Kettlebell Turkish Get Up","s":13,"c":"Tribe Fitness"},{"v":"-Zsx2JTfGsU","t":"Turkish getup. #turkishgetup #TGU #kettlebell #kettlebells #hardstyle","s":25,"c":"Rebecca Rouse"}],"kb_windmill":[{"v":"2mQKCGg0brA","t":"Molino con kettlebell en 40 segundos (pesa rusa WINDMILL).","s":37,"c":"Jeronimo Milo"},{"v":"k1g44y2PsPY","t":"Kettlebell Windmill","s":17,"c":"Perform Physical Therapy and Wellness"},{"v":"EZWHnzAjctU","t":"Kettlebell Windmill Tutorial","s":60,"c":"Kettlebell Kings"}],"kb_zancada_rack":[{"v":"EvoMwBQ_dZQ","t":"Zancada hacia detrás front rack kettlebell homolateral","s":12,"c":"Juanma Gálvez | Entrenador personal online"},{"v":"Mk2GPDwX_dE","t":"Kettlebell Front Rack Reverse Lunge","s":14,"c":"Grown Strong"},{"v":"k-XLL527IBM","t":"Kettlebell Front Rack Lunge","s":19,"c":"Carl Hughes"},{"v":"uEnyqgbDyI0","t":"How to do a Single Rack Kettlebell Reverse Lunge, easy steps | Coach Sean #coachsean #howto #fitness","s":33,"c":"Coach Sean"}],"bw_arquero":[{"v":"bouCFhjGytc","t":"¿CÓMO HACER FLEXIONES DE ARQUERO? - Seric Andrés","s":33,"c":"Seric Andrés"},{"v":"rjhwgocBqow","t":"Truco para lograr las flexiones Archer","s":14,"c":"Gavyfit"},{"v":"ARawRw_9ltA","t":"ARCHER PUSH UPS - HAZLO DE ESTA MANERA! Calistenia | FLEXIONES ARQUERO","s":35,"c":"Olwyn Kubebarz"}],"bw_australiana":[{"v":"FxiuPz8xsQo","t":"DOMINADAS AUSTRALIANAS","s":30,"c":"CARLOS Online Coach"},{"v":"bEbh0uB94Bc","t":"Australian pull ups / Inverted rows / Dominadas australianas | Ejercicios calistenia | Pull exercise","s":35,"c":"NO GYM NO PROBLEM"},{"v":"FOHbel4wlzs","t":"AUSTRALIAN PULL UPS | Dominadas Australianas - HAZLO DE ESTA MANERA! Calistenia","s":36,"c":"Olwyn Kubebarz"},{"v":"5QWq0VcLE2I","t":"dominada australiana ó remo invertido fuerza en el core | inverted rows","s":53,"c":"calistenia para principiantes"}],"bw_diamante":[{"v":"bZJW_GR9jUk","t":"Técnica correcta en flexiones diamante ✅","s":17,"c":"Pipe Arenas"},{"v":"ryOSB7evhiI","t":"Flexiones Diamante","s":35,"c":"Alberto Hiciano IFBB PRO"}],"bw_escalador":[{"v":"ukJ81jb4Kh0","t":"Realiza los Mountain climbers de manera correcta #deportikashorts #shorts #ejercicio","s":19,"c":"Deportika Online"},{"v":"jIzWec7cSyc","t":"Mountain climbers o escalador de montaña","s":25,"c":"Roman Rosin Entrenador"},{"v":"tQkpdUWK8KU","t":"Home Exercise: Mountain climber","s":15,"c":"DIY Active"}],"bw_palmada":[{"v":"7-u6X4Yg3zs","t":"Flexiones pliométricas (palmada)","s":25,"c":"Six Sport"},{"v":"2As8lQYdJ8o","t":"COMO HACER FLEXIONES CON PALMADA","s":60,"c":"Cesar Borja"},{"v":"lPVWIs7fgDA","t":"2 Progresiones para Conseguir FLEXIONES con PALMADA #calisteniaparaprincipiantes #calistenia","s":49,"c":"Jéssica Martín Moreno"}],"bw_pike":[{"v":"If2jAXhKKtY","t":"Cómo hacer PIKE PUSH UPS con técnica perfecta","s":18,"c":"Paulo Iracheta"},{"v":"6esmbGzzF6w","t":"Posición Correcta Pike Push Ups","s":17,"c":"Arceo Fitness"},{"v":"fBbxrN74ELA","t":"Pike Push ups #gym #gymastics #crossfit #strenght","s":13,"c":"Martin Pazzaglia KIPOINT"},{"v":"eG20L9cl81w","t":"Pike Push Ups Made Easy (3 Steps)","s":16,"c":"Stozfit"}],"bw_pino_flexion":[{"v":"uy8caCUFhME","t":"Cómo hacer flexiones de pino por niveles 😱","s":18,"c":"PetruWorkout"},{"v":"zDwSXjDBR08","t":"Cómo Hacer Flexiones de Pino (Handstand Push-Ups) | Técnica Correcta y Puntos Clave #calistenia","s":54,"c":"Japp Calisthenics"},{"v":"862lhECl9Dk","t":"Como lograr el Pino a fuerza - Handstand Press Calistenia","s":18,"c":"Lautaro Pavlin"}],"bw_pistol":[{"v":"HPiZKt7OvlA","t":"Aprende a hacer pistols (sentadillas a una pierna)","s":60,"c":"CrossFit España"},{"v":"EVjBjRGQZME","t":"Como Hacer PISTOL SQUAT - Sentadilla a una pierna","s":60,"c":"Cesar Borja"},{"v":"IfESGr170DY","t":"Easiest ways to learn pistol squats (one leg squat tutorial) #calisthenics #pistolsquat","s":13,"c":"struckbyluck"},{"v":"2c0gUVLfBLs","t":"Aprende a hacer pistol squats desde cero #sentadillapistol #pistolsquat #sentadilla","s":60,"c":"Karen Zárate"}],"bw_sentadilla_libre":[{"v":"cqoNTr02fRk","t":"Cómo se hacen las SENTADILLAS correctamente✅","s":15,"c":"TRANSFÓRMATE LA VIDA"},{"v":"XHY2sT2hZXw","t":"Técnica correcta de la sentadilla libre sin peso - entrenamiento en casa","s":23,"c":"Juan José Garcia / Project180 / Running"},{"v":"IuZggeqWdec","t":"Sentadilla sin peso EJERCICIO","s":13,"c":"Andrea Sanchez"},{"v":"VHzmO9QMeJI","t":"¿Cómo hacer la sentadilla correctamente?","s":22,"c":"NAYLA Vlogs"}],"bw_sentadilla_salto":[{"v":"qEgNkdAK380","t":"Sentadilla con Salto medio✅ Técnica Correcta","s":12,"c":"ERRE Academy"},{"v":"2VoHEWxXG4s","t":"SENTADILLAS CON SALTO - ¿CÓMO HACERLAS CORRECTAMENTE?","s":40,"c":"Facu neyra"},{"v":"IiHH0EWo8-k","t":"Sentadillas Con Salto","s":22,"c":"Strong Runner"},{"v":"LLB7iwq3IG8","t":"Sentadilla con Saltos","s":26,"c":"ejercicios․com"}],"bw_tyson":[{"v":"AuHUzBCTpVk","t":"Flexiones tipo Mike Tyson. CALISTENIA 👍☕🚲","s":15,"c":"Victorio Altuve"},{"v":"QJUGZUZBeds","t":"Mike Tyson Pushup Explanation","s":13,"c":"One Minute Tutorial"},{"v":"0_FQgAuaxmo","t":"🔥Mike Tyson push ups. Best exercise for shoulders, chest, abs and legs at home","s":24,"c":"TIMUR AZIZOV"}],"bw_zancada_salto":[{"v":"1LIacGEMIbY","t":"Zancada con salto alterno - Lunge with alternate jump #shorts","s":35,"c":"Workoutmax"},{"v":"acLvV5Gwi7o","t":"How To: Jumping Lunges","s":23,"c":"Summit Performance Club"},{"v":"iJMsF7fzrOM","t":"JUMP LUNGE","s":17,"c":"Atomic Athlete"},{"v":"cIkkHg8YZQU","t":"Lunge, Jumping","s":32,"c":"FitnessBlender"}],"cb_footwork":[{"v":"fsKV88ZMzxQ","t":"¡MEJORA TU JUEGO DE PIES DE BOXEO PARA PRINCIPIANTES! Pt.2🥊 #boxeo #footwork #tips #fighter","s":19,"c":"Imbrserker"},{"v":"JfukX4C638g","t":"Todos los desplazamientos de boxeo 👌#boxeo #footwork #boxing #boxingtraining #parati #tutorial #fyp","s":24,"c":"team Sanchez"},{"v":"FNXyNs5xRJ4","t":"Los desplazamientos son fundamentales. Veamos un tutorial muy simple . #boxing #boxeo #boxinglife","s":32,"c":"Federico Devesa Boxing"},{"v":"a9QFTHrbUxg","t":"Mejora tu juego de piernas con estos drills🥊💪. #boxeo #footwork #boxingfootwork #boxingdrills","s":15,"c":"Gal Boxing"}],"cb_saco":[{"v":"RqndtL50Cw4","t":"💥 TRABAJO BASICO DE SACO💥 #boxeo #boxeoparaprincipiantes #entrenamientoboxeo #boxeoespañol","s":13,"c":"Gorilas Boxing Club"},{"v":"pNOzNe3jygw","t":"Trabajo de saco | técnica #k1 #boxing #artesmarciales #mma #sparring #kickboxing","s":14,"c":"Vajtan Shanava"},{"v":"dGNpkPQgTJk","t":"EJERCICIO DE SACO PARA GANAR RESISTENCIA EN PELAS🥊🔥🔝#boxeo #saco #tutorial #resistencia #fondo","s":60,"c":"VERNEDA BOXING CLUB"}],"cb_slam":[{"v":"TUyXIzxS7FM","t":"Medball slam o lanzamiento de balon medicinal contra el suelo","s":12,"c":"EASY FISIOTERAPIA"},{"v":"RzRJ1_zit-c","t":"Slam con balón medicinal al centro y laterales | Técnica correcta","s":12,"c":"Telmo Fit"},{"v":"VD0Q6Vyw6gY","t":"LANZAMIENTO DE BALON MEDICINAL | SLAM MED BALL 🔥 AUMENTA TU RENDIMIENTO **TIPS Y TRUCOS","s":31,"c":"Luis Serra"}],"cb_sombra":[{"v":"V-vRQ06mktI","t":"Boxeo de sombra EXPLICADO por un medallista olímpico","s":26,"c":"Tony Jeffries Español"},{"v":"zre3YPfpq0w","t":"FORMA CORRECTA DE HACER SOMBRA BOXEO?🤔🥊👊#boxeo #sombra #shadow #espejo #velocidad #comosehace","s":36,"c":"VERNEDA BOXING CLUB"},{"v":"UzkU-XB-ZJo","t":"Como hacer sombra🥊 #boxeo #fitness #ristomejide","s":56,"c":"Tinín Rodríguez"}],"cb_sprawl":[{"v":"9heWljEl4OI","t":"Cómo hacer un sprawl de forma correcta 👍🏽 #sprawl #mma #mmatraining #mmafighter #training #anitta","s":13,"c":"MMA COLOMBIA"},{"v":"_9j0hdWoSVs","t":"The Correct Way To Sprawl #wrestling #ironfaith","s":33,"c":"Iron Faith Wrestling"},{"v":"bibqTwj6uTc","t":"HOW TO SPRAWL - Ben Askren","s":31,"c":"BJJ Fanatics"}],"cb_sprint":[{"v":"I-mQy77zWMs","t":"Realizar Una Aceleración Correcta En El Sprint | KriptoAtletas","s":15,"c":"KriptoAtletas"},{"v":"4K66H-f3Uio","t":"Drills y Ejercicios De Técnica De Carrera Para Aumentar La Velocidad | KriptoAtletas","s":16,"c":"KriptoAtletas"},{"v":"GRMN4pw5Y8A","t":"Técnica de carrera #atletismo #sprint #velocidad #athletics","s":37,"c":"Profe Marina"}],"remo_renegado":[{"v":"Tw9Ee0YteK0","t":"Remo renegado con mancuernas 2.0","s":22,"c":"Juan Cabrera"},{"v":"DZ17Zeu274s","t":"Remo renegado. Remo con mancuernas . @Pro.fit.entrenamiento","s":14,"c":"Mat\\ías Soto"},{"v":"51nsbQctSzM","t":"Domina los Remos Renegados | Tutorial wOS","s":32,"c":"wOS By Andie Illanes"},{"v":"YUMXGLL2IKE","t":"Alternating Dumbbell Renegade Row","s":21,"c":"Kraken Exercise Library"}]};
 // Se mantiene vacío por compatibilidad: ya nada decide el vídeo por código.
 var YOUTUBE_LINKS={};
 
@@ -4199,8 +4288,8 @@ var MOV_PATRONES = [
   ['press_inclinado',      /press.*inclinad|inclinado.*press/],
   ['press_declinado',      /press.*declinad/],
   ['flexiones',            /flexion|push-?up/],
-  ['press_cerrado',        /agarre cerrado/],
-  ['press_maquina',        /hammer/],
+  ['press_cerrado',        /agarre cerrado|crush press/],
+  ['press_maquina',        /hammer|press.*(en )?maquina|maquina.*press/],
   ['press_hombro_mancuerna', /press (con )?mancuernas sentado|press militar sentado|press hombros mancuernas/],
   ['press_arnold',         /arnold/],
   ['press_militar',        /press militar|press hombros|press de hombros/],
@@ -4222,7 +4311,8 @@ var MOV_PATRONES = [
   ['remoergometro',        /remoerg|remo en maquina \(cardio\)/],
   ['remo_menton',          /menton|upright/],
   ['remo_barra',           /remo con barra/],
-  ['remo_unilateral',      /remo unilateral|kroc/],
+  ['remo_renegado',        /renegad/],
+  ['remo_unilateral',      /remo unilateral|kroc|remo.*(una mano|un brazo|con mancuerna)/],
   ['remo_polea',           /remo (en )?(cable|polea|maquina)|remo cable/],
   ['face_pull',            /face pull/],
   ['encogimientos',        /encogimiento/],
@@ -5421,7 +5511,85 @@ function switchUser(i){
 
 // ── NAVEGACIÓN ────────────────────────────────
 var TITLES={home:'Hoy',plan:'Plan semanal',sesion:'Nueva sesión',hist:'Historial',medidas:'Progreso',perfil:'Mi perfil',kongo:'Kongo — Entrenador IA'};
-function goTo(id){
+// Pila de pantallas para el botón atrás (Android).
+var _pilaPantallas=[];
+function _registrarAtras(id){
+  try{
+    if(_pilaPantallas[_pilaPantallas.length-1]===id) return;
+    _pilaPantallas.push(id);
+    history.pushState({pantalla:id},'');
+  }catch(e){}
+}
+// Cada vez que se abre una ventana emergente se añade un paso al historial,
+// para que el botón atrás de Android la cierre en lugar de salir de la app.
+// Instalación: en Android Chrome el propio navegador ofrece instalarla y
+// aquí se guarda ese aviso para poder lanzarlo desde un botón. En iPhone no
+// existe esa posibilidad, así que se explican los pasos.
+var _avisoInstalar=null;
+window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); _avisoInstalar=e; });
+function appInstalada(){
+  return window.matchMedia('(display-mode: standalone)').matches || navigator.standalone===true;
+}
+window.appInstalada=appInstalada;
+async function instalarApp(){
+  if(_avisoInstalar){
+    _avisoInstalar.prompt();
+    var r=await _avisoInstalar.userChoice;
+    _avisoInstalar=null;
+    if(r&&r.outcome==='accepted') toast('✓ App instalada');
+    return;
+  }
+  if(appInstalada()){ toast('Ya la tienes instalada'); return; }
+  var esIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  var pasos=esIOS
+    ? '<b>En el iPhone (Safari):</b><br>1. Toca el botón compartir <b>□↑</b> de abajo.<br>2. Desliza y elige <b>Añadir a pantalla de inicio</b>.<br>3. Pulsa <b>Añadir</b>.'
+    : '<b>En Android (Chrome):</b><br>1. Toca los <b>tres puntos ⋮</b> arriba a la derecha.<br>2. Elige <b>Instalar aplicación</b> o <b>Añadir a pantalla de inicio</b>.<br>3. Confirma con <b>Instalar</b>.';
+  var html='<div class="modal-ov open" id="m-instalar" onclick="if(event.target===this)closeM(\'m-instalar\')">'
+    +'<div class="modal"><div class="modal-hnd"></div>'
+    +'<div class="modal-title">📲 Instalar SpeciMen</div>'
+    +'<div style="font-size:13px;color:var(--t2);line-height:1.8;margin-bottom:12px;">'+pasos+'</div>'
+    +'<div style="font-size:12px;color:var(--t3);line-height:1.6;">Instalada se abre a pantalla completa, sin la barra del navegador, y funciona aunque te quedes sin cobertura.</div>'
+    +'<div class="modal-actions"><button class="btn btn-full" onclick="closeM(\'m-instalar\')">Entendido</button></div>'
+    +'</div></div>';
+  var old=document.getElementById('m-instalar'); if(old) old.parentNode.removeChild(old);
+  var div=document.createElement('div'); div.innerHTML=html; document.body.appendChild(div.firstChild);
+}
+window.instalarApp=instalarApp;
+
+function _vigilarVentanas(){
+  try{
+    new MutationObserver(function(cambios){
+      for(var i=0;i<cambios.length;i++){
+        var nuevos=cambios[i].addedNodes||[];
+        for(var j=0;j<nuevos.length;j++){
+          var n=nuevos[j];
+          if(n.nodeType===1 && n.classList && n.classList.contains('modal-ov') && n.classList.contains('open')){
+            try{ history.pushState({pantalla:'modal'},''); }catch(e){}
+            return;
+          }
+        }
+      }
+    }).observe(document.body,{childList:true});
+  }catch(e){}
+}
+if(document.readyState!=='loading') _vigilarVentanas(); else document.addEventListener('DOMContentLoaded',_vigilarVentanas);
+
+window.addEventListener('popstate',function(){
+  // Primero, cerrar lo que esté abierto encima.
+  var abierta=document.querySelector('.modal-ov.open');
+  if(abierta){
+    abierta.classList.remove('open');
+    try{ history.pushState({pantalla:'modal'},''); }catch(e){}
+    return;
+  }
+  _pilaPantallas.pop();
+  var previa=_pilaPantallas[_pilaPantallas.length-1];
+  if(previa){ goTo(previa, true); _registrarAtras(previa); }
+  else { try{ goTo('home', true); }catch(e){} }
+});
+
+function goTo(id, _sinHistorial){
+  if(!_sinHistorial) _registrarAtras(id);
   document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
   document.querySelectorAll('.bn').forEach(function(b){b.classList.remove('on');});
   $('sc-'+id).classList.add('active');
@@ -5613,14 +5781,14 @@ function renderPlanEj(){
     // Ejercicios al estilo Hevy
     var exsHtml=d.exs.map(function(e,exIdx){
       // Buscar mejor registro en sesiones pasadas
-      var bestKg=0, bestReps=0;
+      var bestKg=0, bestReps=0, bestInc=0;
       ses.forEach(function(s){
         (s.exs||[]).forEach(function(se){
           if(se.n===e.n||(se.id&&se.id===e.id)){
             (se.series||[]).forEach(function(sr){
               if(sr.done){
                 var kg=parseFloat(sr.kg)||0;
-                if(kg>bestKg){bestKg=kg;bestReps=parseInt(sr.reps)||0;}
+                if(kg>bestKg){bestKg=kg;bestReps=parseFloat(sr.reps)||0;bestInc=parseFloat(sr.inc)||0;}
               }
             });
           }
@@ -5639,7 +5807,7 @@ function renderPlanEj(){
               +'<span class="plan-sets-badge">'+e.s+' × '+e.r+'</span>'
               +e.mus+(e.rir!==undefined&&e.rir!==''?' · RIR '+e.rir:'')
             +'</div>'
-            +(hasPrev?(isCardioEx(e)?'<div class="plan-ex-pr">Último: '+bestReps+' km/h · '+bestKg+' min</div>':'<div class="plan-ex-pr">Mejor: '+bestKg+' kg × '+bestReps+' reps</div>'):'')
+            +(hasPrev?(isCardioEx(e)?'<div class="plan-ex-pr">Último: '+bestKg+' min · '+bestReps+' km/h'+(bestInc?' · '+bestInc+'% inclin.':'')+'</div>':'<div class="plan-ex-pr">Mejor: '+bestKg+' kg × '+bestReps+' reps</div>'):'')
           +'</div>'
         +'</div>'
         +'<button onclick="swapPlanEx(event,'+i+','+exIdx+',\''+emus+'\')" title="Cambiar ejercicio" style="flex-shrink:0;width:30px;height:30px;border-radius:50%;background:var(--bg3);border:1px solid var(--border2);color:var(--t3);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-left:4px;">🔄</button>'
@@ -5942,6 +6110,8 @@ function escribirCamposSesion(campos){
 }
 
 function loadDayExercises(forzar){
+  // Si se está recuperando una sesión, no se toca nada.
+  if(APP._restaurando && !forzar) return;
   var u=U();
   var sel=$('sf-tipo');
   if(!sel) return;
@@ -6008,6 +6178,149 @@ function buildSeries(numSeries, repsPlan){
   return arr;
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// PROGRESIÓN DE CARGAS — 5.0
+// ---------------------------------------------------------------------------
+// Doble progresión, que es lo que se usa en sala: primero se suben las
+// repeticiones dentro del rango (por ejemplo 6-10) y, cuando se llega arriba
+// en todas las series, se sube el peso y se vuelve abajo del rango.
+//
+// La sugerencia sale de la ÚLTIMA vez que se hizo ese ejercicio:
+//  - Completó todas las series en lo alto del rango → subir peso.
+//  - Se quedó dentro del rango → mismo peso, a por una repetición más.
+//  - No llegó al mínimo → bajar un 10%: así se vuelve a entrenar bien.
+// El incremento depende del peso que se mueva y de si es tren inferior, que
+// admite saltos mayores. Nunca se toca nada sin que el usuario lo acepte.
+// ═══════════════════════════════════════════════════════════════════════════
+function _kg(n){ return String(n).replace(".",","); }
+// Los kilos se entienden distinto según el material: en mancuernas es el
+// peso DE CADA UNA (dos de 17,5 kg, no 35); en barra o máquina es el total.
+function unidadPeso(ex){
+  var n=_plegarNombre((ex&&ex.n)||''), r=_plegarNombre((ex&&(ex.repsPlan||ex.r))||'');
+  if(/mancuerna/.test(n)) return {corta:'por mancuerna', larga:'el peso es DE CADA mancuerna'};
+  if(/pesa rusa|kettlebell/.test(n)) return {corta:'de la pesa', larga:'el peso de la pesa rusa'};
+  if(/unilateral|a una mano|un brazo|una pierna/.test(n) || r.indexOf('/lado')>=0) return {corta:'por lado', larga:'el peso que mueve cada lado'};
+  if(/polea|cable|cruce|maquina|prensa|jalon|multipower|smith|peck|contractor/.test(n)) return {corta:'en la máquina', larga:'lo que marca la placa o el selector'};
+  return {corta:'en total', larga:'barra incluida'};
+}
+window.unidadPeso=unidadPeso;
+
+function _rangoReps(r){
+  var m=String(r||'').match(/\d+/g);
+  if(!m||!m.length) return null;
+  var a=parseInt(m[0],10), b=parseInt(m[m.length-1],10);
+  return {min:Math.min(a,b), max:Math.max(a,b)};
+}
+
+function _esTrenInferior(ex){
+  return /cuadriceps|gluteo|isquio|pierna|gemelo|femoral|cadera|soleo/i.test(_plegarNombre(ex.mus||''))
+      || /sentadilla|peso muerto|prensa|zancada|hip thrust/i.test(_plegarNombre(ex.n||''));
+}
+
+// Cuánto se sube: salto pequeño en pesos pequeños, mayor en piernas.
+function _incremento(kg, ex){
+  if(kg<10) return 1;
+  if(kg<25) return 2.5;
+  return _esTrenInferior(ex) ? 5 : 2.5;
+}
+
+// La última sesión en la que aparece ese ejercicio con series anotadas.
+function ultimaVezEjercicio(u, nombre){
+  var n=_plegarNombre(nombre||'');
+  var ses=(u&&u.sessions||[]).slice().sort(function(a,b){ return String(b.fecha||'').localeCompare(String(a.fecha||'')); });
+  for(var i=0;i<ses.length;i++){
+    var exs=ses[i].exs||[];
+    for(var j=0;j<exs.length;j++){
+      if(_plegarNombre(exs[j].n||'')!==n) continue;
+      var hechas=(exs[j].series||[]).filter(function(s){ return (s.done||s.kg) && parseFloat(s.kg)>0; });
+      if(hechas.length) return {fecha:ses[i].fecha, ex:exs[j], series:hechas};
+    }
+  }
+  return null;
+}
+window.ultimaVezEjercicio=ultimaVezEjercicio;
+
+function sugerenciaCarga(u, ex){
+  u=u||U(); if(!u||!ex) return null;
+  // En la sesión el rango se llama repsPlan; getExTipo espera 'r'. Sin esto,
+  // una plancha de 30-60 seg se tomaba por un ejercicio con peso.
+  var tipo=getExTipo({id:ex.id, n:ex.n, mus:ex.mus, r:ex.repsPlan||ex.r||''});
+  if(tipo!=='peso') return null;                    // tiempo, cardio o solo repeticiones
+  var rango=_rangoReps(ex.repsPlan||ex.r);
+  var ult=ultimaVezEjercicio(u, ex.n);
+  if(!ult) return {accion:'empezar', texto:'Primera vez: elige un peso con el que te queden 2 repeticiones de margen ('+unidadPeso(ex).larga+')'};
+
+  var kgs=ult.series.map(function(s){ return parseFloat(String(s.kg).replace(',','.'))||0; });
+  var reps=ult.series.map(function(s){ return parseInt(s.reps,10)||0; });
+  var kgMax=Math.max.apply(null, kgs);
+  var seriesPlan=parseInt(ex.seriesPlan||ex.s,10)||ult.series.length;
+  var completó=ult.series.length>=seriesPlan;
+  var repsMin=Math.min.apply(null, reps.filter(function(r){ return r>0; }).concat([99]));
+  // La última serie casi siempre baja: eso es fatiga normal. Solo se baja
+  // el peso si ya la PRIMERA serie se queda por debajo del rango.
+  var repsPrimera=reps[0]||0;
+  var detalle='Última vez ('+fmtDate(ult.fecha)+'): '+kgMax+' kg × '+reps.join('/')+' reps';
+
+  if(!rango) return {accion:'mantener', kg:kgMax, texto:'Repite '+_kg(kgMax)+' kg y anota las repeticiones', detalle:detalle};
+
+  if(completó && repsMin>=rango.max){
+    var inc=_incremento(kgMax, ex);
+    var nuevo=Math.round((kgMax+inc)*2)/2;
+    return {accion:'subir', kg:nuevo, texto:'Sube a '+_kg(nuevo)+' kg '+unidadPeso(ex).corta+' (+'+_kg(inc)+')', detalle:detalle+' · completaste el rango'};
+  }
+  if(repsPrimera && repsPrimera<rango.min){
+    var baja=Math.max(1, Math.round(kgMax*0.1*2)/2);
+    var menos=Math.max(0, Math.round((kgMax-baja)*2)/2);
+    return {accion:'bajar', kg:menos, texto:'Baja a '+_kg(menos)+' kg '+unidadPeso(ex).corta+' y recupera el rango', detalle:detalle+' · la primera serie se quedó en '+repsPrimera+' reps'};
+  }
+  return {accion:'mantener', kg:kgMax, texto:'Mantén '+_kg(kgMax)+' kg '+unidadPeso(ex).corta+' y busca 1 repetición más', detalle:detalle};
+}
+window.sugerenciaCarga=sugerenciaCarga;
+
+// Pinta el consejo encima de las series.
+function _chipProgresion(exIdx, ex){
+  var s=sugerenciaCarga(U(), ex);
+  if(!s) return '';
+  var uni=unidadPeso(ex);
+  var color=s.accion==='subir'?'var(--green)':s.accion==='bajar'?'var(--amber)':'var(--acc2)';
+  var fondo=s.accion==='subir'?'var(--gb)':s.accion==='bajar'?'var(--ab)':'var(--accb)';
+  var ico=s.accion==='subir'?'⬆️':s.accion==='bajar'?'⬇️':s.accion==='empezar'?'🎯':'➡️';
+  return '<div style="background:'+fondo+';border-radius:8px;padding:7px 10px;margin-bottom:8px;display:flex;align-items:center;gap:8px;">'
+    +'<div style="flex:1;min-width:0;">'
+      +'<div style="font-size:12px;font-weight:700;color:'+color+';">'+ico+' '+s.texto+'</div>'
+      +'<div style="font-size:10.5px;color:var(--t3);margin-top:1px;">'+(s.detalle?s.detalle+' · ':'')+'Kilos: '+uni.larga+'</div>'
+    +'</div>'
+    +(s.kg?'<button onclick="aplicarSugerencia('+exIdx+','+s.kg+')" style="flex-shrink:0;background:var(--bg3);border:1px solid '+color+';color:'+color+';border-radius:7px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;">Usar</button>':'')
+    +'</div>';
+}
+
+// Rellena el peso en las series que están vacías (no pisa lo ya anotado).
+function aplicarSugerencia(exIdx, kg){
+  var ex=(APP.exTemp||[])[exIdx]; if(!ex) return;
+  var puestas=0;
+  (ex.series||[]).forEach(function(s){
+    if(!s.done && !s.kg){ s.kg=String(kg); puestas++; }
+  });
+  if(!puestas){ toast('Ya tienes pesos anotados en todas las series','var(--amber)'); return; }
+  saveSesionDraft();
+  renderExList();
+  toast('✓ '+_kg(kg)+' kg en '+puestas+(puestas===1?' serie':' series'));
+}
+window.aplicarSugerencia=aplicarSugerencia;
+
+// Cómo se lee una serie: la cinta en minutos, velocidad e inclinación; el
+// resto en kilos por repeticiones.
+function _resumenSerie(ex, s){
+  if(!s) return '—';
+  var t=getExTipo({id:ex.id, n:ex.n, mus:ex.mus, r:ex.repsPlan||ex.r||''});
+  if(t==='cinta') return (s.kg||'?')+' min · '+(s.reps||'?')+' km/h'+(s.inc?' · '+s.inc+'%':'');
+  if(t==='hiit')  return (s.kg||'?')+' min · '+(s.reps||'?');
+  if(t==='tiempo')return (s.kg||'?')+' seg';
+  if(t==='reps')  return (s.reps||'?')+' reps';
+  return (s.kg||'?')+'kg × '+(s.reps||'?');
+}
+window._resumenSerie=_resumenSerie;
+
 function renderExList(){
   var el=$('ex-list');
   if(!APP.exTemp.length){
@@ -6043,9 +6356,15 @@ function renderExList(){
       +'</div>';
     // Cabecera de columnas — 4 tipos según ejercicio
     var exTipo=getExTipo(ex);
-    var colHdr='<div style="display:grid;grid-template-columns:28px 1fr 1fr 32px;gap:7px;margin-bottom:4px;padding:0 2px;">'
+    var chipProg=_chipProgresion(exIdx, ex);
+    var rejilla=exTipo==='cinta' ? '28px 1fr 1fr 1fr 32px' : '28px 1fr 1fr 32px';
+    var colHdr=chipProg+'<div style="display:grid;grid-template-columns:'+rejilla+';gap:7px;margin-bottom:4px;padding:0 2px;">'
       +'<div></div>'
-      +(exTipo==='hiit'
+      +(exTipo==='cinta'
+        ?'<div style="font-size:10px;color:var(--t3);text-align:center;text-transform:uppercase;letter-spacing:0.06em;">Minutos</div>'
+         +'<div style="font-size:10px;color:var(--t3);text-align:center;text-transform:uppercase;letter-spacing:0.06em;">km/h</div>'
+         +'<div style="font-size:10px;color:var(--t3);text-align:center;text-transform:uppercase;letter-spacing:0.06em;">Inclin. %</div>'
+        :exTipo==='hiit'
         ?'<div style="font-size:10px;color:var(--t3);text-align:center;text-transform:uppercase;letter-spacing:0.06em;">Duración (min)</div>'
          +'<div style="font-size:10px;color:var(--t3);text-align:center;text-transform:uppercase;letter-spacing:0.06em;">Vel / Nivel</div>'
         :exTipo==='tiempo'
@@ -6054,15 +6373,19 @@ function renderExList(){
         :exTipo==='reps'
         ?'<div style="font-size:10px;color:var(--t3);text-align:center;text-transform:uppercase;letter-spacing:0.06em;">Reps</div>'
          +'<div style="font-size:10px;color:var(--t3);text-align:center;text-transform:uppercase;letter-spacing:0.06em;">Serie</div>'
-        :'<div style="font-size:10px;color:var(--t3);text-align:center;text-transform:uppercase;letter-spacing:0.06em;">Peso (kg)</div>'
+        :'<div style="font-size:10px;color:var(--t3);text-align:center;text-transform:uppercase;letter-spacing:0.06em;">Kg '+unidadPeso(ex).corta+'</div>'
          +'<div style="font-size:10px;color:var(--t3);text-align:center;text-transform:uppercase;letter-spacing:0.06em;">Reps reales</div>')
       +'<div></div>'
       +'</div>';
     // Filas de series
     var seriesHtml=ex.series.map(function(s,sIdx){
       var done=s.done;
-      var inp1,inp2;
-      if(exTipo==='hiit'){
+      var inp1,inp2,inp3="";
+      if(exTipo==='cinta'){
+        inp1='<input class="serie-input'+(s.kg?' filled':'')+'" type="text" inputmode="decimal" placeholder="min" value="'+s.kg+'" data-ex="'+exIdx+'" data-s="'+sIdx+'" data-field="kg">';
+        inp2='<input class="serie-input'+(s.reps?' filled':'')+'" type="text" inputmode="decimal" placeholder="km/h" value="'+s.reps+'" data-ex="'+exIdx+'" data-s="'+sIdx+'" data-field="reps">';
+        inp3='<input class="serie-input'+(s.inc?' filled':'')+'" type="text" inputmode="decimal" placeholder="%" value="'+(s.inc||'')+'" data-ex="'+exIdx+'" data-s="'+sIdx+'" data-field="inc">';
+      } else if(exTipo==='hiit'){
         inp1='<input class="serie-input'+(s.kg?' filled':'')+'" type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="min" value="'+s.kg+'" data-ex="'+exIdx+'" data-s="'+sIdx+'" data-field="kg">';
         inp2='<input class="serie-input'+(s.reps&&s.done?' filled':'')+'" type="text" inputmode="decimal" placeholder="km/h" value="'+s.reps+'" data-ex="'+exIdx+'" data-s="'+sIdx+'" data-field="reps">';
       } else if(exTipo==='tiempo'){
@@ -6076,9 +6399,9 @@ function renderExList(){
         inp1='<input class="serie-input'+(s.kg?' filled':'')+'" type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="kg" value="'+s.kg+'" data-ex="'+exIdx+'" data-s="'+sIdx+'" data-field="kg">';
         inp2='<input class="serie-input'+(s.reps&&s.done?' filled':'')+'" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="reps" value="'+s.reps+'" data-ex="'+exIdx+'" data-s="'+sIdx+'" data-field="reps">';
       }
-      return '<div class="serie-row" data-ex="'+exIdx+'" data-s="'+sIdx+'">'
+      return '<div class="serie-row" data-ex="'+exIdx+'" data-s="'+sIdx+'" style="grid-template-columns:'+rejilla+';">'
         +'<div class="serie-num'+(done?' done':'')+'">'+( sIdx+1)+'</div>'
-        +inp1+inp2
+        +inp1+inp2+inp3
         +'<div class="serie-check'+(done?' done':'')+'" data-ex="'+exIdx+'" data-s="'+sIdx+'">'+( done?'✓':'')+'</div>'
         +'</div>';
     }).join('');
@@ -6120,7 +6443,12 @@ function renderExList(){
       var si=parseInt(this.getAttribute('data-s'));
       // Validar que tenga al menos reps
       var s=APP.exTemp[ei].series[si];
-      if(!s.done && !s.reps){
+      var _tipo=getExTipo({id:APP.exTemp[ei].id, n:APP.exTemp[ei].n, mus:APP.exTemp[ei].mus, r:APP.exTemp[ei].repsPlan||''});
+      if(_tipo==='cinta' && !s.done && !s.kg){
+        var inpMin=el.querySelector('.serie-input[data-ex="'+ei+'"][data-s="'+si+'"][data-field="kg"]');
+        if(inpMin&&inpMin.value){ s.kg=inpMin.value; inpMin.classList.add('filled'); }
+      }
+      if(_tipo!=='cinta' && !s.done && !s.reps){
         // Intentar leer del input en pantalla
         var inp=el.querySelector('.serie-input[data-ex="'+ei+'"][data-s="'+si+'"][data-field="reps"]');
         if(inp&&inp.value){s.reps=inp.value; inp.classList.add('filled');}
@@ -6199,7 +6527,8 @@ function saveSesion(){
   // Recopilar datos de todos los ejercicios con sus series
   var exsData=APP.exTemp.map(function(ex){
     var seriesDone=ex.series.filter(function(s){return s.done;});
-    var volumenTotal=seriesDone.reduce(function(acc,s){
+    var _esCardio=['cinta','hiit','tiempo'].indexOf(getExTipo({id:ex.id,n:ex.n,mus:ex.mus,r:ex.repsPlan||''}))>=0;
+    var volumenTotal=_esCardio ? 0 : seriesDone.reduce(function(acc,s){
       return acc+(parseFloat(s.kg)||0)*(parseInt(s.reps)||0);
     },0);
     return {
@@ -6255,7 +6584,7 @@ function renderHist(){
       var mejor=mejorSerie[0];
       return '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:12px;">'
         +'<span style="color:var(--t2);flex:1;">'+e.n+'</span>'
-        +(mejor?'<span style="font-weight:700;color:var(--acc2);">'+mejor.kg+'kg × '+mejor.reps+'</span>':'<span style="color:var(--t3);">—</span>')
+        +(mejor?'<span style="font-weight:700;color:var(--acc2);">'+_resumenSerie(e,mejor)+'</span>':'<span style="color:var(--t3);">—</span>')
         +'</div>';
     }).join('');
     var collapsed=true; // start collapsed
@@ -7524,6 +7853,56 @@ window.foodConfirmAdd=foodConfirmAdd;
 // BÚSQUEDA DE EJERCICIOS — Wger.de API + base local ampliada
 
 var EX_LOCAL=[
+  // ── MANCUERNAS Y MÁQUINAS · ampliación 28/10/2026 ──
+  {n:'Press banca con mancuernas',mus:'Pecho',mus2:'Tríceps, Deltoides',eq:'Mancuernas + banco',id:'press-banca-m'},
+  {n:'Press inclinado con mancuernas',mus:'Pecho',mus2:'Pecho superior, Deltoides',eq:'Mancuernas + banco',id:'press-incl-m'},
+  {n:'Press declinado con mancuernas',mus:'Pecho',mus2:'Pecho inferior, Tríceps',eq:'Mancuernas + banco',id:'press-decl-m'},
+  {n:'Aperturas inclinadas con mancuernas',mus:'Pecho',mus2:'Pecho superior',eq:'Mancuernas + banco',id:'aperturas-incl'},
+  {n:'Press cerrado con mancuernas (crush press)',mus:'Pecho',mus2:'Tríceps',eq:'Mancuernas + banco',id:'crush-press'},
+  {n:'Remo con mancuerna a una mano',mus:'Espalda',mus2:'Dorsal, Bíceps',eq:'Mancuerna + banco',id:'remo-uni-m'},
+  {n:'Remo renegado con mancuernas',mus:'Espalda',mus2:'Core, Dorsal',eq:'Mancuernas',id:'remo-renegado'},
+  {n:'Encogimientos con mancuernas',mus:'Espalda',mus2:'Trapecio',eq:'Mancuernas',id:'encogimientos-m'},
+  {n:'Elevaciones laterales con mancuernas',mus:'Hombro',mus2:'Deltoides lateral',eq:'Mancuernas',id:'elev-lat-m'},
+  {n:'Elevaciones frontales con mancuernas',mus:'Hombro',mus2:'Deltoides anterior',eq:'Mancuernas',id:'elev-front-m'},
+  {n:'Pájaros con mancuernas',mus:'Hombro',mus2:'Deltoides posterior',eq:'Mancuernas',id:'pajaros-m'},
+  {n:'Curl inclinado con mancuernas',mus:'Bíceps',mus2:'Porción larga del bíceps',eq:'Mancuernas + banco',id:'curl-incl'},
+  {n:'Curl araña con mancuernas',mus:'Bíceps',mus2:'Porción corta del bíceps',eq:'Mancuernas + banco',id:'curl-arana'},
+  {n:'Curl Zottman',mus:'Bíceps',mus2:'Antebrazo, Braquial',eq:'Mancuernas',id:'curl-zottman'},
+  {n:'Press francés con mancuernas',mus:'Tríceps',mus2:'Porción larga',eq:'Mancuernas + banco',id:'press-frances-m'},
+  {n:'Extensión de tríceps sobre la cabeza con mancuerna',mus:'Tríceps',mus2:'Porción larga',eq:'Mancuerna',id:'ext-cabeza-m'},
+  {n:'Patada de tríceps con mancuerna',mus:'Tríceps',mus2:'Porción lateral',eq:'Mancuernas',id:'patada-m'},
+  {n:'Zancadas con mancuernas',mus:'Pierna',mus2:'Cuádriceps, Glúteo',eq:'Mancuernas',id:'zancadas-m'},
+  {n:'Sentadilla búlgara con mancuernas',mus:'Pierna',mus2:'Cuádriceps, Glúteo',eq:'Mancuernas + banco',id:'bulgara-m'},
+  {n:'Peso muerto rumano con mancuernas',mus:'Isquiotibiales',mus2:'Glúteo, Espalda baja',eq:'Mancuernas',id:'pm-rumano-m'},
+  {n:'Peso muerto con mancuernas',mus:'Isquiotibiales',mus2:'Glúteo, Espalda',eq:'Mancuernas',id:'pm-m'},
+  {n:'Step-up con mancuernas',mus:'Pierna',mus2:'Cuádriceps, Glúteo',eq:'Mancuernas + cajón',id:'step-up-m'},
+  {n:'Elevación de gemelo con mancuerna',mus:'Pierna',mus2:'Gemelo, Sóleo',eq:'Mancuerna',id:'gemelo-m2'},
+  {n:'Sentadilla goblet con mancuerna',mus:'Pierna',mus2:'Cuádriceps, Glúteo',eq:'Mancuerna',id:'goblet-m'},
+  {n:'Hip thrust con mancuerna',mus:'Glúteo',mus2:'Isquiotibiales',eq:'Mancuerna + banco',id:'hip-thrust-m2'},
+  {n:'Russian twist con mancuerna',mus:'Core',mus2:'Oblicuos',eq:'Mancuerna',id:'russian-m'},
+  {n:'Press de pecho en máquina',mus:'Pecho',mus2:'Tríceps, Deltoides',eq:'Máquina',id:'press-maq'},
+  {n:'Press inclinado en máquina (Hammer)',mus:'Pecho',mus2:'Pecho superior',eq:'Máquina Hammer',id:'press-hammer'},
+  {n:'Cruce de poleas',mus:'Pecho',mus2:'Pecho, Deltoides anterior',eq:'Poleas cruzadas',id:'cruce-poleas'},
+  {n:'Jalón al pecho agarre ancho',mus:'Espalda',mus2:'Dorsal ancho',eq:'Polea alta',id:'jalon-ancho'},
+  {n:'Jalón al pecho agarre supino',mus:'Espalda',mus2:'Dorsal, Bíceps',eq:'Polea alta',id:'jalon-supino'},
+  {n:'Jalón con cuerda brazos rectos',mus:'Espalda',mus2:'Dorsal, Serrato',eq:'Polea alta',id:'jalon-recto'},
+  {n:'Remo en máquina apoyado en pecho',mus:'Espalda',mus2:'Romboides, Trapecio',eq:'Máquina',id:'remo-apoyado'},
+  {n:'Remo en T con apoyo',mus:'Espalda',mus2:'Dorsal, Trapecio',eq:'Máquina T-bar',id:'remo-t2'},
+  {n:'Dominadas asistidas en máquina',mus:'Espalda',mus2:'Dorsal, Bíceps',eq:'Máquina asistida',id:'dominadas-asist'},
+  {n:'Face pull en polea',mus:'Hombro',mus2:'Deltoides posterior, Trapecio',eq:'Polea + cuerda',id:'face-pull2'},
+  {n:'Pájaros en máquina (pec deck inverso)',mus:'Hombro',mus2:'Deltoides posterior',eq:'Máquina',id:'pajaros-maq'},
+  {n:'Press de hombro en máquina',mus:'Hombro',mus2:'Deltoides, Tríceps',eq:'Máquina',id:'press-hombro-maq'},
+  {n:'Prensa de pierna horizontal',mus:'Pierna',mus2:'Cuádriceps, Glúteo',eq:'Máquina',id:'prensa-h'},
+  {n:'Sentadilla hack en máquina',mus:'Pierna',mus2:'Cuádriceps',eq:'Máquina hack',id:'hack'},
+  {n:'Sentadilla en multipower (Smith)',mus:'Pierna',mus2:'Cuádriceps, Glúteo',eq:'Multipower',id:'smith-sent'},
+  {n:'Extensión de cuádriceps en máquina',mus:'Pierna',mus2:'Cuádriceps',eq:'Máquina',id:'ext-cuad2'},
+  {n:'Curl femoral tumbado en máquina',mus:'Isquiotibiales',mus2:'Gemelo',eq:'Máquina',id:'curl-fem-t'},
+  {n:'Curl femoral sentado en máquina',mus:'Isquiotibiales',mus2:'Gemelo',eq:'Máquina',id:'curl-fem-s'},
+  {n:'Elevación de gemelo sentado en máquina',mus:'Pierna',mus2:'Sóleo',eq:'Máquina',id:'gemelo-sent'},
+  {n:'Hip thrust en máquina',mus:'Glúteo',mus2:'Isquiotibiales',eq:'Máquina',id:'hip-maq'},
+  {n:'Extensión lumbar en banco (hiperextensiones)',mus:'Espalda',mus2:'Lumbar, Glúteo',eq:'Banco romano',id:'hiper'},
+  {n:'Extensión de tríceps en polea con cuerda',mus:'Tríceps',mus2:'Porción lateral',eq:'Polea + cuerda',id:'ext-polea-c'},
+  {n:'Curl de bíceps en polea',mus:'Bíceps',mus2:'Braquial',eq:'Polea baja',id:'curl-polea2'},
   // ── PESA RUSA (una sola) · 5.0 ──
   {n:'Swing ruso con pesa rusa (dos manos)',mus:'Glúteo',mus2:'Isquiotibiales, Core',eq:'Pesa rusa',id:'kb-swing'},
   {n:'Swing a una mano con pesa rusa',mus:'Glúteo',mus2:'Isquiotibiales, Core',eq:'Pesa rusa',id:'kb-swing-1m'},
@@ -8049,16 +8428,16 @@ function tituloSinMaquina(filas){
 }
 
 var EX_ALTERNATIVES={
-  'Cuádriceps':['Sentadilla con Barra','Prensa de Pierna','Sentadilla Goblet','Extensión Cuádriceps Máquina','Sentadilla Hack','Sentadilla Frontal','Sentadilla Búlgara','Zancadas caminando','Step-up con mancuernas','Sentadilla Sumo'],
-  'Glúteo':['Hip Thrust con Barra','Hip Thrust con Mancuerna','Patada de Glúteo en Polea','Puente de Glúteo','Abducción Cadera Máquina','Peso Muerto Rumano','Zancadas Búlgaras','Kickback en Polea'],
-  'Isquiotibiales':['Peso Muerto Rumano','Curl Femoral Tumbado','Curl Femoral Sentado','Curl Femoral Nórdico','Buenos Días con Barra','Peso Muerto Convencional'],
-  'Pecho':['Press Banca Barra','Press Banca Mancuernas','Press Inclinado Barra','Press Inclinado Mancuernas','Press Declinado','Aperturas con Mancuernas','Aperturas en Cable','Fondos en Paralelas','Press en Máquina','Push-up lastrado'],
-  'Espalda':['Dominadas','Jalón al Pecho','Remo con Barra','Remo con Mancuerna','Remo en Cable','Remo Pendlay','Remo en Máquina','Pullover en Polea','Face Pull'],
-  'Dorsal':['Dominadas','Jalón al Pecho Agarre Ancho','Jalón al Pecho Agarre Neutro','Remo en Cable Agarre Bajo','Pullover con Mancuerna'],
-  'Hombros':['Press Militar Barra','Press Arnold','Press con Mancuernas','Elevaciones Laterales','Elevaciones Frontales','Face Pull','Press en Máquina Hombros','Press Landmine'],
-  'Tríceps':['Extensión Tríceps Polea Cuerda','Extensión Tríceps Barra','Fondos en Paralelas','Press Francés','Patada de Tríceps','Extensión Tríceps sobre Cabeza'],
-  'Bíceps':['Curl Barra','Curl EZ','Curl Mancuernas','Curl Martillo','Curl en Polea','Curl Scott','Curl Inclinado','Curl Concentrado'],
-  'Core':['Plancha Isométrica','Plancha Lateral','Rueda Abdominal','Crunch','Elevación de Piernas','Dead Bug','Pallof Press'],
+  'Cuádriceps':['Prensa de Pierna Horizontal','Sentadilla Hack en Máquina','Sentadilla en Multipower (Smith)','Extensión de Cuádriceps en Máquina','Zancadas con Mancuernas','Sentadilla Búlgara con Mancuernas','Step-up con Mancuernas','Sentadilla con Barra','Prensa de Pierna','Sentadilla Goblet','Extensión Cuádriceps Máquina','Sentadilla Hack','Sentadilla Frontal','Sentadilla Búlgara','Zancadas caminando','Step-up con mancuernas','Sentadilla Sumo'],
+  'Glúteo':['Hip Thrust en Máquina','Abductores en Máquina','Step-up con Mancuernas','Hip Thrust con Barra','Hip Thrust con Mancuerna','Patada de Glúteo en Polea','Puente de Glúteo','Abducción Cadera Máquina','Peso Muerto Rumano','Zancadas Búlgaras','Kickback en Polea'],
+  'Isquiotibiales':['Curl Femoral Tumbado en Máquina','Curl Femoral Sentado en Máquina','Peso Muerto Rumano con Mancuernas','Peso Muerto con Mancuernas','Peso Muerto Rumano','Curl Femoral Tumbado','Curl Femoral Sentado','Curl Femoral Nórdico','Buenos Días con Barra','Peso Muerto Convencional'],
+  'Pecho':['Press Banca con Mancuernas','Press Inclinado con Mancuernas','Press Cerrado con Mancuernas (crush press)','Press de Pecho en Máquina','Press Inclinado en Máquina (Hammer)','Cruce de Poleas','Aperturas Inclinadas con Mancuernas','Press Banca Barra','Press Banca Mancuernas','Press Inclinado Barra','Press Inclinado Mancuernas','Press Declinado','Aperturas con Mancuernas','Aperturas en Cable','Fondos en Paralelas','Press en Máquina','Push-up lastrado'],
+  'Espalda':['Remo con Mancuerna a Una Mano','Remo en Máquina Sentado','Remo en Máquina Apoyado en Pecho','Jalón al Pecho Agarre Supino','Jalón con Cuerda Brazos Rectos','Dominadas Asistidas en Máquina','Remo Meadows','Dominadas','Jalón al Pecho','Remo con Barra','Remo con Mancuerna','Remo en Cable','Remo Pendlay','Remo en Máquina','Pullover en Polea','Face Pull'],
+  'Dorsal':['Jalón con Cuerda Brazos Rectos','Dominadas Asistidas en Máquina','Dominadas','Jalón al Pecho Agarre Ancho','Jalón al Pecho Agarre Neutro','Remo en Cable Agarre Bajo','Pullover con Mancuerna'],
+  'Hombros':['Press de Hombro en Máquina','Elevaciones Laterales en Polea','Pájaros en Máquina (pec deck inverso)','Face Pull en Polea','Elevaciones Frontales con Mancuernas','Press Militar Barra','Press Arnold','Press con Mancuernas','Elevaciones Laterales','Elevaciones Frontales','Face Pull','Press en Máquina Hombros','Press Landmine'],
+  'Tríceps':['Press Francés con Mancuernas','Extensión de Tríceps sobre la Cabeza con Mancuerna','Extensión de Tríceps en Polea con Cuerda','Patada de Tríceps con Mancuerna','Extensión Tríceps Polea Cuerda','Extensión Tríceps Barra','Fondos en Paralelas','Press Francés','Patada de Tríceps','Extensión Tríceps sobre Cabeza'],
+  'Bíceps':['Curl Inclinado con Mancuernas','Curl Araña con Mancuernas','Curl Zottman','Curl de Bíceps en Polea','Curl Barra','Curl EZ','Curl Mancuernas','Curl Martillo','Curl en Polea','Curl Scott','Curl Inclinado','Curl Concentrado'],
+  'Core':['Crunch en Polea','Russian Twist con Mancuerna','Remo Renegado con Mancuernas','Plancha Isométrica','Plancha Lateral','Rueda Abdominal','Crunch','Elevación de Piernas','Dead Bug','Pallof Press'],
   'Cardio':['Caminata Inclinada','Bicicleta Estática','Elíptica','Remo Ergómetro','Burpees','Salto a la Comba','HIIT Sprints'],
   'Recuperación':['Caminata Suave','Natación','Yoga','Movilidad Articular','Foam Rolling']
 };
@@ -8158,9 +8537,20 @@ function getExTipo(e){
   var r=(e.r||'').toLowerCase();
   var mus=(e.mus||'').toLowerCase();
 
+  // CINTA: minutos + velocidad + inclinación. Se reconoce por el nombre,
+  // porque el mismo id se usa para caminar por la calle.
+  var n=_plegarNombre(e.n||'');
+  // Ojo: 'inclinado' a secas NO vale, porque hay press inclinado y banco
+  // inclinado. Tiene que ser la máquina o una caminata/carrera inclinada.
+  var andar=/caminata|caminar|correr|trote|carrera|marcha/.test(n);
+  if(!/bici|eliptica|remo|escalador/.test(n) &&
+     (/cinta|tapiz|treadmill/.test(n) || (andar && /inclinad|cardio liss/.test(n)))) return 'cinta';
+
   // Tipos HIIT/cardio con velocidad (Duración + Vel/Nivel)
   var hiitIds=['eliptica','cardio-sab','caminata','caminata-m','caminar'];
   if(hiitIds.indexOf(id)>=0) return 'hiit';
+  // La movilidad y los estiramientos son minutos, no velocidad.
+  if(/movilidad|estiramiento|yoga|foam/.test(n)) return 'tiempo';
   if(r.indexOf('min')>=0&&(mus.indexOf('cardiovascular')>=0||mus.indexOf('cardio')>=0||mus.indexOf('neat')>=0||mus.indexOf('recuperación')>=0)) return 'hiit';
 
   // Tipos TIEMPO (segundos/isométrico — sin peso ni velocidad)
@@ -8177,7 +8567,7 @@ function getExTipo(e){
   return 'peso';
 }
 // Mantener compatibilidad con código que usa isCardioEx
-function isCardioEx(e){var t=getExTipo(e);return t==='hiit'||t==='tiempo';}
+function isCardioEx(e){var t=getExTipo(e);return t==='hiit'||t==='tiempo'||t==='cinta';}
 window.isCardioEx=isCardioEx;
 window.getExTipo=getExTipo;
 
