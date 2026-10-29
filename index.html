@@ -189,6 +189,9 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .meal-hora{font-size:11px;color:var(--t3);}
 .meal-kcal{font-size:11px;color:var(--amber);font-weight:600;}
 .meal-item{font-size:12px;color:var(--t2);padding:3px 0;border-bottom:1px solid var(--border);}
+.meal-nota{font-size:11px;color:var(--acc2);padding:5px 0 1px;line-height:1.45;}
+.enf-chip{flex:1 1 44%;min-width:132px;text-align:left;padding:9px 10px;border-radius:10px;border:1.5px solid var(--border2);background:var(--card2,transparent);color:var(--t2);font-size:12px;font-weight:600;cursor:pointer;line-height:1.3;}
+.enf-chip.on{border-color:var(--amber);color:var(--amber);background:rgba(240,192,64,0.08);}
 .meal-item:last-child{border-bottom:none;}
 .meal-item::before{content:'· ';color:var(--acc2);}
 
@@ -848,6 +851,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     </div>
     <div class="fg"><label>Nombre completo</label><input type="text" id="ob-nombre" placeholder="Tu nombre y apellido"></div>
     <div class="fg"><label>Email</label><input type="email" id="ob-email" placeholder="correo@ejemplo.com" inputmode="email"></div>
+    <div class="fg"><label>Usuario <span style="color:var(--t3);font-weight:400;">(opcional)</span></label><input type="text" id="ob-usuario" placeholder="para entrar sin escribir el correo" autocapitalize="none" autocorrect="off" spellcheck="false"><div style="font-size:11px;color:var(--t3);margin-top:4px;">De 3 a 20 caracteres: letras, números, punto, guion o guion bajo. Si lo dejas vacío lo creamos a partir de tu correo.</div></div>
     <div class="fg"><label>Contraseña</label><div class="pw-wrap"><input type="password" id="ob-pw" placeholder="Mínimo 8 caracteres"><button class="pw-eye" type="button" onclick="togglePw('ob-pw',this)" tabindex="-1"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
     <button class="btn btn-acc btn-full" id="s1-next" style="margin-top:auto;">Continuar →</button>
     <div style="text-align:center;margin-top:14px;font-size:13px;color:var(--t2);">¿Ya tienes cuenta? <button class="btn btn-ghost btn-sm" id="go-login" style="font-size:12px;">Iniciar sesión</button></div>
@@ -858,8 +862,8 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     <div class="onb-logo">SpeciMen®</div>
     <div class="prog-bar"><div class="prog-fill" style="width:50%"></div></div>
     <div class="onb-title">Bienvenido/a de vuelta</div>
-    <div class="onb-sub">Tus datos, historial de sesiones y plan se recuperan automáticamente con tu email y contraseña.</div>
-    <div class="fg"><label>Email</label><input type="email" id="lg-email" inputmode="email" placeholder="tu@email.com"></div>
+    <div class="onb-sub">Tus datos, historial de sesiones y plan se recuperan automáticamente al entrar.</div>
+    <div class="fg"><label>Usuario o email</label><input type="text" id="lg-email" placeholder="tu usuario o tu@email.com" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
     <div class="fg"><label>Contraseña</label><div class="pw-wrap"><input type="password" id="lg-pw" placeholder="Tu contraseña"><button class="pw-eye" type="button" onclick="togglePw('lg-pw',this)" tabindex="-1"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
     <div id="lg-err" style="color:var(--red);font-size:13px;margin-bottom:10px;display:none;"></div>
     <button class="btn btn-acc btn-full" id="btn-login">Entrar →</button>
@@ -1071,6 +1075,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   <div id="plan-ej-list"></div>
 </div>
   <div id="pv-nut" style="display:none">
+  <div class="card" id="enf-card" style="margin-bottom:10px;"></div>
   <button class="btn btn-full" style="margin-bottom:10px;border:1.5px solid var(--border2);font-size:13px;" onclick="variarComidas()">🔄 Variar comidas · mismos macros (gratis)</button>
   <button class="btn btn-acc btn-full" style="margin-bottom:12px;" onclick="openFoodSearch()">+ Buscar y añadir alimento</button>
   <div id="plan-nut-list"></div>
@@ -1111,6 +1116,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
       <button class="btn btn-sm" id="btn-add-ex" style="font-size:11px;">+ Extra</button>
     </div>
     <div id="ex-list"></div>
+    <button class="btn btn-ghost btn-full" style="margin-top:10px;border:1.5px dashed var(--border2);font-size:13px;" onclick="openExSearch()">+ Añadir ejercicio a esta sesión</button>
   </div>
   <!-- Timer descanso -->
   <div class="card">
@@ -1305,6 +1311,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
       <details class="pf-sub-sec">
         <summary>🔒 Privacidad y legal</summary>
         <div class="pf-body">
+        <button class="btn btn-full" onclick="abrirCambiarUsuario()" style="margin-bottom:8px;font-size:13px;">👤 Mi nombre de usuario</button>
         <button class="btn btn-full" onclick="abrirCambiarClave()" style="margin-bottom:8px;font-size:13px;">🔑 Cambiar mi contraseña</button>
     <button class="btn btn-full" onclick="verConsentimientos()" style="margin-bottom:8px;font-size:13px;">🔒 Consentimientos y mis derechos</button>
         <button class="btn btn-full" onclick="verDocumentoLegal()" style="margin-bottom:8px;font-size:13px;">📄 Términos y política de privacidad</button>
@@ -1441,6 +1448,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
       <span class="srch-ico">🔍</span>
     </div>
     <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;" id="ex-srch-filters">
+      <button class="srch-tag" id="ex-tag-dia" data-filter="__dia" style="display:none;" onclick="exSrchFilter(this,'__dia')">⭐ De hoy</button>
       <button class="srch-tag" style="background:var(--acc);color:#fff;" data-filter="" onclick="exSrchFilter(this,'')">Todos</button>
       <button class="srch-tag" data-filter="Pecho" onclick="exSrchFilter(this,'Pecho')">Pecho</button>
       <button class="srch-tag" data-filter="Espalda" onclick="exSrchFilter(this,'Espalda')">Espalda</button>
@@ -1564,12 +1572,12 @@ function saveSesionDraft(){
     // 5.0: el borrador guardaba solo exTemp. Fecha, tipo, semana, mesociclo,
     // peso corporal, duracion, RPE, fatiga y notas viven en el DOM y se
     // perdian enteros al recuperar. Ahora tambien van dentro.
-    var hayEjercicios = APP.exTemp && APP.exTemp.length;
     var campos = (typeof leerCamposSesion==='function') ? leerCamposSesion() : {};
-    var hayCampos = ['sf-peso','sf-dur','sf-rpe','sf-fat','sf-notas'].some(function(k){
-      return campos[k] && String(campos[k]).trim();
-    });
-    if(!hayEjercicios && !hayCampos){ return; }
+    // Abrir la pantalla de Sesión carga la plantilla del día: eso por sí solo
+    // no es una sesión a medias y no debe guardarse, o el aviso de "sesión sin
+    // guardar" saldría cada vez que se abre la app. Tampoco se borra lo que
+    // hubiera: un borrador de verdad anterior tiene que sobrevivir.
+    if(!_hayTrabajoAnotado(APP.exTemp, campos)){ return; }
     var draft={
       exTemp: APP.exTemp || [],
       tipo: APP._exTempTipo || (campos['sf-tipo']||''),
@@ -1603,7 +1611,39 @@ document.addEventListener('visibilitychange',function(){
 });
 window.addEventListener('pagehide',function(){ try{ saveSesionDraft(); }catch(e){} });
 window.addEventListener('blur',function(){ try{ saveSesionDraft(); }catch(e){} });
-function clearSesionDraft(){try{localStorage.removeItem(SES_DRAFT_KEY);}catch(e){}}
+// Descartar un borrador tiene que llevarse también la copia de seguridad:
+// si no, `_leerBorrador` la encuentra y el aviso vuelve al arrancar.
+function clearSesionDraft(){
+  try{ localStorage.removeItem(SES_DRAFT_KEY); }catch(e){}
+  try{ localStorage.removeItem(SES_DRAFT_KEY+'_prev'); }catch(e){}
+}
+
+// ¿Hay algo anotado de verdad, o es la plantilla del día recién cargada?
+// Solo cuenta lo que ha escrito la persona: un peso, una serie marcada, una
+// casilla tocada (los ejercicios de peso corporal no tienen kilos), una nota
+// o un ejercicio añadido a mano. Las repeticiones que vienen puestas de
+// serie por la plantilla NO cuentan: están ahí sin que nadie las escriba.
+function _seriesAnotadas(exs){
+  var n=0;
+  (exs||[]).forEach(function(ex){
+    (ex.series||[]).forEach(function(s){ if(s.done||s.kg||s.tocada) n++; });
+  });
+  return n;
+}
+window._seriesAnotadas=_seriesAnotadas;
+
+function _hayTrabajoAnotado(exs, campos){
+  if(_seriesAnotadas(exs)>0) return true;
+  var hayNota=(exs||[]).some(function(ex){ return ex.notas && String(ex.notas).trim(); });
+  if(hayNota) return true;
+  // Un ejercicio añadido a mano ya es una decisión que merece guardarse.
+  if((exs||[]).some(function(ex){ return ex.extra; })) return true;
+  campos=campos||{};
+  return ['sf-peso','sf-dur','sf-rpe','sf-fat','sf-notas'].some(function(k){
+    return campos[k] && String(campos[k]).trim();
+  });
+}
+window._hayTrabajoAnotado=_hayTrabajoAnotado;
 // Devuelve el borrador con datos: el último, o la copia anterior si el
 // último se quedó vacío o corrupto.
 function _leerBorrador(){
@@ -1615,9 +1655,9 @@ function _leerBorrador(){
       if(!raw) continue;
       var d=JSON.parse(raw);
       if(!d) continue;
-      var series=0;
-      (d.exTemp||[]).forEach(function(ex){ (ex.series||[]).forEach(function(s){ if(s.done||s.kg||s.reps) series++; }); });
-      d._series=series;
+      // Gana la copia con más trabajo ANOTADO. Contar también las
+      // repeticiones de la plantilla hacía que ganara cualquiera.
+      d._series=_seriesAnotadas(d.exTemp);
       if(!mejor || series>mejor._series) mejor=d;
     }catch(e){}
   }
@@ -1630,13 +1670,11 @@ function checkSesionDraft(){
     var d=_leerBorrador();
     if(!d) return;
     if(!d || Date.now()-d.ts>24*3600*1000){clearSesionDraft();return;}
-    var nEx=(d.exTemp||[]).length;
-    // Series realmente anotadas, para que el aviso diga algo util
-    var nSeries=0;
-    (d.exTemp||[]).forEach(function(ex){
-      (ex.series||[]).forEach(function(s){ if(s.done||s.kg) nSeries++; });
-    });
-    if(!nEx && !nSeries) { clearSesionDraft(); return; }
+    var nSeries=_seriesAnotadas(d.exTemp);
+    // Si no hay nada anotado, no hay nada que recuperar: fuera el borrador y
+    // ningún aviso. Antes bastaba con que hubiera ejercicios (la plantilla
+    // del día) y por eso salía "0 series anotadas" al abrir la app.
+    if(!_hayTrabajoAnotado(d.exTemp, d.campos)){ clearSesionDraft(); return; }
     var mins=Math.round((Date.now()-d.ts)/60000);
     var cuando = mins<60 ? ('hace '+mins+' min')
                : mins<1440 ? ('hace '+Math.round(mins/60)+' h')
@@ -1812,6 +1850,211 @@ window.addEventListener('unhandledrejection', function(e){
   diagLog('PROMESA', (r && (r.message || r)) || 'rechazo sin motivo');
 });
 
+// ── ENFOQUES NUTRICIONALES ────────────────────
+// Un enfoque es la ESTRATEGIA de la alimentación, no el menú. El objetivo
+// (perder, mantener, volumen) sigue decidiendo las CALORÍAS; el enfoque
+// decide el reparto de proteína/grasa/hidrato, la fibra, QUÉ alimentos se
+// priorizan dentro de cada rol del catálogo y qué hábitos acompañan a cada
+// comida. El menú de los 7 días se genera igual, con el mismo filtro de
+// alergias y país, pero sale afinado al enfoque.
+//
+// De dónde salen los números:
+//  · Pérdida de grasa: a igualdad de calorías el reparto de macros cambia
+//    poco el resultado; lo que cambia es subir la proteína (2,2-3 g por kg
+//    de masa magra) y la fibra, que conservan músculo y quitan hambre. El
+//    patrón mediterráneo es el que más gente mantiene al año.
+//  · Músculo: lo que predice la ganancia es la proteína TOTAL del día, y la
+//    curva se aplana sobre 1,6 g/kg de peso (Morton, Br J Sports Med 2018).
+//    Por toma, 0,3-0,4 g/kg en 4-5 tomas. El momento exacto importa poco
+//    (Schoenfeld, JISSN 2013).
+//  · Azúcar en sangre: la calidad del hidrato y la fibra pesan más que la
+//    cantidad exacta (ADA, Standards of Care). Tres palancas con ensayo
+//    detrás: verdura y proteína antes del hidrato (Shukla, 2017-2019),
+//    vinagre antes de comer (meta-análisis de 2017) y caminar 10-15 min
+//    después de cada comida (DiPietro 2013; Buffey 2022).
+//  · Testosterona: bajar la grasa de la dieta la reduce (Whittaker y Wu,
+//    J Steroid Biochem 2021: -0,38 de diferencia estandarizada, y la caída
+//    mayor en dietas vegetarianas muy bajas en grasa), así que aquí la grasa
+//    no baja del 30 % de las calorías. Lo que más mueve la aguja de verdad
+//    es perder grasa abdominal y dormir; zinc y vitamina D solo si hay
+//    déficit. No es un tratamiento: acompaña, no sustituye a un endocrino.
+//
+// Cada enfoque declara:
+//   protMult  g de proteína por kg de MASA MAGRA (tope del 40 % de kcal)
+//   grasaPct  fracción de las calorías que va a grasa
+//   carbMax   techo de hidrato (fracción de kcal); el resto se va a grasa
+//   fibra     objetivo de fibra en g/día (sube con las calorías)
+//   tomas     en cuántas tomas se reparte la proteína
+//   pref      alimentos que se prefieren en cada rol del catálogo
+//   nota      recordatorio que se pinta en las dos comidas principales
+var ENFOQUES_NUT=[
+  {k:'mediterraneo', ico:'🫒', n:'Mediterráneo',
+   sub:'La base. El patrón que más gente sigue manteniendo al año.',
+   protMult:2.0, grasaPct:0.35, fibra:30, tomas:4,
+   reglas:[
+     'Aceite de oliva virgen extra como grasa principal: 3-4 cucharadas al día, una de ellas en crudo.',
+     'Legumbres 3 o 4 veces por semana: proteína y fibra en el mismo plato.',
+     'Verdura en las dos comidas principales y fruta entera 2-3 veces al día.',
+     'Pescado 3 veces por semana, dos de ellas azul (salmón, caballa, sardina).',
+     'Un puñado (30 g) de frutos secos al día, crudos y sin sal.',
+     'Carne roja y procesados, una vez por semana como máximo.'],
+   nota:'Que no falte la verdura y una cucharada de aceite de oliva en crudo.',
+   evidencia:'Entre dietas distintas, las diferencias de peso al año son pequeñas: pesa más lo que uno puede mantener. El patrón mediterráneo es el que mejor sale en adherencia y en salud cardiovascular, y es el que la Asociación Americana de Diabetes propone como referencia.',
+   pref:{cereal_desayuno:['avena','trigo sarraceno'], cereal_principal:['quinoa','trigo sarraceno','pasta integral','arroz integral'],
+         grasa_aceite:['oliva'], grasa_seco:['nueces','almendras','pistachos'],
+         prot_pescado_graso:['salmon','sardina','caballa','boqueron','trucha'],
+         prot_roja:['conejo','ternera magra','solomillo'], legumbre:['lentejas','garbanzos','alubias','frijoles']}},
+
+  {k:'perdida', ico:'🔥', n:'Pérdida de grasa',
+   sub:'Proteína alta y platos con volumen para no pasar hambre.',
+   protMult:2.5, grasaPct:0.25, fibra:32, tomas:5,
+   reglas:[
+     'La proteína primero, repartida en 4 o 5 tomas: es lo que protege el músculo mientras bajas.',
+     'Medio plato de verdura en comida y cena: mismo volumen, mucho menos aporte.',
+     'Fibra alta (legumbre, verdura y fruta entera, no en zumo): saciar es más fácil así.',
+     '500 ml de agua antes de comer, y el alcohol fuera: son calorías que no alimentan.',
+     'Los hidratos, alrededor del entreno. De noche, proteína y verdura.',
+     'Pésate una vez por semana en ayunas: la referencia es bajar 0,2-0,7 kg por semana.'],
+   nota:'Mastica despacio y deja el plato 20 minutos: la saciedad llega tarde.',
+   evidencia:'A igualdad de calorías el reparto de macros cambia poco el resultado. Lo que sí cambia: más proteína (2,2-3 g por kg de masa magra) y más fibra conservan músculo y reducen el hambre. Bajar más de 0,7 kg por semana empieza a costar músculo.',
+   pref:{cereal_desayuno:['avena'], cereal_principal:['quinoa','pasta de lenteja','trigo sarraceno'],
+         prot_ave:['pechuga'], prot_pescado_blanco:['merluza','bacalao','lubina','corvina','tilapia'],
+         lacteo:['0%','skyr','queso fresco batido'], fruta_ligera:['fresas','arandanos','kiwi','manzana','pera'],
+         tuberculo:['boniato','calabaza'], grasa_aceite:['oliva'], legumbre:['lentejas','garbanzos','alubias']}},
+
+  {k:'musculo', ico:'💪', n:'Ganancia de músculo',
+   sub:'El total de proteína del día, repartido en tomas que valgan.',
+   protMult:2.1, grasaPct:0.25, fibra:28, tomas:5,
+   reglas:[
+     'Lo que manda es el total de proteína del día, no la hora exacta de la toma.',
+     'Reparte en 4 o 5 tomas de 0,3-0,4 g por kg de peso: por debajo de eso la toma rinde menos.',
+     'Hidratos antes y después de entrenar, 40-60 g en cada lado: son el combustible de las series.',
+     'Superávit controlado: subir 0,25-0,5 kg por semana. Más rápido que eso es grasa.',
+     'Una toma de proteína cerca de dormir (yogur griego, requesón o caseína) cubre la noche.',
+     'Si la fuerza no sube dos semanas seguidas, el problema suele ser las calorías o el sueño, no el ejercicio.'],
+   nota:'Esta comida es una de las tomas de proteína del día: que no se quede corta.',
+   evidencia:'El predictor de la ganancia es la proteína total del día, y por encima de ~1,6 g por kg de peso la curva se aplana (Morton, 2018). El momento exacto de la toma importa mucho menos de lo que se dice (Schoenfeld, 2013): por eso aquí se fija el total y se reparte en tomas suficientes.',
+   pref:{cereal_desayuno:['avena'], cereal_principal:['arroz','quinoa','pasta integral'],
+         fruta_energia:['platano','banano','datiles','mango'], tuberculo:['boniato','patata','papa','yuca'],
+         suplemento_prot:['whey','suero','caseina'], huevo_forma:['huevos enteros'],
+         prot_roja:['ternera','res magra','solomillo'], lacteo:['skyr','yogur griego','queso fresco batido']}},
+
+  {k:'glucosa', ico:'🩸', n:'Azúcar en sangre estable',
+   sub:'Las mismas comidas, pero sin el pico de después.',
+   protMult:2.2, grasaPct:0.33, carbMax:0.40, fibra:35, tomas:4,
+   reglas:[
+     'Orden del plato: primero la verdura, después la proteína y el hidrato al final. El mismo plato en otro orden sube menos.',
+     'Una cucharada (15 ml) de vinagre en la ensalada, antes del hidrato.',
+     'Camina 10-15 minutos después de cada comida principal. Es la palanca con más respaldo de las tres.',
+     'Hidratos enteros y con fibra (legumbre, avena, quinoa, boniato, pan 100 % integral). Fuera zumos, refrescos y bollería.',
+     'Nunca un hidrato solo: siempre acompañado de proteína, grasa o verdura.',
+     'Concentra los hidratos en la comida de alrededor del entreno, cuando el músculo los capta mejor.'],
+   nota:'Verdura y proteína primero, el hidrato al final. Camina 10-15 min al terminar.',
+   evidencia:'La calidad del hidrato y la fibra pesan más que la cantidad exacta. Tres medidas tienen ensayo detrás: comer verdura y proteína antes del hidrato baja el pico y la insulina (Shukla, 2017-2019), el vinagre antes de comer reduce la glucosa posterior (meta-análisis de 2017) y caminar 10-15 min después de cada comida controla mejor el día que una sola caminata larga (DiPietro 2013; Buffey 2022).',
+   pref:{cereal_desayuno:['avena','trigo sarraceno','quinoa'], cereal_principal:['pasta de lenteja','quinoa','trigo sarraceno','amaranto','arroz integral'],
+         tuberculo:['calabaza','boniato'], fruta_ligera:['fresas','arandanos','kiwi','manzana','pera','guayaba'],
+         fruta_energia:['boniato','higo'], pan_tostada:['centeno','sarraceno','integral'],
+         legumbre:['lentejas','garbanzos','alubias','frijoles'], lacteo:['yogur natural','skyr','queso fresco batido'],
+         grasa_aceite:['oliva'], grasa_seco:['nueces','almendras','chia','lino']}},
+
+  {k:'testo', ico:'⚡', n:'Apoyo hormonal masculino', soloH:true,
+   sub:'Grasa suficiente, menos grasa abdominal y dormir. No es un fármaco.',
+   protMult:2.0, grasaPct:0.32, fibra:30, tomas:4,
+   reglas:[
+     'La grasa no baja del 30 % de las calorías: las dietas muy bajas en grasa reducen la testosterona.',
+     'Huevos enteros con la yema, aceite de oliva, pescado azul, aguacate y frutos secos. Grasa de verdad, no suplementos.',
+     'Zinc cada día (carne, marisco, semillas de calabaza) y magnesio (frutos secos, verde oscuro, cacao puro).',
+     'Vitamina D: sol a diario y pescado azul. Si sospechas déficit, pide una analítica antes de suplementarte.',
+     'Perder grasa abdominal es lo que más mueve la aguja: la grasa visceral convierte testosterona en estrógeno.',
+     'Dormir 7-9 horas y no abusar del alcohol. Una semana durmiendo 5 horas ya baja los niveles.'],
+   nota:'La grasa de este plato no se recorta: es la materia prima de las hormonas.',
+   evidencia:'La revisión de Whittaker y Wu (2021) encontró que las dietas bajas en grasa reducen la testosterona total y libre, con la caída mayor en las vegetarianas muy bajas en grasa; de ahí el suelo de grasa de este enfoque. Del zinc y la vitamina D solo hay beneficio claro cuando existe déficit, y el magnesio se apoya sobre todo en estudios observacionales. Lo mejor documentado sigue siendo perder grasa y dormir.',
+   aviso:'Esto no trata un hipogonadismo. Si tienes síntomas (cansancio, poca libido, pérdida de fuerza o de masa muscular), lo que toca es una analítica y un endocrino, no una dieta.',
+   pref:{huevo_forma:['huevos enteros'], grasa_aceite:['oliva'], grasa_fruta:['aguacate'],
+         grasa_seco:['calabaza','nueces','almendras'], prot_pescado_graso:['salmon','caballa','sardina','trucha','boqueron'],
+         prot_roja:['ternera','res magra','cordero','solomillo'], prot_conserva:['sardinas','caballa','atun'],
+         verdura:['espinacas','acelga','brocoli','coliflor'], cereal_principal:['arroz','quinoa','patata']}}
+];
+
+function enfoquePorClave(k){
+  for(var i=0;i<ENFOQUES_NUT.length;i++){ if(ENFOQUES_NUT[i].k===k) return ENFOQUES_NUT[i]; }
+  return null;
+}
+window.enfoquePorClave=enfoquePorClave;
+
+// Qué enfoque propone la app cuando el usuario no ha elegido ninguno. La
+// diabetes manda sobre el objetivo: controlar la glucosa va antes que el
+// reparto de macros ideal para perder o ganar.
+function enfoqueSugerido(u){
+  var sal=(typeof condicionesDe==='function')?condicionesDe(u):((u&&u.salud)||[]);
+  if(sal && sal.indexOf('diabetes')>=0) return 'glucosa';
+  var obj=(u&&u.obj)||'recomp';
+  if(obj==='perdida') return 'perdida';
+  if(obj==='volumen') return 'musculo';
+  return 'mediterraneo';
+}
+window.enfoqueSugerido=enfoqueSugerido;
+
+function enfoqueDe(u){
+  var k=(u&&u.enfoque)||'';
+  var e=enfoquePorClave(k);
+  if(e && e.soloH && (u&&u.genero)!=='H') e=null;   // el hormonal masculino no aplica
+  return e?e.k:enfoqueSugerido(u);
+}
+window.enfoqueDe=enfoqueDe;
+
+function enfoqueActivo(u){ return enfoquePorClave(enfoqueDe(u))||ENFOQUES_NUT[0]; }
+window.enfoqueActivo=enfoqueActivo;
+
+// Reparto de macros del enfoque. Las calorías NO se tocan aquí: vienen del
+// objetivo y del déficit. Keto y low-carb mandan sobre el reparto (el usuario
+// las eligió a propósito): en ese caso el enfoque solo aporta sus hábitos.
+function ajustarMacrosEnfoque(enf, o, dieta){
+  var r={prot:o.prot, carbs:o.carbs, grasa:o.grasa};
+  if(!enf) return r;
+  var tope=Math.round(o.kcal*0.40/4);           // la proteína nunca pasa del 40 % de kcal
+  if(enf.protMult) r.prot=Math.min(Math.round(o.masaMagra*enf.protMult), tope);
+  var resto=o.kcal-r.prot*4;
+  if(dieta==='keto'){
+    r.carbs=Math.min(40, Math.round(resto*0.05/4));
+    r.grasa=Math.max(0, Math.round((resto-r.carbs*4)/9));
+    return r;
+  }
+  if(dieta==='lowcarb'){
+    r.grasa=Math.round(resto*0.65/9);
+    r.carbs=Math.max(0, Math.round((resto-r.grasa*9)/4));
+    return r;
+  }
+  var gKcal=o.kcal*(enf.grasaPct||0.25);
+  var cKcal=o.kcal-r.prot*4-gKcal;
+  // Techo de hidrato: lo que sobra se va a la grasa, no al aire.
+  if(enf.carbMax && cKcal>o.kcal*enf.carbMax){ cKcal=o.kcal*enf.carbMax; gKcal=o.kcal-r.prot*4-cKcal; }
+  if(cKcal<0){ cKcal=0; gKcal=o.kcal-r.prot*4; }
+  r.carbs=Math.max(0, Math.round(cKcal/4));
+  r.grasa=Math.max(0, Math.round(gKcal/9));
+  return r;
+}
+window.ajustarMacrosEnfoque=ajustarMacrosEnfoque;
+
+// Avisos del enfoque: lo que el usuario necesita saber ANTES de aplicarlo.
+function avisosEnfoque(u){
+  var av=[]; var enf=enfoqueActivo(u);
+  var sal=(typeof condicionesDe==='function')?condicionesDe(u):((u&&u.salud)||[]);
+  var dieta=(u&&u.dieta)||'equilibrada';
+  if(enf.k==='glucosa' && sal.indexOf('diabetes')>=0){
+    av.push({t:'rojo', m:'Has marcado diabetes en tu ficha. Si tomas insulina o pastillas para la glucosa, cambiar los hidratos puede provocarte una bajada: háblalo con tu médico o endocrino ANTES de aplicar este enfoque y mide más a menudo los primeros días.'});
+  }
+  if(enf.aviso) av.push({t:'ambar', m:enf.aviso});
+  if(enf.k==='musculo' && (dieta==='keto'||dieta==='lowcarb')){
+    av.push({t:'ambar', m:'Tienes elegida una alimentación '+(dieta==='keto'?'cetogénica':'baja en carbohidratos')+', así que los hidratos de alrededor del entreno quedan limitados y el rendimiento en las series suele bajar. Para ganar músculo, la opción equilibrada rinde más.'});
+  }
+  if(enf.carbMax && dieta==='equilibrada' && (u&&u.obj)==='volumen'){
+    av.push({t:'ambar', m:'Este enfoque pone techo a los hidratos y tu objetivo es volumen: las calorías se mantienen, pero llegan más por la grasa que por el hidrato.'});
+  }
+  return av;
+}
+window.avisosEnfoque=avisosEnfoque;
+
 // ── calcMacros · BMR por Mifflin-St Jeor ──────
 function calcMacros(u){
   // ── Datos base ──
@@ -1897,6 +2140,16 @@ function calcMacros(u){
   }
   if(carbs<0) carbs=0;
 
+  // ── Enfoque nutricional ──
+  // El objetivo decide las calorías; el enfoque decide el reparto y la
+  // fibra. Ver ENFOQUES_NUT.
+  var _enf=enfoqueActivo(u);
+  var _aj=ajustarMacrosEnfoque(_enf,{kcal:kcal, prot:prot, carbs:carbs, grasa:grasa, masaMagra:masaMagra, peso:peso}, dieta);
+  prot=_aj.prot; carbs=_aj.carbs; grasa=_aj.grasa;
+  // Fibra: el objetivo del enfoque, nunca por debajo de 14 g por 1000 kcal.
+  var fibra=Math.round(Math.max(_enf.fibra||30, kcal*14/1000));
+  var tomasProt=_enf.tomas||(esH?5:4);
+
   // ── Agua ──
   var agua=Math.round(peso*35 + (act>1.55?500:0));
 
@@ -1924,7 +2177,9 @@ function calcMacros(u){
     pctProt:Math.round(prot*4/kcal*100),
     pctCarbs:Math.round(carbs*4/kcal*100),
     pctGrasa:Math.round(grasa*9/kcal*100),
-    kcalRecortada:kcalRecortada, kcalMin:kcalMin
+    kcalRecortada:kcalRecortada, kcalMin:kcalMin,
+    enfoque:_enf.k, fibra:fibra, tomasProt:tomasProt,
+    protPorToma:Math.round(prot/tomasProt)
   };
 }
 
@@ -3614,7 +3869,7 @@ function _semillaMenu(u){
 
 // Elige un alimento del rol, excluyendo SIEMPRE los alérgenos declarados.
 var _ALI_SIN_OPCION = [];
-function _pickAli(rol, rests, pais, seed){
+function _pickAli(rol, rests, pais, seed, pref){
   rests = rests || [];
   var pool = (CAT_ALIMENTOS[rol] || []).filter(function(a){
     if (a.pais && a.pais.indexOf(pais) < 0) return false;
@@ -3631,6 +3886,17 @@ function _pickAli(rol, rests, pais, seed){
   if (!pool.length) {
     if (_ALI_SIN_OPCION.indexOf(rol) < 0) _ALI_SIN_OPCION.push(rol);
     return 'alimento libre de tus alérgenos (elige tú)';
+  }
+  // Preferencias del enfoque: estrechan el pool, nunca lo amplían. Si
+  // ninguna opción preferida sobrevive al filtro de alergias y país, se
+  // usa el pool entero: antes un alimento válido que ninguno.
+  if (pref && pref.length) {
+    var elegidos = pool.filter(function(a){
+      var nf = _plegarNombre(a.n);
+      for (var j = 0; j < pref.length; j++) { if (nf.indexOf(_plegarNombre(pref[j])) >= 0) return true; }
+      return false;
+    });
+    if (elegidos.length) pool = elegidos;
   }
   return pool[Math.abs(seed || 0) % pool.length].n;
 }
@@ -3742,11 +4008,36 @@ function sanearPlanAlergenos(plan, rests, pais, semilla){
 }
 window.sanearPlanAlergenos=sanearPlanAlergenos;
 
+// Marca del enfoque en el plan ya generado: el nombre en la etiqueta del
+// día y el recordatorio en las dos comidas más grandes (ahí es donde el
+// orden del plato o la caminata de después cambian algo). Los alimentos no
+// se tocan: de eso se encarga la preferencia del enfoque al elegirlos, así
+// que las calorías de cada comida siguen cuadrando con los macros.
+function aplicarEnfoqueAlPlan(plan, enf, u, mac){
+  if(!plan || !plan.length || !enf) return plan;
+  plan.forEach(function(dia){
+    var cs=dia.comidas||[];
+    if(!cs.length) return;
+    dia.label=(dia.label||'')+' · '+enf.ico+' '+enf.n;
+    if(enf.nota){
+      cs.slice().sort(function(a,b){ return (b.k||0)-(a.k||0); }).slice(0,2)
+        .forEach(function(c){ c.nota=enf.nota; });
+    }
+    // En el enfoque de músculo el recordatorio lleva los gramos de la toma.
+    if(enf.k==='musculo' && mac && mac.protPorToma){
+      cs.forEach(function(c){ if(c.nota) c.nota='Unos '+mac.protPorToma+' g de proteína en esta toma ('+mac.tomasProt+' al día).'; });
+    }
+  });
+  return plan;
+}
+window.aplicarEnfoqueAlPlan=aplicarEnfoqueAlPlan;
+
 // Punto de entrada público: genera y, a continuación, sanea. Así ninguna
 // ruta del código puede entregar un plan sin pasar por el filtro final.
 function getPlanNutricion(u, mac, rests){
   var r=normalizarRests(rests||[]);
   var plan=_getPlanNutricionBase(u, mac, r);
+  plan=aplicarEnfoqueAlPlan(plan, enfoqueActivo(u), u, mac);
   return sanearPlanAlergenos(plan, r, (u&&u.pais)||'es', _semillaMenu(u));
 }
 window.getPlanNutricion=getPlanNutricion;
@@ -3804,7 +4095,12 @@ function _getPlanNutricionBase(u, mac, rests){
   // y se rota con una semilla estable por usuario y semana — mismo menú
   // durante la semana, distinto la siguiente.
   var _rot = _semillaMenu(u);
-  function P(rol, i){ return _pickAli(rol, rests, pais, _rot + (i||0)); }
+  // Las preferencias del enfoque deciden QUÉ alimento sale de cada rol
+  // (avena antes que crema de arroz si hay que cuidar la glucosa, huevo
+  // entero antes que claras en el enfoque hormonal...). Las calorías de la
+  // comida no cambian: cambia el alimento.
+  var _prefEnf = (enfoqueActivo(u).pref) || {};
+  function P(rol, i){ return _pickAli(rol, rests, pais, _rot + (i||0), _prefEnf[rol]); }
 
   var carb1     = P('cereal_desayuno');
   var carb2     = P('cereal_principal');
@@ -4535,6 +4831,7 @@ function crearPerfil(rests){
   var u={
     nombre:$('ob-nombre').value.trim(),
     email:$('ob-email').value.trim(),
+    usuario:normUsuario($('ob-usuario')&&$('ob-usuario').value||''),
     pw:hashStr($('ob-pw').value),
     genero:ONB.genero,
     fnac:$('ob-fnac').value,
@@ -4619,12 +4916,37 @@ $('s4-finish').addEventListener('click',function(){
   initApp();
 });
 
+// El nombre de usuario se guarda y se compara siempre en minúsculas y sin
+// tildes: quien lo escribió como "Carolina.P" tiene que poder entrar
+// tecleando "carolina.p".
+function normUsuario(v){
+  return String(v||'')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .toLowerCase().trim()
+    .replace(/[^a-z0-9._-]/g,'')
+    .slice(0,20);
+}
+window.normUsuario=normUsuario;
+
+function usuarioValido(v){ return /^[a-z0-9][a-z0-9._-]{2,19}$/.test(v); }
+window.usuarioValido=usuarioValido;
+
+// ¿Es esta cuenta del móvil la que corresponde a lo escrito al entrar?
+// Vale el correo o el nombre de usuario.
+function cuentaCoincide(u, ident){
+  var v=String(ident||'').trim().toLowerCase();
+  if(!v) return false;
+  if(v.indexOf('@')>=0) return String(u.email||'').toLowerCase()===v;
+  return !!u.usuario && normUsuario(u.usuario)===normUsuario(v);
+}
+window.cuentaCoincide=cuentaCoincide;
+
 // Login
 $('btn-login').addEventListener('click',function(){
   var email=$('lg-email').value.trim(), pw=$('lg-pw').value;
   var h=hashStr(pw);
   if(nubeWorker()){ entrarConNube(email,pw,h); return; }
-  var u=APP.users.find(function(x){return x.email===email&&x.pw===h;});
+  var u=APP.users.find(function(x){return cuentaCoincide(x,email)&&x.pw===h;});
   if(u){
     APP.cur=APP.users.indexOf(u);
     saveAll();
@@ -4635,7 +4957,7 @@ $('btn-login').addEventListener('click',function(){
   // No está en este dispositivo — intentar recuperar desde la nube
   var gasUrl=localStorage.getItem('specimen_gas_url')||'';
   if(!gasUrl){
-    $('lg-err').textContent='Email o contraseña incorrectos';
+    $('lg-err').textContent='Usuario o contraseña incorrectos';
     $('lg-err').style.display='block';
     return;
   }
@@ -4694,7 +5016,7 @@ $('btn-login').addEventListener('click',function(){
       initApp();
       toast('✓ Recuperado: '+nu.sessions.length+' sesiones · '+nu.measures.length+' medidas');
     } else {
-      $('lg-err').textContent=res.error||'Email o contraseña incorrectos';
+      $('lg-err').textContent=res.error||'Usuario o contraseña incorrectos';
       $('lg-err').style.display='block';
     }
   }).catch(function(e){
@@ -4759,6 +5081,7 @@ function _consentimientoLocal(){
 function _usuarioDesdeNube(d, h){
   var u=Object.assign({}, d.perfil||{});
   u.email=d.email; u.nombre=d.nombre||u.nombre||''; u.pw=h; u.plan=d.plan||'free';
+  u.usuario=d.usuario||u.usuario||null;
   u.sessions=d.sessions||[]; u.measures=d.measures||[];
   u.hydration=u.hydration||{}; u.compraMarcados=u.compraMarcados||{};
   u.rests=normalizarRests(u.rests||[]);
@@ -4771,8 +5094,11 @@ function _usuarioDesdeNube(d, h){
 
 // Alta en el Worker (usado al crear el perfil).
 async function nubeRegistrar(u, password, opciones){
-  var r=await api('/api/registro',{email:u.email,password:password,nombre:u.nombre,perfil:_perfilParaNube(u),consentimiento:_consentimientoLocal()});
+  var r=await api('/api/registro',{email:u.email,usuario:u.usuario||'',password:password,nombre:u.nombre,perfil:_perfilParaNube(u),consentimiento:_consentimientoLocal()});
   if(r.d.ok){
+    // El servidor puede haberlo creado a partir del correo: se guarda el
+    // que de verdad ha quedado, no el que se pidió.
+    if(r.d.usuario){ u.usuario=r.d.usuario; saveAll(); }
     toast('✓ Cuenta creada en la nube');
     if(opciones && opciones.bienvenida) pedirBienvenida(u.email);
   }
@@ -5005,7 +5331,7 @@ async function entrarConNube(email, pw, h){
     toast('✓ Recuperado: '+nu.sessions.length+' sesiones · '+nu.measures.length+' medidas');
   }catch(e){
     diagLog('NUBE-LOGIN',e.message);
-    var u=APP.users.find(function(x){ return String(x.email||'').toLowerCase()===String(email||'').toLowerCase() && x.pw===h; });
+    var u=APP.users.find(function(x){ return cuentaCoincide(x,email) && x.pw===h; });
     if(u){
       APP.cur=APP.users.indexOf(u); saveAll();
       $('onb').style.display='none'; initApp();
@@ -5167,8 +5493,8 @@ function abrirRecuperar(){
     +'<div class="modal-title">🔑 Cambiar la contraseña</div>'
     +'<div id="rec-paso1">'
       +'<div style="font-size:12.5px;color:var(--t2);line-height:1.6;margin-bottom:12px;">'
-        +'Escribe tu email y te enviamos un código de 6 cifras para poner una contraseña nueva.</div>'
-      +'<div class="fg"><label>Email de tu cuenta</label><input type="email" id="rec-email" inputmode="email" placeholder="tu@email.com" value="'+email.replace(/"/g,'&quot;')+'"></div>'
+        +'Escribe tu usuario o tu email y te enviamos un código de 6 cifras para poner una contraseña nueva. El código va siempre al correo de la cuenta.</div>'
+      +'<div class="fg"><label>Usuario o email</label><input type="text" id="rec-email" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="tu usuario o tu@email.com" value="'+email.replace(/"/g,'&quot;')+'"></div>'
       +'<div id="rec-err1" style="color:var(--red);font-size:12px;margin-bottom:8px;display:none;"></div>'
       +'<button class="btn btn-acc btn-full" id="rec-btn1" onclick="pedirCodigoRec()">Enviarme el código</button>'
     +'</div>'
@@ -5245,6 +5571,53 @@ async function cambiarConCodigo(){
 window.cambiarConCodigo=cambiarConCodigo;
 
 // ── CAMBIAR LA CONTRASEÑA SABIENDO LA ACTUAL ─────────────────────────────
+// Poner o cambiar el nombre de usuario. Las cuentas creadas antes de esto
+// no tienen ninguno: aquí es donde se lo ponen.
+function abrirCambiarUsuario(){
+  var u=U(); if(!u) return;
+  var actual=u.usuario||'';
+  var html='<div class="modal-ov open" id="m-usuario" onclick="if(event.target===this)closeM(\'m-usuario\')">'
+    +'<div class="modal"><div class="modal-hnd"></div>'
+    +'<div class="modal-title">👤 Mi nombre de usuario</div>'
+    +'<div style="font-size:12.5px;color:var(--t2);line-height:1.6;margin-bottom:12px;">'
+      +'Sirve para entrar sin escribir el correo. De 3 a 20 caracteres: letras, números, punto, guion o guion bajo.'
+      +(actual?'':' Tu cuenta todavía no tiene uno.')+'</div>'
+    +'<div class="fg"><label>Usuario</label><input type="text" id="usr-nuevo" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="tu usuario" value="'+actual.replace(/"/g,'&quot;')+'"></div>'
+    +'<div id="usr-err" style="color:var(--red);font-size:12px;margin-bottom:8px;display:none;"></div>'
+    +'<button class="btn btn-green btn-full" id="usr-btn" onclick="guardarUsuarioNuevo()">Guardar</button>'
+    +'<div class="modal-actions"><button class="btn btn-full" onclick="closeM(\'m-usuario\')">Cancelar</button></div>'
+    +'</div></div>';
+  var old=document.getElementById('m-usuario');
+  if(old) old.parentNode.removeChild(old);
+  var div=document.createElement('div');
+  div.innerHTML=html;
+  document.body.appendChild(div.firstChild);
+}
+window.abrirCambiarUsuario=abrirCambiarUsuario;
+
+async function guardarUsuarioNuevo(){
+  var u=U(); var err=$('usr-err'), btn=$('usr-btn');
+  var v=normUsuario($('usr-nuevo').value||'');
+  var fallo=function(t){ err.textContent=t; err.style.display='block'; };
+  err.style.display='none';
+  if(!usuarioValido(v)){ fallo('Entre 3 y 20 caracteres: letras, números, punto, guion o guion bajo.'); return; }
+  // Sin cuenta en la nube el nombre vale igual: sirve para entrar en este
+  // móvil, que es donde están los datos.
+  if(!nubeWorker() || !_tokenApi()){
+    u.usuario=v; saveAll(); closeM('m-usuario'); toast('✓ Usuario: '+v); return;
+  }
+  btn.disabled=true; btn.textContent='Guardando...';
+  try{
+    var r=await api('/api/usuario',{usuario:v});
+    if(!r.d.ok){ fallo(r.d.error||'No se ha podido guardar'); return; }
+    u.usuario=r.d.usuario||v; saveAll();
+    closeM('m-usuario');
+    toast('✓ Usuario: '+u.usuario);
+  }catch(e){ fallo('Sin conexión: inténtalo más tarde'); }
+  finally{ btn.disabled=false; btn.textContent='Guardar'; }
+}
+window.guardarUsuarioNuevo=guardarUsuarioNuevo;
+
 function abrirCambiarClave(){
   var html='<div class="modal-ov open" id="m-clave" onclick="if(event.target===this)closeM(\'m-clave\')">'
     +'<div class="modal"><div class="modal-hnd"></div>'
@@ -5323,6 +5696,17 @@ function dedupUsers(){
 function initApp(){
   setTimeout(function(){ try{ ofrecerVinculoNube(); }catch(e){} }, 1500);
   dedupUsers();
+  // Enfoque nutricional: quien ya tenía plan guardado lo estrenó sin él. Se
+  // recalculan macros y menús una sola vez, cuando los macros guardados
+  // todavía no llevan enfoque.
+  try{
+    var _u=U();
+    if(_u && _u.nombre && (!_u.macros || !_u.macros.enfoque)){
+      _u.macros=calcMacros(_u);
+      _u.planNut=getPlanNutricion(_u,_u.macros,normalizarRests(_u.rests||[]));
+      saveAll();
+    }
+  }catch(e){ diagLog('ENFOQUE', e.message); }
   // Sesiones repetidas por el Apps Script antiguo: se quitan al abrir y,
   // si hay cuenta en la nube, se borran también allí.
   try{
@@ -5638,11 +6022,13 @@ function renderHome(){
   $('h-macros').innerHTML=[
     {n:'Proteína',v:mac.prot+'g',c:'var(--acc2)',pct:100},
     {n:'Carbohidratos',v:mac.carbs+'g',c:'var(--green)',pct:100},
-    {n:'Grasas',v:mac.grasa+'g',c:'var(--amber)',pct:100}
+    {n:'Grasas',v:mac.grasa+'g',c:'var(--amber)',pct:100},
+    {n:'Fibra',v:(mac.fibra||30)+'g',c:'var(--blue)',pct:100}
   ].map(function(m){
     return '<div style="margin-bottom:7px;"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;"><span>'+m.n+'</span><span style="font-weight:700;color:'+m.c+';">'+m.v+'</span></div>'
       +'<div class="prog-inline"><div class="prog-inline-fill" style="width:'+m.pct+'%;background:'+m.c+';"></div></div></div>';
-  }).join('')+'<div style="font-size:11px;color:var(--t3);text-align:center;margin-top:4px;">TDEE: '+(mac.tdee||'—')+' kcal · Objetivo: '+mac.kcal+' kcal · Agua: '+Math.round((mac.agua||2500)/100)*100+' ml</div>';
+  }).join('')+'<div style="font-size:11px;color:var(--t3);text-align:center;margin-top:4px;">TDEE: '+(mac.tdee||'—')+' kcal · Objetivo: '+mac.kcal+' kcal · Agua: '+Math.round((mac.agua||2500)/100)*100+' ml</div>'
+    +'<div style="font-size:11px;color:var(--amber);text-align:center;margin-top:3px;cursor:pointer;" onclick="goTo(\'plan\');planTab(\'nut\');">'+enfoqueActivo(u).ico+' Enfoque: '+enfoqueActivo(u).n+' ›</div>';
 
   // Entreno de hoy
   var dow=new Date().getDay(); // 0=Dom,1=Lun...
@@ -5673,7 +6059,8 @@ function renderHome(){
     $tm.innerHTML='<div style="font-size:11px;font-weight:700;color:var(--amber);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.06em;">'+diaHoyNut.dia+' — '+diaHoyNut.label+'</div>'
       +diaHoyNut.comidas.map(function(c){
         return '<div class="meal-block"><div class="meal-title"><span>'+c.n+'</span><div style="display:flex;gap:8px;"><span class="meal-hora">'+c.h+'</span><span class="meal-kcal">~'+c.k+' kcal</span></div></div>'
-          +c.items.map(function(i){return '<div class="meal-item">'+i+'</div>';}).join('')+'</div>';
+          +c.items.map(function(i){return '<div class="meal-item">'+i+'</div>';}).join('')
+          +(c.nota?'<div class="meal-nota">💡 '+c.nota+'</div>':'')+'</div>';
       }).join('');
   }
 }
@@ -5842,6 +6229,73 @@ window.toggleDay=function(hdr){
   b.classList.toggle('open');c.classList.toggle('open');
 };
 
+// ── ENFOQUE NUTRICIONAL EN PANTALLA ───────────────────────────────────────
+// La tarjeta dice qué enfoque está puesto, por qué, qué reglas trae y qué
+// evidencia hay detrás. Cambiar de enfoque recalcula macros y menús: las
+// calorías las sigue mandando el objetivo del perfil.
+function enfoquesDisponibles(u){
+  return ENFOQUES_NUT.filter(function(e){ return !(e.soloH && (u&&u.genero)!=='H'); });
+}
+window.enfoquesDisponibles=enfoquesDisponibles;
+
+function renderEnfoqueNut(){
+  var caja=$('enf-card'); if(!caja) return;
+  var u=U(); if(!u) return;
+  var enf=enfoqueActivo(u);
+  var mac=u.macros||calcMacros(u);
+  var elegido=!!enfoquePorClave(u.enfoque||'');
+  var avisos=avisosEnfoque(u);
+  var html='<div class="card-title" style="margin-bottom:8px;">🥗 Enfoque nutricional'
+    +(elegido?'':' <span class="badge ba" style="font-size:10px;">SUGERIDO</span>')+'</div>';
+  html+='<div style="font-size:13px;font-weight:700;color:var(--amber);">'+enf.ico+' '+enf.n+'</div>';
+  html+='<div style="font-size:12px;color:var(--t2);margin:3px 0 9px;line-height:1.45;">'+enf.sub+'</div>';
+  // Lo que el enfoque deja fijado hoy, en números.
+  html+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">'
+    +[['Proteína',mac.prot+' g'],['Hidratos',mac.carbs+' g'],['Grasa',mac.grasa+' g'],['Fibra',(mac.fibra||30)+' g'],['Tomas de proteína',(mac.tomasProt||4)+' × '+(mac.protPorToma||0)+' g']]
+      .map(function(p){ return '<div style="flex:1 1 30%;min-width:92px;background:var(--border);border-radius:8px;padding:6px 8px;"><div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:0.05em;">'+p[0]+'</div><div style="font-size:13px;font-weight:700;">'+p[1]+'</div></div>'; }).join('')
+    +'</div>';
+  avisos.forEach(function(a){
+    html+='<div class="tip warn" style="margin-bottom:8px;'+(a.t==='rojo'?'border-left:3px solid var(--red);':'')+'">'+(a.t==='rojo'?'<b style="color:var(--red);">⚠️ Consúltalo antes</b><br>':'')+a.m+'</div>';
+  });
+  html+='<div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:5px;">Reglas de este enfoque</div>';
+  html+=(enf.reglas||[]).map(function(r){
+    return '<div style="font-size:12.5px;color:var(--t2);padding:4px 0;border-bottom:1px solid var(--border);display:flex;gap:7px;line-height:1.5;"><span style="color:var(--green);flex-shrink:0;">→</span><span>'+r+'</span></div>';
+  }).join('');
+  html+='<details style="margin-top:9px;"><summary style="font-size:12px;color:var(--acc2);cursor:pointer;">Qué dice la evidencia</summary>'
+    +'<div style="font-size:12px;color:var(--t2);line-height:1.55;margin-top:6px;">'+enf.evidencia+'</div>'
+    +'<div style="font-size:11px;color:var(--t3);line-height:1.5;margin-top:7px;">Orientativo. No sustituye a tu médico, endocrino ni dietista-nutricionista.</div></details>';
+  html+='<div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.05em;margin:12px 0 6px;">Cambiar de enfoque</div>';
+  html+='<div style="display:flex;gap:6px;flex-wrap:wrap;">'+enfoquesDisponibles(u).map(function(e){
+    return '<button class="enf-chip'+(e.k===enf.k?' on':'')+'" onclick="fijarEnfoque(\''+e.k+'\')">'+e.ico+' '+e.n+'</button>';
+  }).join('')+'</div>';
+  if(elegido) html+='<button class="btn btn-ghost btn-full" style="margin-top:8px;font-size:12px;" onclick="fijarEnfoque(\'\')">Volver al enfoque que sugiere la app</button>';
+  caja.innerHTML=html;
+}
+window.renderEnfoqueNut=renderEnfoqueNut;
+
+// Cambiar de enfoque: recalcula macros y regenera los 7 días. Pasar cadena
+// vacía devuelve el control a enfoqueSugerido().
+function fijarEnfoque(k){
+  var u=U(); if(!u) return;
+  if(k){
+    var e=enfoquePorClave(k);
+    if(!e) return;
+    if(e.soloH && u.genero!=='H'){ toast('Ese enfoque está planteado para hombres','var(--amber)'); return; }
+    u.enfoque=k;
+  } else {
+    delete u.enfoque;
+  }
+  u.macros=calcMacros(u);
+  u.planNut=getPlanNutricion(u,u.macros,normalizarRests(u.rests||[]));
+  saveAll();
+  renderEnfoqueNut();
+  renderPlanNut();
+  try{ renderHome(); }catch(e2){}
+  if(nubeWorker()) nubeSincronizar(true,true);
+  toast('✓ Enfoque: '+enfoqueActivo(u).n);
+}
+window.fijarEnfoque=fijarEnfoque;
+
 // ── VARIAR LAS COMIDAS ────────────────────────────────────────────────────
 // Los menús ya cambian solos cada semana (la semilla incluye la semana del
 // año). Esto permite pedir un cambio cuando se quiera, sin esperar al lunes:
@@ -5877,6 +6331,7 @@ function volverComidasAnterior(){
 window.volverComidasAnterior=volverComidasAnterior;
 
 function renderPlanNut(){
+  renderEnfoqueNut();
   var u=U(); var dow=new Date().getDay(); var idxMap=[6,0,1,2,3,4,5]; var hoyIdx=idxMap[dow];
   // 5.0: red de seguridad — avisa si algun alimento del plan choca con una
   // alergia declarada. Si esto salta, hay una etiqueta mal puesta en el catalogo.
@@ -5903,7 +6358,8 @@ function renderPlanNut(){
       +'<div class="plan-body'+(isHoy?' open':'')+'">'
       +(d.comidas||[]).map(function(c){
         return '<div class="meal-block"><div class="meal-title"><span>'+c.n+'</span><div style="display:flex;gap:8px;"><span class="meal-hora">'+c.h+'</span><span class="meal-kcal">~'+c.k+' kcal</span></div></div>'
-          +c.items.map(function(it){return '<div class="meal-item">'+it+'</div>';}).join('')+'</div>';
+          +c.items.map(function(it){return '<div class="meal-item">'+it+'</div>';}).join('')
+          +(c.nota?'<div class="meal-nota">💡 '+c.nota+'</div>':'')+'</div>';
       }).join('')
       +'</div></div>';
   }).join('');
@@ -6422,6 +6878,9 @@ function renderExList(){
       var si=parseInt(this.getAttribute('data-s'));
       var field=this.getAttribute('data-field');
       APP.exTemp[ei].series[si][field]=this.value;
+      // Queda marcada como escrita por la persona: es lo que distingue una
+      // serie anotada de las repeticiones que pone la plantilla sola.
+      APP.exTemp[ei].series[si].tocada=true;
       this.classList.toggle('filled',!!this.value);
       saveSesionDraft(); // guardar inmediatamente al escribir
     });
@@ -6981,6 +7440,7 @@ async function runIA(){
     +'% Grasa: '+(u.grasa||'—')+'% · Masa magra: '+mac2.masaMagra+' kg\n'
     +'BMR: '+mac2.bmr+' kcal · TDEE: '+mac2.tdee+' kcal · Target: '+mac2.kcal+' kcal (déficit '+mac2.deficitReal+'%)\n'
     +'Proteína: '+mac2.prot+' g/día · IMC: '+((parseFloat(u.peso||0)/Math.pow((u.alt||170)/100,2)).toFixed(1))+'\n'
+    +'Enfoque nutricional: '+enfoqueActivo(u).n+' (mantén los ajustes dentro de ese enfoque)\n'
     +'Sesiones: '+sesUlt7.length+'/5 · RPE: '+(sesUlt7.reduce(function(a,s){return a+(parseFloat(s.rpe)||7);},0)/Math.max(1,sesUlt7.length)).toFixed(1)+'/10\n\n'
     +'FORMATO DE RESPUESTA (obligatorio, sin cambiar las etiquetas):\n'
     +'NIVEL: bueno\n'
@@ -8133,23 +8593,70 @@ var EX_LOCAL=[
 ];
 
 // Estado buscador ejercicios
-var _exSrch={timer:null,filter:'',query:'',results:[]};
+var _exSrch={timer:null,filter:'',query:'',results:[],dia:[]};
+
+// Qué músculos toca hoy. Primero mira la sesión que se está registrando;
+// si no hay ninguna abierta, el día de hoy del plan. Devuelve los nombres
+// tal y como los usa el catálogo del buscador ('Pierna', 'Pecho'...), no
+// los del plan, que son más finos ("Cuad/Glut", "Gemelo/Sóleo").
+var GRUPO_A_BUSCADOR={'Hombros':'Hombro','Cuádriceps':'Pierna','Recuperación':'Cardio'};
+function musculosDeHoy(){
+  var exs=[];
+  if(APP.exTemp && APP.exTemp.length) exs=APP.exTemp;
+  else{
+    try{
+      var u=U();
+      var dow=new Date().getDay(), idxMap=[6,0,1,2,3,4,5];
+      var idx=(APP._sesionDiaIdx!==undefined&&APP._sesionDiaIdx!==null)?APP._sesionDiaIdx:idxMap[dow];
+      var dia=(semanaEfectiva(u)||[])[idx];
+      exs=(dia&&dia.exs)||[];
+    }catch(e){ exs=[]; }
+  }
+  var vistos={}, fuera=[];
+  exs.forEach(function(e){
+    var g=_grupoDe(e.mus);
+    if(!g) return;
+    var k=GRUPO_A_BUSCADOR[g]||g;
+    if(k==='Cardio') return;            // cardio no se busca por músculo
+    if(!vistos[k]){ vistos[k]=true; fuera.push(k); }
+  });
+  return fuera;
+}
+window.musculosDeHoy=musculosDeHoy;
 
 function openExSearch(){
-  _exSrch.filter=''; _exSrch.query='';
+  _exSrch.query='';
   $('ex-srch-inp').value='';
-  exSrchRender(EX_LOCAL.slice(0,20));
+  // Se abre ya filtrado por lo que toca hoy; el chip "Todos" lo quita.
+  _exSrch.dia=musculosDeHoy();
+  var chip=$('ex-tag-dia');
+  if(_exSrch.dia.length){
+    chip.style.display='';
+    chip.textContent='⭐ De hoy · '+_exSrch.dia.join(' · ');
+    _exSrch.filter='__dia';
+  }else{
+    chip.style.display='none';
+    _exSrch.filter='';
+  }
+  _marcarChipBuscador();
+  exDoSearch();
   openM('m-ex-srch');
   setTimeout(function(){$('ex-srch-inp').focus();},300);
 }
 
 function exSrchFilter(btn,filter){
   _exSrch.filter=filter;
-  document.querySelectorAll('#ex-srch-filters .srch-tag').forEach(function(b){
-    b.style.background='';b.style.color='';
-  });
-  btn.style.background='var(--acc)';btn.style.color='#fff';
+  _marcarChipBuscador();
   exDoSearch();
+}
+
+// Deja encendido el chip del filtro que está puesto.
+function _marcarChipBuscador(){
+  document.querySelectorAll('#ex-srch-filters .srch-tag').forEach(function(b){
+    var suyo=(b.getAttribute('data-filter')||'')===_exSrch.filter;
+    b.style.background=suyo?'var(--acc)':'';
+    b.style.color=suyo?'#fff':'';
+  });
 }
 window.exSrchFilter=exSrchFilter;
 
@@ -8158,23 +8665,54 @@ function exSrchDebounce(){
   _exSrch.timer=setTimeout(exDoSearch,300);
 }
 
+// Un ejercicio encaja en un filtro si el músculo principal, el secundario o
+// el material lo nombran.
+function _encajaFiltro(e, f){
+  if(!f) return true;
+  if(f==='__dia') return _exSrch.dia.some(function(k){ return _encajaFiltro(e,k); });
+  return e.mus.indexOf(f)>=0||e.mus2.indexOf(f)>=0||e.eq.indexOf(f)>=0;
+}
+
 function exDoSearch(){
   var q=($('ex-srch-inp').value||'').trim().toLowerCase();
   _exSrch.query=q;
-  var local=EX_LOCAL.filter(function(e){
-    var matchQ=!q||(e.n.toLowerCase().indexOf(q)>=0||e.mus.toLowerCase().indexOf(q)>=0||e.mus2.toLowerCase().indexOf(q)>=0||e.eq.toLowerCase().indexOf(q)>=0);
-    var matchF=!_exSrch.filter||(e.mus.indexOf(_exSrch.filter)>=0||e.mus2.indexOf(_exSrch.filter)>=0||e.eq.indexOf(_exSrch.filter)>=0);
-    return matchQ&&matchF;
-  });
-  exSrchRender(local);
+  function coincide(e){
+    return !q||(e.n.toLowerCase().indexOf(q)>=0||e.mus.toLowerCase().indexOf(q)>=0||e.mus2.toLowerCase().indexOf(q)>=0||e.eq.toLowerCase().indexOf(q)>=0);
+  }
+  var local=EX_LOCAL.filter(function(e){ return coincide(e)&&_encajaFiltro(e,_exSrch.filter); });
+  // Si lo buscado no existe dentro del músculo del día, se enseña el resto
+  // en vez de un "sin resultados" que no es verdad.
+  var fuera=null;
+  if(!local.length && _exSrch.filter && q){
+    fuera=EX_LOCAL.filter(coincide);
+  }
+  exSrchRender(local, fuera);
   // Try Wger.de API online
   if(q.length>=2) exSearchWger(q);
 }
 
-function exSrchRender(list){
+function exSrchRender(list, fuera){
   var div=$('ex-srch-results');
-  if(!list.length){div.innerHTML='<div class="srch-empty">Sin resultados. Intenta con otro término.</div>';return;}
-  var html='<div class="srch-section-title">Base de datos local ('+list.length+' ejercicios)</div>';
+  function fila(e){
+    var safe=JSON.stringify(e).replace(/'/g,"\\'");
+    return '<div class="srch-item" onclick="exSelectAndAdd('+safe+')">'
+      +'<div class="srch-item-name">'+e.n+'</div>'
+      +'<div class="srch-item-macros" style="color:var(--acc2);">'+e.mus+' · '+e.mus2+'</div>'
+      +'<div class="srch-item-sub">'+e.eq+'</div>'
+      +'</div>';
+  }
+  if(!list.length){
+    if(fuera && fuera.length){
+      div.innerHTML='<div class="srch-empty" style="padding-bottom:6px;">Nada de eso en '+(_exSrch.filter==='__dia'?_exSrch.dia.join(' · '):_exSrch.filter)+'. Esto es lo que hay en el resto:</div>'
+        +'<div class="srch-section-title">Otros músculos ('+fuera.length+')</div>'+fuera.slice(0,25).map(fila).join('');
+      return;
+    }
+    div.innerHTML='<div class="srch-empty">Sin resultados. Intenta con otro término.</div>'; return;
+  }
+  var titulo=_exSrch.filter==='__dia'
+    ? 'Para tu día de '+_exSrch.dia.join(' · ')+' ('+list.length+')'
+    : 'Base de datos local ('+list.length+' ejercicios)';
+  var html='<div class="srch-section-title">'+titulo+'</div>';
   html+=list.slice(0,25).map(function(e){
     var safe=JSON.stringify(e).replace(/'/g,"\\'");
     return '<div class="srch-item" onclick="exSelectAndAdd('+safe+')">'
@@ -8559,9 +9097,12 @@ function getExTipo(e){
   if(r.indexOf('seg')>=0||r.indexOf('s ')>=0||r.indexOf('-60s')>=0||r.indexOf('-45s')>=0) return 'tiempo';
   if(r.indexOf('min')>=0&&(mus.indexOf('core')>=0||mus.indexOf('estabiliz')>=0||mus.indexOf('recuper')>=0)) return 'tiempo';
 
-  // Tipos SOLO REPS (sin peso — ejercicios de peso corporal puros)
-  var repsIds=['crunch-m','abduccion','gemelo-pie','gemelo-m'];
-  if(repsIds.indexOf(id)>=0) return 'reps';
+  // SOLO REPETICIONES: únicamente lo que no admite carga ninguna.
+  // Antes había aquí una lista de ids con el gemelo, el abductor y el crunch
+  // de máquina. Los tres llevan peso: la máquina tiene placas y el gemelo de
+  // pie se hace con mancuerna o en multipower. Al estar en esta lista la
+  // casilla de los kilos no aparecía y no se podía anotar la serie.
+  if(/\(sin peso\)|sin carga|a peso corporal/.test(n)) return 'reps';
 
   // Por defecto: peso + reps
   return 'peso';
@@ -10019,7 +10560,8 @@ async function kongoSend(){
     +'- Objetivo: '+objLabel+' | Dieta: '+(u.dieta||'equilibrada')+' | País: '+pais+'\n'
     +'- Experiencia: '+({prin:'principiante',inter:'intermedio',avanz:'avanzado'}[u.exp]||u.exp)+' | Actividad: '+diasEntr+'\n'
     +'- Calorías objetivo: '+mac.kcal+' kcal/día (BMR: '+mac.bmr+' | TDEE: '+mac.tdee+')\n'
-    +'- Macros: '+mac.prot+'g proteína | '+mac.carbs+'g carbs | '+mac.grasa+'g grasa\n'
+    +'- Macros: '+mac.prot+'g proteína | '+mac.carbs+'g carbs | '+mac.grasa+'g grasa | '+(mac.fibra||30)+'g fibra\n'
+    +'- ENFOQUE NUTRICIONAL (respétalo en lo que recomiendes): '+enfoqueActivo(u).n+'. Reglas: '+enfoqueActivo(u).reglas.join(' ')+'\n'
     +'- Déficit/Superávit: '+(mac.deficitReal||0)+'% | Agua: '+Math.round((mac.agua||2500)/100)/10+'L/día\n'
     +(condicionesDe(u).length?'- SALUD (no propongas ejercicios que lo agraven): '+condicionesDe(u).map(nombreCondicion).join(', ')+(u.saludNotas?'. '+u.saludNotas:'')+String.fromCharCode(10):'')
     +(u.rests&&u.rests.length?'- INTOLERANCIAS (excluir siempre): '+normalizarRests(u.rests).map(nombreAlergeno).join(', ')+'\n':'')
